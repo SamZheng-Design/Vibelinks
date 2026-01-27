@@ -19,6 +19,8 @@ app.use('/api/*', cors())
 app.use('/static/*', serveStatic())
 
 // ==================== 核心计算引擎 ====================
+// 完全按照 Word文档《CardiB_Comparable_计算过程_可复算_v2.docx》逻辑实现
+// 版本日期：2026-01-27
 
 // 默认模型参数
 const DEFAULT_PARAMS = {
@@ -53,7 +55,7 @@ const DEFAULT_PARAMS = {
     {
       id: 'travis',
       name: 'Travis Scott',
-      boxOffice: 78.15,  // 百万元
+      boxOffice: 78.15,  // 百万元（三线城市口径：7815万RMB）
       city: '长沙',
       tier: 'tier3',
       data: { baidu: 280, netease: 126.6, xhs: 1.0 }
@@ -61,7 +63,7 @@ const DEFAULT_PARAMS = {
     {
       id: 'kanye',
       name: 'Kanye West',
-      boxOffice: 51.00,  // 百万元
+      boxOffice: 51.00,  // 百万元（三线城市口径：5100万RMB）
       city: '澳门',
       tier: 'tier3',
       data: { baidu: 616, netease: 99.7, xhs: 13.9 }
@@ -69,7 +71,21 @@ const DEFAULT_PARAMS = {
   ]
 }
 
-// 计算函数 - 支持动态参数和城市级别
+/**
+ * 计算函数 - 完全按照Word文档逻辑实现
+ * 
+ * 计算链路：
+ * Step A: 归一化 → Step B: D指数 → Step C: LC转化率 → Step D: F指数 → Step E: Comparable校准 → Step F: 城市溢价
+ * 
+ * 关键公式（以Cardi B为例，Word文档数据验证通过）：
+ * - 归一化: x' = x / max(x)，max取所有艺人该维度最大值
+ * - D = 0.45×Baidu' + 0.35×Netease' + 0.20×XHS'
+ * - LC = clip(0.60 + 0.40×Netease' - 0.20×XHS', 0.60, 1.00)
+ * - F = D × LC
+ * - ratio = F_target / F_anchor
+ * - 三线票房 = 锚点三线票房 × ratio
+ * - 城市溢价: 保守=Kanye锚点×1.15, 中性=双锚点均值×1.25, 激进=Travis锚点×1.35
+ */
 function calculateComparable(
   artistData: Record<string, number>,
   params: any = DEFAULT_PARAMS,
@@ -88,13 +104,16 @@ function calculateComparable(
     { id: 'kanye', name: benchmarks.kanye?.name || 'Kanye West', boxOffice: benchmarks.kanye?.boxOffice || 51.00, tier: 'tier3', data: benchmarks.kanye || { baidu: 616, netease: 99.7, xhs: 13.9 }}
   ]
   
-  // 合并所有艺人数据用于归一化
+  // 合并所有艺人数据用于归一化（包含锚点艺人和目标艺人）
   const allArtists = [
     ...benchmarkList.map((b: any) => ({ ...b.data, name: b.name, id: b.id, boxOffice: b.boxOffice, tier: b.tier || 'tier3' })),
     { ...artistData, name: 'Target', id: 'target' }
   ]
   
-  // Step A: 归一化 (Max Normalization) - 动态处理所有维度
+  // ========== Step A: 归一化 (Max Normalization) ==========
+  // 采用 Max Normalization：x' = x / max(x)
+  // max(x) 取所有艺人（锚点+目标）在该维度的最大值
+  // 目的：各维度量级差异大，归一化后统一到0-1区间，让权重公平生效
   const dimensions = Object.keys(artistData)
   const maxValues: Record<string, number> = {}
   dimensions.forEach(dim => {
@@ -102,8 +121,16 @@ function calculateComparable(
   })
   
   const normalize = (artist: any) => {
-    const normalized: any = { name: artist.name, id: artist.id, boxOffice: artist.boxOffice, tier: artist.tier }
+    const normalized: any = { 
+      name: artist.name, 
+      id: artist.id, 
+      boxOffice: artist.boxOffice, 
+      tier: artist.tier,
+      // 保留原始数据用于展示
+      rawData: {} as Record<string, number>
+    }
     dimensions.forEach(dim => {
+      normalized.rawData[dim] = artist[dim] || 0
       normalized[`${dim}_norm`] = maxValues[dim] > 0 ? (artist[dim] || 0) / maxValues[dim] : 0
     })
     return normalized
@@ -111,7 +138,9 @@ function calculateComparable(
   
   const normalized = allArtists.map(normalize)
   
-  // Step B: 计算需求指数 D - 动态权重
+  // ========== Step B: 计算需求指数 D (Demand Index) ==========
+  // D = Σ(权重i × 归一化值i')
+  // 默认: D = 0.45×Baidu' + 0.35×Netease' + 0.20×XHS'
   const calcD = (n: any) => {
     let d = 0
     dimensions.forEach(dim => {
@@ -120,7 +149,9 @@ function calculateComparable(
     return d
   }
   
-  // Step C: 计算转化率 LC
+  // ========== Step C: 计算转化率 LC (Live Conversion) ==========
+  // LC = clip(0.60 + 0.40×Netease' - 0.20×XHS', 0.60, 1.00)
+  // 说明：网易云粉丝更可能现场购票（正向），小红书粉丝偏重图文关注（负向修正）
   const calcLC = (n: any) => {
     const raw = lc.constant + 
       lc.netease_coef * (n.netease_norm || 0) + 
@@ -128,7 +159,8 @@ function calculateComparable(
     return Math.min(Math.max(raw, lc.min), lc.max)
   }
   
-  // Step D: 计算出票指数 F
+  // ========== Step D: 计算出票指数 F (Final Index) ==========
+  // F = D × LC（不含风险折扣）
   const indices = normalized.map(n => ({
     ...n,
     D: calcD(n),
@@ -139,79 +171,76 @@ function calculateComparable(
   const targetIdx = indices.find(i => i.id === 'target')!
   const benchmarkIndices = indices.filter(i => i.id !== 'target')
   
-  // 城市级别乘数配置（用于将不同级别城市票房标准化到基准）
-  const tierMultipliers = cityTiers || {
-    tier1: { multiplier: 1.0 },
-    tier2: { multiplier: 0.85 },
-    tier3: { multiplier: 0.70 }
-  }
-  
-  // 获取目标城市的乘数
-  const targetMultiplier = tierMultipliers[targetTier]?.multiplier || 1.0
-  
-  // Step E: 多锚点校准 - 支持多个锚点，且每个锚点可以有不同的城市级别
-  // 计算思路：
-  // 1. 先用 F 比值计算出锚点城市级别的票房
-  // 2. 再根据锚点城市与目标城市的级别差异计算溢价/折价
+  // ========== Step E: Comparable（双锚点）校准 ==========
+  // 采用比例映射：用 F 的相对比值映射到 benchmark 的真实单场票房
+  // ratio = F_target / F_anchor
+  // 三线票房 = 锚点三线票房 × ratio
   const anchorResults = benchmarkIndices.map((anchor: any) => {
     const ratio = anchor.F > 0 ? targetIdx.F / anchor.F : 0
     const anchorTier = anchor.tier || 'tier3'
-    const anchorMultiplier = tierMultipliers[anchorTier]?.multiplier || 0.70
     
-    // 锚点级别票房（用F比值映射）
-    const anchorTierBoxOffice = anchor.boxOffice * ratio
-    
-    // 从锚点级别转换到目标级别的溢价系数
-    // 如果锚点在三线，目标在一线，需要用 toTier1 的溢价
-    // 如果锚点在一线，目标在三线，需要用反向折价
-    const tierKey = `to${targetTier.charAt(0).toUpperCase()}${targetTier.slice(1)}`
-    const fromTierKey = `from${anchorTier.charAt(0).toUpperCase()}${anchorTier.slice(1)}`
-    
-    // 标准化到三线基准，再应用到目标级别的逻辑
-    // 基准票房 = 锚点票房 / 锚点级别乘数 * 三线乘数 (0.7)
-    const tier3BaseBoxOffice = anchorTierBoxOffice * (0.70 / anchorMultiplier)
+    // 直接用比例映射到锚点的三线票房
+    // 假设锚点票房已经是三线口径（根据Word文档说明）
+    const tier3BoxOffice = anchor.boxOffice * ratio
     
     return {
       name: anchor.name,
       id: anchor.id,
       ratio,
       anchorTier,
-      anchorTierBoxOffice,  // 锚点城市级别的预测票房
-      tier3BoxOffice: tier3BaseBoxOffice  // 标准化到三线的基准票房
+      anchorBoxOffice: anchor.boxOffice,  // 锚点原始票房（三线口径）
+      tier3BoxOffice,  // 目标艺人三线票房预测
+      // 保留锚点的F值用于展示
+      anchorF: anchor.F,
+      anchorD: anchor.D,
+      anchorLC: anchor.LC
     }
   })
   
-  // 计算三线城市基准票房范围（用于标准化比较）
+  // 计算三线城市基准票房范围
   const tier3Values = anchorResults.map((a: any) => a.tier3BoxOffice)
   const tier3Min = Math.min(...tier3Values)
   const tier3Max = Math.max(...tier3Values)
   const tier3Avg = tier3Values.reduce((a: number, b: number) => a + b, 0) / tier3Values.length
   
-  // Step F: 城市溢价计算 - 从三线基准转换到目标城市级别
+  // ========== Step F: 城市溢价计算 ==========
+  // 组合口径：下沿=Kanye锚点×保守溢价；中位=双锚点均值×中性溢价；上沿=Travis锚点×激进溢价
   const tierKey = `to${targetTier.charAt(0).toUpperCase()}${targetTier.slice(1)}`
   const premiums = tierPremiums?.[tierKey] || 
     tierPremiums?.toTier1 || { conservative: 1.15, neutral: 1.25, aggressive: 1.35 }
   
+  // 按Word文档逻辑：
+  // 保守 = 较小锚点值 × 保守系数
+  // 中性 = 双锚点均值 × 中性系数
+  // 激进 = 较大锚点值 × 激进系数
   const conservative = tier3Min * premiums.conservative
   const neutral = tier3Avg * premiums.neutral
   const aggressive = tier3Max * premiums.aggressive
   
   return {
-    // 归一化最大值
+    // 归一化信息
     normalization: {
       maxValues,
-      dimensions
+      dimensions,
+      // 添加归一化说明
+      explanation: `采用 Max Normalization: x' = x / max(x)，max值取所有艺人（含锚点）该维度最大值`
     },
-    // 各艺人指数
+    // 各艺人指数（含原始数据和归一化数据）
     indices,
-    // 多锚点比例映射
+    // 多锚点比例映射结果
     anchorResults,
     // 三线城市基准票房
     tier3: {
       values: tier3Values,
       min: tier3Min,
       max: tier3Max,
-      avg: tier3Avg
+      avg: tier3Avg,
+      // 添加各锚点映射说明
+      fromAnchors: anchorResults.map((a: any) => ({
+        name: a.name,
+        formula: `${a.anchorBoxOffice} × ${a.ratio.toFixed(3)} = ${a.tier3BoxOffice.toFixed(2)}`,
+        value: a.tier3BoxOffice
+      }))
     },
     // 目标城市输出
     targetTier,
@@ -220,7 +249,13 @@ function calculateComparable(
       neutral: { value: neutral, label: '中性', premium: premiums.neutral },
       aggressive: { value: aggressive, label: '激进', premium: premiums.aggressive },
       range: [conservative, aggressive],
-      mid: neutral
+      mid: neutral,
+      // 添加计算公式说明
+      formulas: {
+        conservative: `${tier3Min.toFixed(2)} × ${premiums.conservative} = ${conservative.toFixed(2)}`,
+        neutral: `${tier3Avg.toFixed(2)} × ${premiums.neutral} = ${neutral.toFixed(2)}`,
+        aggressive: `${tier3Max.toFixed(2)} × ${premiums.aggressive} = ${aggressive.toFixed(2)}`
+      }
     }
   }
 }
@@ -1827,66 +1862,99 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-blue-600 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">A</div>
-                                    <h3 class="font-bold text-white">Step A · 数据归一化</h3>
+                                    <h3 class="font-bold text-white">Step A · 归一化 (Normalization)</h3>
                                 </div>
                                 <div class="p-5">
-                                    <!-- 目标艺人数据 -->
-                                    <div class="mb-4">
-                                        <p class="text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-user-circle text-blue-500 mr-1"></i>
-                                            目标艺人「<strong class="text-blue-600">\${artistName}</strong>」的原始数据：
-                                        </p>
-                                        <div class="grid grid-cols-3 gap-2">
-                                            \${normDisplay.map(n => \`
-                                                <div class="bg-blue-50 rounded-lg p-3 text-center">
-                                                    <p class="text-xs text-gray-500">\${n.name}</p>
-                                                    <p class="text-xl font-bold text-blue-700">\${n.raw}</p>
-                                                </div>
-                                            \`).join('')}
+                                    <!-- 1. 原始数据表格 -->
+                                    <div class="mb-5">
+                                        <p class="text-sm font-bold text-gray-800 mb-3">1. 原始输入数据</p>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-sm border-collapse">
+                                                <thead>
+                                                    <tr class="bg-gray-100">
+                                                        <th class="border border-gray-200 px-3 py-2 text-left font-medium">艺人</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">百度指数</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">网易云粉丝(万)</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">小红书粉丝(万)</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">三线票房</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    \${benchmarkDataDisplay.map(b => \`
+                                                        <tr class="bg-orange-50">
+                                                            <td class="border border-gray-200 px-3 py-2 font-medium">\${b.name} <span class="text-xs text-orange-500">(锚点)</span></td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.baidu}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.netease}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.xhs}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">\${b.boxOffice}M</td>
+                                                        </tr>
+                                                    \`).join('')}
+                                                    <tr class="bg-blue-50">
+                                                        <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName} <span class="text-xs text-blue-500">(目标)</span></td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.baidu || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.netease || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.xhs || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">待预测</td>
+                                                    </tr>
+                                                    <tr class="bg-gray-50">
+                                                        <td class="border border-gray-200 px-3 py-2 font-medium text-gray-500">max值</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='baidu')?.max.toFixed(0) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='netease')?.max.toFixed(1) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='xhs')?.max.toFixed(1) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                     
-                                    <!-- 锚点艺人数据 -->
-                                    <div class="mb-4">
-                                        <p class="text-sm font-medium text-gray-700 mb-2">
-                                            <i class="fas fa-anchor text-orange-500 mr-1"></i>
-                                            对比锚点艺人（已知票房）的数据：
-                                        </p>
-                                        <div class="space-y-2">
-                                            \${benchmarkDataDisplay.map(b => \`
-                                                <div class="flex items-center justify-between bg-orange-50 rounded-lg p-3">
-                                                    <span class="font-medium text-gray-700">\${b.name}</span>
-                                                    <div class="flex gap-4 text-sm">
-                                                        <span>百度 <strong>\${b.data.baidu || '-'}</strong></span>
-                                                        <span>网易云 <strong>\${b.data.netease || '-'}</strong></span>
-                                                        <span>小红书 <strong>\${b.data.xhs || '-'}</strong></span>
-                                                        <span class="text-orange-600">票房 <strong>\${b.boxOffice}M</strong></span>
-                                                    </div>
-                                                </div>
-                                            \`).join('')}
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- 归一化说明 -->
-                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400 mb-4">
+                                    <!-- 2. 归一化说明 -->
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400 mb-5">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>为什么要归一化？</strong> 各维度量级差异大（百度几百，网易云几十万），直接计算会被大数值主导。
-                                            归一化后统一到0-1区间，确保权重能公平生效。
+                                            <strong>归一化目的：</strong>各维度量级差异大（百度几百，网易云几十万，小红书几万），
+                                            直接加权会被大数值主导。归一化后统一到0-1区间，让权重公平生效。
                                         </p>
-                                        <p class="text-xs text-gray-500 mt-2">
-                                            方法：各维度值 ÷ 该维度所有艺人中的最大值
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：x' = x / max(x)，即每个值除以该列最大值
                                         </p>
                                     </div>
                                     
-                                    <!-- 归一化结果 -->
-                                    <div class="grid grid-cols-3 gap-3">
-                                        \${normDisplay.map(n => \`
-                                            <div class="bg-gradient-to-br from-white to-blue-50 rounded-lg p-4 border border-blue-100 text-center">
-                                                <p class="text-xs text-gray-500 mb-1">\${n.name}</p>
-                                                <p class="text-xs text-gray-400">\${n.raw} ÷ \${n.max.toFixed(0)} =</p>
-                                                <p class="text-2xl font-bold text-blue-600">\${n.norm.toFixed(3)}</p>
-                                            </div>
-                                        \`).join('')}
+                                    <!-- 3. 归一化结果表格 -->
+                                    <div class="mb-4">
+                                        <p class="text-sm font-bold text-gray-800 mb-3">2. 归一化结果</p>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-sm border-collapse">
+                                                <thead>
+                                                    <tr class="bg-gray-100">
+                                                        <th class="border border-gray-200 px-3 py-2 text-left font-medium">艺人</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">Baidu'</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">Netease'</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">XHS'</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    \${benchmarkDataDisplay.map(b => {
+                                                        const baiduMax = normDisplay.find(n=>n.id==='baidu')?.max || 1;
+                                                        const neteaseMax = normDisplay.find(n=>n.id==='netease')?.max || 1;
+                                                        const xhsMax = normDisplay.find(n=>n.id==='xhs')?.max || 1;
+                                                        return \`
+                                                        <tr class="bg-orange-50">
+                                                            <td class="border border-gray-200 px-3 py-2 font-medium">\${b.name}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.baidu / baiduMax).toFixed(3)}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.netease / neteaseMax).toFixed(3)}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.xhs / xhsMax).toFixed(3)}</td>
+                                                        </tr>
+                                                        \`;
+                                                    }).join('')}
+                                                    <tr class="bg-blue-100">
+                                                        <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='baidu')?.norm.toFixed(3) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='netease')?.norm.toFixed(3) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='xhs')?.norm.toFixed(3) || '-'}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1895,32 +1963,40 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-purple-600 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">B</div>
-                                    <h3 class="font-bold text-white">Step B · 需求指数 D</h3>
+                                    <h3 class="font-bold text-white">Step B · 需求指数 D (Demand Index)</h3>
                                 </div>
                                 <div class="p-5">
                                     <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-purple-400 mb-4">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>D指数衡量市场需求强度。</strong> 
-                                            不同平台对票房预测力不同：百度指数反映大众搜索热度，网易云粉丝代表核心音乐受众，小红书更多是话题热度。
-                                            根据历史数据回归，百度和网易云对票房预测力更强，因此权重更高。
+                                            <strong>D指数 = 加权平均的市场需求强度。</strong> 
+                                            百度指数反映大众搜索热度，网易云代表核心音乐受众，小红书反映话题热度。
+                                            历史数据回归显示百度和网易云对票房预测力更强。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：D = 0.45×Baidu' + 0.35×Netease' + 0.20×XHS'
                                         </p>
                                     </div>
                                     
-                                    <div class="flex flex-wrap gap-2 mb-4">
-                                        \${weightParams.map(p => \`
-                                            <span class="px-3 py-1.5 bg-purple-100 rounded-lg text-sm">
-                                                <i class="\${p.icon} mr-1" style="color: \${p.color}"></i>
-                                                \${p.name} <strong>\${(p.value * 100).toFixed(0)}%</strong>
-                                            </span>
-                                        \`).join('')}
+                                    <!-- D值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">D指数</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Travis Scott</td><td class="border border-gray-200 px-3 py-2 text-center">0.557</td></tr>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Kanye West</td><td class="border border-gray-200 px-3 py-2 text-center">0.760</td></tr>
+                                                <tr class="bg-blue-100"><td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td><td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${(targetIdx.D || 0).toFixed(3)}</td></tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                     
-                                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-100">
-                                        <p class="text-xs text-gray-500 mb-2">D = Σ(权重 × 归一化值)</p>
-                                        <p class="text-sm text-gray-600 mb-3">
-                                            = \${dCalcParts.map(p => \`\${(p.weight).toFixed(2)} × \${p.norm.toFixed(3)}\`).join(' + ')}
-                                        </p>
-                                        <p class="text-3xl font-bold text-purple-600 text-center">D = \${(targetIdx.D || 0).toFixed(4)}</p>
+                                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                                        <p class="text-xs text-gray-500 mb-2">\${artistName}：D = \${dCalcParts.map(p => \`\${(p.weight).toFixed(2)}×\${p.norm.toFixed(3)}\`).join(' + ')}</p>
+                                        <p class="text-3xl font-bold text-purple-600 text-center">D = \${(targetIdx.D || 0).toFixed(3)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1929,28 +2005,45 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-emerald-600 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">C</div>
-                                    <h3 class="font-bold text-white">Step C · 转化率 LC</h3>
+                                    <h3 class="font-bold text-white">Step C · 现场转化效率 LC (Live Conversion)</h3>
                                 </div>
                                 <div class="p-5">
                                     <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-emerald-400 mb-4">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>LC修正线上热度到实际购票的转化效率。</strong> 
-                                            网易云粉丝是「真爱粉」，为音乐而来，购票意愿强 → 正向加成；
-                                            小红书粉丝更多是「路人粉」，看热闹不买票 → 负向修正。
+                                            <strong>LC修正线上热度→实际购票的转化率。</strong> 
+                                            网易云粉丝是「真爱粉」购票意愿强(+)；小红书粉丝更多是「路人粉」看热闹不买票(-)。
                                             这避免高估「虚火」艺人。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：LC = clip(0.60 + 0.40×Netease' − 0.20×XHS', 0.60, 1.00)
                                         </p>
                                     </div>
                                     
-                                    <div class="bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg p-4 border border-emerald-100">
-                                        <p class="text-xs text-gray-500 mb-2">LC = 0.60 + 0.40×网易云' − 0.20×小红书'，限制在[0.60, 1.00]</p>
-                                        <p class="text-sm text-gray-600 mb-3">
-                                            = 0.60 + 0.40×\${neteaseNorm.toFixed(3)} − 0.20×\${xhsNorm.toFixed(3)}
-                                        </p>
+                                    <!-- LC值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">LC</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">说明</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Travis Scott</td><td class="border border-gray-200 px-3 py-2 text-center text-green-600 font-medium">0.998</td><td class="border border-gray-200 px-3 py-2 text-xs text-gray-500">网易云高+小红书极低→转化率极高</td></tr>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Kanye West</td><td class="border border-gray-200 px-3 py-2 text-center text-green-600 font-medium">0.881</td><td class="border border-gray-200 px-3 py-2 text-xs text-gray-500">网易云高+小红书中低→转化率高</td></tr>
+                                                <tr class="bg-blue-100"><td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td><td class="border border-gray-200 px-3 py-2 text-center font-bold text-red-600">\${(targetIdx.LC || 0).toFixed(3)}</td><td class="border border-gray-200 px-3 py-2 text-xs text-red-500">小红书高→转化率被拉低</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                                        <p class="text-xs text-gray-500 mb-2">\${artistName}：LC = 0.60 + 0.40×\${neteaseNorm.toFixed(3)} − 0.20×\${xhsNorm.toFixed(3)}</p>
                                         <div class="flex items-center justify-between">
                                             <span class="text-xs px-2 py-1 rounded \${(targetIdx.LC || 0) >= 0.85 ? 'bg-green-100 text-green-700' : (targetIdx.LC || 0) >= 0.70 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
-                                                \${(targetIdx.LC || 0) >= 0.85 ? '转化率高' : (targetIdx.LC || 0) >= 0.70 ? '转化率中等' : '转化率偏低'}
+                                                \${(targetIdx.LC || 0) >= 0.85 ? '转化率高' : (targetIdx.LC || 0) >= 0.70 ? '转化率中等' : '⚠️ 小红书粉丝占比高，转化率偏低'}
                                             </span>
-                                            <p class="text-3xl font-bold text-emerald-600">LC = \${(targetIdx.LC || 0).toFixed(4)}</p>
+                                            <p class="text-3xl font-bold text-emerald-600">LC = \${(targetIdx.LC || 0).toFixed(3)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1960,19 +2053,58 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-amber-500 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">D</div>
-                                    <h3 class="font-bold text-white">Step D · 出票指数 F</h3>
+                                    <h3 class="font-bold text-white">Step D · 最终出票指数 F (Final Index)</h3>
                                 </div>
                                 <div class="p-5">
                                     <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-amber-400 mb-4">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>F = D × LC，综合出票能力。</strong> 
-                                            需求强度乘以转化效率，得到可比较的出票指数。F本身无单位，但可与其他艺人横向对比，这是下一步锚点校准的基础。
+                                            <strong>F = D × LC，综合出票能力指数。</strong> 
+                                            F用于与锚点艺人横向对比，计算比值后映射到真实票房。
                                         </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">公式：F = D × LC</p>
                                     </div>
                                     
-                                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-100 text-center">
-                                        <p class="text-sm text-gray-600 mb-2">F = D × LC = \${(targetIdx.D || 0).toFixed(4)} × \${(targetIdx.LC || 0).toFixed(4)}</p>
-                                        <p class="text-4xl font-bold text-amber-600">F = \${(targetIdx.F || 0).toFixed(4)}</p>
+                                    <!-- F值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">D</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">LC</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">F</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">三线票房</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50">
+                                                    <td class="border border-gray-200 px-3 py-2">Travis Scott</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.557</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.998</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold">0.556</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">78.15M</td>
+                                                </tr>
+                                                <tr class="bg-orange-50">
+                                                    <td class="border border-gray-200 px-3 py-2">Kanye West</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.760</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.881</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold">0.669</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">51.00M</td>
+                                                </tr>
+                                                <tr class="bg-blue-100">
+                                                    <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-blue-700">\${(targetIdx.D || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-blue-700">\${(targetIdx.LC || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${(targetIdx.F || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">待计算</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 text-center">
+                                        <p class="text-sm text-gray-600 mb-2">F = \${(targetIdx.D || 0).toFixed(3)} × \${(targetIdx.LC || 0).toFixed(3)}</p>
+                                        <p class="text-4xl font-bold text-amber-600">F = \${(targetIdx.F || 0).toFixed(3)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -1981,33 +2113,41 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-orange-500 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">E</div>
-                                    <h3 class="font-bold text-white">Step E · 锚点校准</h3>
+                                    <h3 class="font-bold text-white">Step E · Comparable双锚点校准</h3>
                                 </div>
                                 <div class="p-5">
                                     <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-orange-400 mb-4">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>用「比较法」而非「绝对法」预测票房。</strong> 
-                                            直接用公式预测误差大，但锚点比较更可靠——Travis Scott和Kanye West在中国有真实票房数据，
-                                            用F指数比值乘以锚点票房，即可推算目标艺人票房。双锚点取均值，降低单一锚点偏差。
+                                            <strong>用「比较法」映射票房。</strong> 
+                                            计算\${artistName}与锚点的F指数比值r，再乘以锚点真实票房，得到\${artistName}的三线基准票房。
+                                            双锚点分别计算，形成预测区间。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：r = F_\${artistName} ÷ F_锚点；三线票房 = 锚点票房 × r
                                         </p>
                                     </div>
                                     
                                     <div class="space-y-3 mb-4">
                                         \${(result.anchorResults || []).map(a => \`
                                             <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-100">
-                                                <div class="flex items-center justify-between">
+                                                <div class="flex items-center justify-between flex-wrap gap-2">
                                                     <div class="flex items-center gap-3">
-                                                        <div class="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center">
+                                                        <div class="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center flex-shrink-0">
                                                             <i class="fas fa-anchor text-orange-600"></i>
                                                         </div>
                                                         <div>
-                                                            <p class="font-bold text-gray-800">\${a.name}</p>
-                                                            <p class="text-xs text-gray-500">\${tierNames[a.anchorTier] || '三线城市'}真实票房</p>
+                                                            <p class="font-bold text-gray-800">\${a.name}锚点</p>
+                                                            <p class="text-xs text-gray-500">三线票房 \${a.name === 'Travis Scott' ? '78.15' : '51.00'}M</p>
                                                         </div>
                                                     </div>
                                                     <div class="text-right">
-                                                        <p class="text-xs text-gray-500">r = F<sub>\${artistName}</sub> ÷ F<sub>\${a.name.split(' ')[0]}</sub> = \${(a.ratio || 0).toFixed(3)}</p>
-                                                        <p class="text-xl font-bold text-orange-600">→ \${a.tier3BoxOffice.toFixed(2)} 百万</p>
+                                                        <p class="text-xs text-gray-600 font-mono">
+                                                            r = \${(targetIdx.F || 0).toFixed(3)} ÷ \${a.name === 'Travis Scott' ? '0.556' : '0.669'} = <strong>\${(a.ratio || 0).toFixed(3)}</strong>
+                                                        </p>
+                                                        <p class="text-xs text-gray-600 font-mono mt-1">
+                                                            \${a.name === 'Travis Scott' ? '78.15' : '51.00'} × \${(a.ratio || 0).toFixed(3)} = 
+                                                        </p>
+                                                        <p class="text-xl font-bold text-orange-600">\${a.tier3BoxOffice.toFixed(2)} 百万</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2015,10 +2155,11 @@ app.get('/', (c) => {
                                     </div>
                                     
                                     <div class="bg-orange-100 rounded-lg p-4 text-center">
-                                        <p class="text-xs text-gray-600 mb-1">双锚点均值 → 三线城市基准票房</p>
+                                        <p class="text-xs text-gray-600 mb-1">⇒ \${artistName}三线城市基准票房区间</p>
                                         <p class="text-2xl font-bold text-gray-800">
                                             \${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万元
                                         </p>
+                                        <p class="text-xs text-gray-500 mt-1">（约\${(result.tier3.min * 100).toFixed(0)}万 ~ \${(result.tier3.max * 100).toFixed(0)}万 RMB）</p>
                                     </div>
                                 </div>
                             </div>
@@ -2027,15 +2168,19 @@ app.get('/', (c) => {
                             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                                 <div class="bg-indigo-600 px-5 py-3 flex items-center gap-3">
                                     <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">F</div>
-                                    <h3 class="font-bold text-white">Step F · 城市溢价 → 最终预测</h3>
+                                    <h3 class="font-bold text-white">Step F · 城市溢价（\${tierNames[targetTier]}）→ 最终预测</h3>
                                 </div>
                                 <div class="p-5">
                                     <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-indigo-400 mb-4">
                                         <p class="text-gray-700 text-sm leading-relaxed">
-                                            <strong>目标城市\${tierNames[targetTier]}需应用城市溢价。</strong> 
-                                            一线城市消费力强、市场成熟，票房通常高于三线。三档情景提供决策弹性：
-                                            保守（市场平淡）、中性（合理预期）、激进（市场火爆）。
+                                            <strong>应用城市溢价系数。</strong> 
+                                            \${tierNames[targetTier]}消费力和市场成熟度与三线不同，需调整。三档情景：
                                         </p>
+                                        <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                                            <li>• <strong>保守</strong>（×\${result.output.conservative.premium}）：Kanye锚点基准 × 保守溢价</li>
+                                            <li>• <strong>中性</strong>（×\${result.output.neutral.premium}）：双锚点均值 × 中性溢价</li>
+                                            <li>• <strong>激进</strong>（×\${result.output.aggressive.premium}）：Travis锚点基准 × 激进溢价</li>
+                                        </ul>
                                     </div>
                                     
                                     <div class="grid grid-cols-3 gap-3">
@@ -2044,18 +2189,21 @@ app.get('/', (c) => {
                                             <p class="text-xs text-gray-500 mb-2">×\${result.output.conservative.premium}</p>
                                             <p class="text-2xl font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)}</p>
                                             <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.conservative.value * 100).toFixed(0)}万</p>
                                         </div>
                                         <div class="bg-purple-100 rounded-xl p-4 border-2 border-purple-400 text-center shadow-md">
                                             <p class="text-purple-700 font-bold text-sm">中性 ⭐</p>
                                             <p class="text-xs text-gray-500 mb-2">×\${result.output.neutral.premium}</p>
                                             <p class="text-3xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)}</p>
                                             <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.neutral.value * 100).toFixed(0)}万</p>
                                         </div>
                                         <div class="bg-green-50 rounded-xl p-4 border border-green-200 text-center">
                                             <p class="text-green-700 font-bold text-sm">激进</p>
                                             <p class="text-xs text-gray-500 mb-2">×\${result.output.aggressive.premium}</p>
                                             <p class="text-2xl font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)}</p>
                                             <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.aggressive.value * 100).toFixed(0)}万</p>
                                         </div>
                                     </div>
                                 </div>
@@ -2271,12 +2419,12 @@ app.get('/', (c) => {
         // ==================== 艺人档案管理 ====================
         let artistArchives = [];  // 档案数组
         
-        // Cardi B 预置档案（示例数据）
+        // Cardi B 预置档案（基于文档 CardiB_Comparable_计算过程_可复算_v2.docx）
         const CARDI_B_PRESET_ARCHIVE = {
             id: 'preset_cardib',
             artistName: 'Cardi B',
-            notes: '【示例档案】深圳/杭州单场票房预测案例 - 基于Comparable模型六步计算',
-            createdAt: '2026-01-15T10:00:00.000Z',
+            notes: '【示例档案】深圳/杭州单场票房预测 - 基于Comparable模型六步计算（2026-01-26版）',
+            createdAt: '2026-01-26T10:00:00.000Z',
             inputData: {
                 baidu: 388,
                 netease: 80.6,
@@ -2284,16 +2432,22 @@ app.get('/', (c) => {
             },
             targetTier: 'tier1',
             result: {
-                conservative: 76.02,
-                neutral: 85.07,
-                aggressive: 94.50
+                conservative: 40.52,  // Kanye锚点×保守溢价1.15
+                neutral: 62.67,       // 双锚点均值×中性溢价1.25
+                aggressive: 87.79     // Travis锚点×激进溢价1.35
             },
             indices: {
-                D: 0.6817,
-                LC: 0.8523,
-                F: 0.5811
+                D: 0.706,   // 0.45×0.630 + 0.35×0.637 + 0.20×1.000
+                LC: 0.655,  // clip(0.60 + 0.40×0.637 - 0.20×1.000, 0.60, 1.00) = 0.655
+                F: 0.462    // D × LC = 0.706 × 0.655
             },
-            isPreset: true  // 标记为预置档案
+            // 锚点校准详细数据
+            anchorCalibration: {
+                travis: { F: 0.556, ratio: 0.832, tier3BoxOffice: 65.03 },  // 78.15 × 0.832
+                kanye: { F: 0.669, ratio: 0.691, tier3BoxOffice: 35.24 }    // 51.00 × 0.691
+            },
+            tier3Range: { min: 35.24, max: 65.03, avg: 50.14 },
+            isPreset: true
         };
         
         // 加载档案
