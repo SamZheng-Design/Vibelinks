@@ -1677,6 +1677,14 @@ app.get('/', (c) => {
             const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
             const tierColors = { tier1: 'purple', tier2: 'blue', tier3: 'orange' };
             
+            // 收集当前艺人输入数据用于详情展示
+            const currentArtistData = {};
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                currentArtistData[p.id] = parseFloat(input?.value || 0);
+            });
+            const artistName = document.getElementById('artist-search-input')?.value?.trim() || '目标艺人';
+            
             container.innerHTML = \`
                 <div class="fade-in space-y-4">
                     <div class="text-center mb-4">
@@ -1704,54 +1712,314 @@ app.get('/', (c) => {
                         </div>
                     </div>
                     
-                    <!-- 锚点校准详情 -->
-                    <div class="bg-orange-50 rounded-lg p-3 mt-4">
-                        <p class="text-sm text-orange-700 font-medium mb-2">
-                            <i class="fas fa-anchor mr-1"></i>锚点校准详情
-                        </p>
-                        <div class="space-y-2">
-                            \${(result.anchorResults || []).map(a => \`
-                                <div class="flex items-center justify-between text-sm bg-white rounded p-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-medium">\${a.name}</span>
-                                        <span class="px-1.5 py-0.5 text-xs rounded \${
-                                            a.anchorTier === 'tier1' ? 'bg-purple-100 text-purple-600' :
-                                            a.anchorTier === 'tier2' ? 'bg-blue-100 text-blue-600' :
-                                            'bg-orange-100 text-orange-600'
-                                        }">\${tierNames[a.anchorTier] || '三线城市'}</span>
-                                    </div>
-                                    <span class="text-gray-600">→ 三线基准: \${a.tier3BoxOffice.toFixed(2)}百万</span>
-                                </div>
-                            \`).join('')}
-                        </div>
-                        <p class="text-gray-500 text-xs mt-2">
-                            三线基准范围: \${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万
-                        </p>
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="showCalculationDetail()" 
+                            class="flex-1 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md">
+                            <i class="fas fa-calculator mr-2"></i>查看详细计算过程
+                        </button>
                     </div>
-                    
-                    <!-- 指数详情 -->
-                    <details class="mt-4">
-                        <summary class="text-sm text-gray-500 cursor-pointer hover:text-gray-700">
-                            <i class="fas fa-info-circle mr-1"></i>查看计算指数
-                        </summary>
-                        <div class="mt-2 p-3 bg-gray-100 rounded text-sm">
-                            \${result.indices.filter(i => i.id === 'target').map(t => \`
-                                <p>D: \${t.D.toFixed(4)} | LC: \${t.LC.toFixed(4)} | F: \${t.F.toFixed(4)}</p>
-                            \`).join('')}
-                        </div>
-                    </details>
-                    
-                    <!-- 建档按钮 -->
                     <button onclick="showArchiveDialog()" 
-                        class="w-full mt-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all">
+                        class="w-full py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all">
                         <i class="fas fa-folder-plus mr-2"></i>建立档案
                     </button>
                 </div>
             \`;
             
-            // 保存当前预测结果供建档使用
+            // 保存当前预测结果供建档和详情展示使用
             window.currentPredictionResult = result;
             window.currentTargetTier = targetTier;
+            window.currentArtistData = currentArtistData;
+            window.currentArtistName = artistName;
+        }
+        
+        // 显示详细计算过程的大浮窗
+        function showCalculationDetail(archiveData = null) {
+            // 使用传入的档案数据或当前预测数据
+            const result = archiveData?.result ? {
+                output: {
+                    conservative: { value: archiveData.result.conservative, premium: 1.15 },
+                    neutral: { value: archiveData.result.neutral, premium: 1.25 },
+                    aggressive: { value: archiveData.result.aggressive, premium: 1.35 }
+                },
+                indices: [{ id: 'target', D: archiveData.indices?.D || 0, LC: archiveData.indices?.LC || 0, F: archiveData.indices?.F || 0 }],
+                tier3: { min: archiveData.result.neutral / 1.25 * 0.9, max: archiveData.result.neutral / 1.25 * 1.1, avg: archiveData.result.neutral / 1.25 },
+                anchorResults: benchmarks.map(b => ({
+                    name: b.name,
+                    anchorTier: b.tier,
+                    tier3BoxOffice: b.boxOffice * (b.tier === 'tier1' ? 0.70 : b.tier === 'tier2' ? 0.85 : 1.0)
+                }))
+            } : window.currentPredictionResult;
+            
+            const targetTier = archiveData?.targetTier || window.currentTargetTier || 'tier1';
+            const artistData = archiveData?.inputData || window.currentArtistData || {};
+            const artistName = archiveData?.artistName || window.currentArtistName || '目标艺人';
+            
+            if (!result) {
+                alert('暂无计算数据');
+                return;
+            }
+            
+            const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            const targetIdx = result.indices?.find(i => i.id === 'target') || {};
+            
+            // 计算归一化相关数据
+            const normData = result.normalization || {};
+            const maxValues = normData.maxValues || {};
+            
+            // 构建归一化展示数据
+            const normDisplay = Object.entries(artistData).map(([key, val]) => {
+                const param = weightParams.find(p => p.id === key);
+                const maxVal = maxValues[key] || val;
+                const normVal = maxVal > 0 ? (val / maxVal) : 0;
+                return { name: param?.name || key, raw: val, max: maxVal, norm: normVal };
+            });
+            
+            // 计算D值的详细过程
+            const dCalcParts = weightParams.map(p => {
+                const val = artistData[p.id] || 0;
+                const maxVal = maxValues[p.id] || val;
+                const normVal = maxVal > 0 ? (val / maxVal) : 0;
+                return \`\${p.value.toFixed(2)}×\${normVal.toFixed(2)}\`;
+            });
+            
+            const dialog = document.createElement('div');
+            dialog.id = 'calculation-detail-dialog';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4';
+            dialog.innerHTML = \`
+                <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden fade-in">
+                    <!-- 头部 -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-2xl font-bold flex items-center gap-3">
+                                    <i class="fas fa-calculator"></i>
+                                    Comparable模型计算详解
+                                </h2>
+                                <p class="text-indigo-200 mt-2">
+                                    <span class="font-medium text-white">\${artistName}</span> · \${tierNames[targetTier]} 票房预测
+                                </p>
+                            </div>
+                            <button onclick="this.closest('#calculation-detail-dialog').remove()" 
+                                class="text-white/80 hover:text-white text-2xl transition-all hover:rotate-90">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- 最终结果摘要 -->
+                        <div class="grid grid-cols-3 gap-4 mt-6">
+                            <div class="bg-white/20 backdrop-blur rounded-xl p-4 text-center">
+                                <p class="text-indigo-200 text-sm">保守估计</p>
+                                <p class="text-2xl font-bold">\${result.output.conservative.value.toFixed(2)}</p>
+                                <p class="text-indigo-200 text-xs">百万元</p>
+                            </div>
+                            <div class="bg-white/30 backdrop-blur rounded-xl p-4 text-center border-2 border-white/50">
+                                <p class="text-indigo-100 text-sm">中性预测</p>
+                                <p class="text-3xl font-bold">\${result.output.neutral.value.toFixed(2)}</p>
+                                <p class="text-indigo-200 text-xs">百万元</p>
+                            </div>
+                            <div class="bg-white/20 backdrop-blur rounded-xl p-4 text-center">
+                                <p class="text-indigo-200 text-sm">激进估计</p>
+                                <p class="text-2xl font-bold">\${result.output.aggressive.value.toFixed(2)}</p>
+                                <p class="text-indigo-200 text-xs">百万元</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 计算步骤内容 -->
+                    <div class="p-6 overflow-y-auto" style="max-height: calc(95vh - 280px);">
+                        <div class="space-y-6">
+                            
+                            <!-- Step A: 归一化 -->
+                            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-5 border border-blue-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">A</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">归一化 Normalization</h3>
+                                        <p class="text-gray-500 text-sm">将各维度数据转换为0-1区间，使不同量级的数据可比</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>公式：</strong>维度' = 维度值 / max(所有艺人该维度值)</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        \${normDisplay.map(n => \`
+                                            <div class="bg-blue-50 rounded-lg p-3">
+                                                <p class="text-xs text-blue-600 font-medium">\${n.name}</p>
+                                                <p class="text-lg font-bold text-gray-800 mt-1">\${n.raw} <span class="text-gray-400">/ \${n.max.toFixed(1)}</span></p>
+                                                <p class="text-blue-600 font-medium">= <span class="text-xl">\${n.norm.toFixed(4)}</span></p>
+                                            </div>
+                                        \`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step B: 需求指数D -->
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">B</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">需求指数 D (Demand Index)</h3>
+                                        <p class="text-gray-500 text-sm">综合各平台数据加权计算市场需求强度</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>公式：</strong>D = Σ(权重<sub>i</sub> × 维度<sub>i</sub>')</p>
+                                    <div class="bg-purple-50 rounded-lg p-4">
+                                        <p class="text-purple-700">D = \${dCalcParts.join(' + ')}</p>
+                                        <p class="text-2xl font-bold text-purple-700 mt-2">D = \${(targetIdx.D || 0).toFixed(4)}</p>
+                                    </div>
+                                    <div class="mt-3 flex flex-wrap gap-2">
+                                        \${weightParams.map(p => \`
+                                            <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                                                <i class="\${p.icon} mr-1" style="color: \${p.color}"></i>
+                                                \${p.name}: <strong>\${(p.value * 100).toFixed(0)}%</strong>
+                                            </span>
+                                        \`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step C: 转化率LC -->
+                            <div class="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-5 border border-green-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">C</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">转化率 LC (Conversion Rate)</h3>
+                                        <p class="text-gray-500 text-sm">预测线上热度转化为线下购票的比率</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>公式：</strong>LC = clip(0.60 + 0.40×网易云' - 0.20×小红书', 0.60, 1.00)</p>
+                                    <div class="bg-green-50 rounded-lg p-4">
+                                        <p class="text-green-700">LC = 0.60 + 0.40×网易云' - 0.20×小红书'</p>
+                                        <p class="text-2xl font-bold text-green-700 mt-2">LC = \${(targetIdx.LC || 0).toFixed(4)}</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        转化率范围限制在 0.60 ~ 1.00 之间，网易云粉丝正向影响，小红书粉丝负向修正
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Step D: 出票指数F -->
+                            <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-5 border border-amber-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold">D</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">出票指数 F (Ticketing Index)</h3>
+                                        <p class="text-gray-500 text-sm">综合需求和转化率得出的核心预测指数</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>公式：</strong>F = D × LC</p>
+                                    <div class="bg-amber-50 rounded-lg p-4">
+                                        <p class="text-amber-700">F = \${(targetIdx.D || 0).toFixed(4)} × \${(targetIdx.LC || 0).toFixed(4)}</p>
+                                        <p class="text-2xl font-bold text-amber-700 mt-2">F = \${(targetIdx.F || 0).toFixed(4)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step E: 双锚点校准 -->
+                            <div class="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-5 border border-orange-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">E</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">双锚点校准 (Benchmark Calibration)</h3>
+                                        <p class="text-gray-500 text-sm">用锚点艺人的真实票房数据校准预测值</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>公式：</strong>r = F<sub>目标</sub> / F<sub>锚点</sub>，三线票房 = 锚点票房 × r</p>
+                                    <div class="space-y-3">
+                                        \${(result.anchorResults || []).map(a => \`
+                                            <div class="bg-orange-50 rounded-lg p-3 flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-anchor text-orange-600"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-800">\${a.name}</p>
+                                                        <p class="text-xs text-gray-500">\${tierNames[a.anchorTier] || '三线城市'} · 真实票房</p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-sm text-gray-600">r = \${(a.ratio || 0).toFixed(4)}</p>
+                                                    <p class="font-bold text-orange-600">→ \${a.tier3BoxOffice.toFixed(2)} 百万</p>
+                                                </div>
+                                            </div>
+                                        \`).join('')}
+                                    </div>
+                                    <div class="mt-3 p-3 bg-gray-100 rounded-lg text-center">
+                                        <p class="text-gray-600 text-sm">三线城市基准票房范围</p>
+                                        <p class="text-xl font-bold text-gray-800">
+                                            \${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万
+                                            <span class="text-sm font-normal text-gray-500">(平均 \${result.tier3.avg.toFixed(2)})</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step F: 城市溢价 -->
+                            <div class="bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl p-5 border border-indigo-100">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="w-10 h-10 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold">F</div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">城市溢价 (City Premium)</h3>
+                                        <p class="text-gray-500 text-sm">根据目标城市级别应用溢价系数</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4">
+                                    <p class="text-sm text-gray-600 mb-3"><strong>目标城市：</strong>\${tierNames[targetTier]}</p>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="bg-yellow-100 rounded-lg p-4 text-center">
+                                            <p class="text-yellow-600 text-sm font-medium">保守</p>
+                                            <p class="text-xs text-gray-500">×\${result.output.conservative.premium}</p>
+                                            <p class="text-xl font-bold text-yellow-700 mt-1">\${result.output.conservative.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                        </div>
+                                        <div class="bg-purple-100 rounded-lg p-4 text-center border-2 border-purple-300">
+                                            <p class="text-purple-600 text-sm font-medium">中性</p>
+                                            <p class="text-xs text-gray-500">×\${result.output.neutral.premium}</p>
+                                            <p class="text-2xl font-bold text-purple-700 mt-1">\${result.output.neutral.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                        </div>
+                                        <div class="bg-green-100 rounded-lg p-4 text-center">
+                                            <p class="text-green-600 text-sm font-medium">激进</p>
+                                            <p class="text-xs text-gray-500">×\${result.output.aggressive.premium}</p>
+                                            <p class="text-xl font-bold text-green-700 mt-1">\${result.output.aggressive.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- 底部操作栏 -->
+                    <div class="bg-gray-50 px-6 py-4 border-t flex justify-between items-center">
+                        <div class="flex gap-2">
+                            \${archiveData ? \`
+                                <button onclick="loadArchiveData('\${archiveData.id}'); switchTab('predict'); this.closest('#calculation-detail-dialog').remove();" 
+                                    class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
+                                    <i class="fas fa-redo mr-1"></i>复用此数据预测
+                                </button>
+                                \${!archiveData.isPreset ? \`
+                                <button onclick="deleteArchive('\${archiveData.id}'); this.closest('#calculation-detail-dialog').remove();" 
+                                    class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all">
+                                    <i class="fas fa-trash mr-1"></i>删除
+                                </button>
+                                \` : ''}
+                            \` : ''}
+                        </div>
+                        <button onclick="this.closest('#calculation-detail-dialog').remove()" 
+                            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(dialog);
         }
         
         // ==================== 参数管理 ====================
@@ -2190,137 +2458,13 @@ app.get('/', (c) => {
             }).join('');
         }
         
-        // 显示档案详情
+        // 显示档案详情 - 直接调用详细计算过程浮窗
         function showArchiveDetail(archiveId) {
             const archive = artistArchives.find(a => a.id === archiveId);
             if (!archive) return;
             
-            const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
-            const isPreset = archive.isPreset;
-            
-            // 预置档案的计算步骤说明
-            const calculationSteps = isPreset ? \`
-                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4">
-                    <h4 class="font-medium text-purple-700 mb-3">
-                        <i class="fas fa-graduation-cap mr-1"></i>Comparable模型计算步骤
-                    </h4>
-                    <div class="space-y-3 text-sm">
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step A: 归一化 (Normalization)</p>
-                            <p class="text-gray-500 text-xs mt-1">各维度除以最大值，使数据可比</p>
-                            <p class="text-purple-600 text-xs mt-1">百度' = 388/616 = 0.63 | 网易云' = 80.6/126.6 = 0.64 | 小红书' = 82/82 = 1.00</p>
-                        </div>
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step B: 需求指数 D</p>
-                            <p class="text-gray-500 text-xs mt-1">D = Σ(权重i × 维度i')</p>
-                            <p class="text-purple-600 text-xs mt-1">D = 0.45×0.63 + 0.35×0.64 + 0.20×1.00 = 0.6817</p>
-                        </div>
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step C: 转化率 LC</p>
-                            <p class="text-gray-500 text-xs mt-1">LC = clip(0.60 + 0.40×网易云' - 0.20×小红书', 0.60, 1.00)</p>
-                            <p class="text-purple-600 text-xs mt-1">LC = 0.60 + 0.40×0.64 - 0.20×1.00 = 0.8523</p>
-                        </div>
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step D: 出票指数 F</p>
-                            <p class="text-gray-500 text-xs mt-1">F = D × LC</p>
-                            <p class="text-purple-600 text-xs mt-1">F = 0.6817 × 0.8523 = 0.5811</p>
-                        </div>
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step E: 双锚点校准</p>
-                            <p class="text-gray-500 text-xs mt-1">用F的比值映射到锚点艺人的真实票房</p>
-                            <p class="text-purple-600 text-xs mt-1">Travis锚点(78.15M): r=0.83 → 65.03M | Kanye锚点(51M): r=0.69 → 35.24M</p>
-                        </div>
-                        <div class="bg-white rounded-lg p-3">
-                            <p class="font-medium text-gray-700">Step F: 城市溢价</p>
-                            <p class="text-gray-500 text-xs mt-1">根据目标城市级别（一线）应用溢价系数</p>
-                            <p class="text-purple-600 text-xs mt-1">保守×1.15 | 中性×1.25 | 激进×1.35</p>
-                        </div>
-                    </div>
-                </div>
-            \` : '';
-            
-            const dialog = document.createElement('div');
-            dialog.id = 'archive-detail-dialog';
-            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            dialog.innerHTML = \`
-                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4 fade-in max-h-[90vh] overflow-y-auto">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-xl font-bold text-gray-800">\${archive.artistName}</h3>
-                                \${isPreset ? '<span class="px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-full">示例档案</span>' : ''}
-                            </div>
-                            <p class="text-sm text-gray-500">\${new Date(archive.createdAt).toLocaleString('zh-CN')}</p>
-                        </div>
-                        <button onclick="this.closest('#archive-detail-dialog').remove()" 
-                            class="text-gray-400 hover:text-gray-600">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-                    
-                    \${archive.notes ? '<p class="text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">' + archive.notes + '</p>' : ''}
-                    
-                    <!-- 输入数据 -->
-                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
-                        <h4 class="font-medium text-blue-700 mb-2">
-                            <i class="fas fa-database mr-1"></i>输入数据
-                        </h4>
-                        <div class="grid grid-cols-3 gap-2 text-sm">
-                            \${Object.entries(archive.inputData).map(([key, val]) => {
-                                const param = weightParams.find(p => p.id === key);
-                                return \`
-                                    <div class="bg-white rounded p-2 text-center">
-                                        <p class="text-xs text-gray-500">\${param?.name || key}</p>
-                                        <p class="font-bold text-gray-800">\${val}</p>
-                                    </div>
-                                \`;
-                            }).join('')}
-                        </div>
-                    </div>
-                    
-                    \${calculationSteps}
-                    
-                    <!-- 预测结果 -->
-                    <div class="bg-purple-50 rounded-lg p-4 mb-4">
-                        <h4 class="font-medium text-purple-700 mb-2">
-                            <i class="fas fa-chart-line mr-1"></i>预测结果
-                            <span class="text-sm font-normal ml-2">(\${tierNames[archive.targetTier]})</span>
-                        </h4>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="bg-yellow-100 rounded p-3 text-center">
-                                <p class="text-xs text-yellow-600">保守</p>
-                                <p class="text-lg font-bold text-yellow-700">\${archive.result.conservative.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万</p>
-                            </div>
-                            <div class="bg-purple-100 rounded p-3 text-center border-2 border-purple-300">
-                                <p class="text-xs text-purple-600">中性</p>
-                                <p class="text-xl font-bold text-purple-700">\${archive.result.neutral.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万</p>
-                            </div>
-                            <div class="bg-green-100 rounded p-3 text-center">
-                                <p class="text-xs text-green-600">激进</p>
-                                <p class="text-lg font-bold text-green-700">\${archive.result.aggressive.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 操作按钮 -->
-                    <div class="flex gap-3">
-                        <button onclick="loadArchiveData('\${archive.id}'); switchTab('predict'); this.closest('#archive-detail-dialog').remove();" 
-                            class="flex-1 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
-                            <i class="fas fa-redo mr-1"></i>复用此数据预测
-                        </button>
-                        \${!isPreset ? \`
-                        <button onclick="deleteArchive('\${archive.id}'); this.closest('#archive-detail-dialog').remove();" 
-                            class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        \` : ''}
-                    </div>
-                </div>
-            \`;
-            document.body.appendChild(dialog);
+            // 直接显示详细计算过程
+            showCalculationDetail(archive);
         }
         
         // 加载档案数据进行复用
