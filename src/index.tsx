@@ -453,10 +453,15 @@ app.get('/', (c) => {
                 
                 <div class="max-w-xl mx-auto">
                     <div class="flex gap-4">
-                        <div class="flex-1">
+                        <div class="flex-1 relative">
                             <input type="text" id="ai-artist-input" 
                                 placeholder="输入艺人英文名，如: Drake, Taylor Swift, Bad Bunny..."
+                                autocomplete="off"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg">
+                            <!-- 自动补全下拉框 -->
+                            <div id="autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                                <!-- 动态填充 -->
+                            </div>
                         </div>
                         <button onclick="runAIAnalysis()" id="ai-analyze-btn"
                             class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2">
@@ -751,13 +756,216 @@ app.get('/', (c) => {
         // ==================== 全局状态 ====================
         let currentParams = null;
         
+        // 艺人数据库（用于自动补全）
+        const ARTIST_DATABASE = [
+            // Hip-Hop / Rap
+            { name: 'Drake', cn: '德雷克', genre: 'Hip-Hop' },
+            { name: 'Travis Scott', cn: '特拉维斯·斯科特', genre: 'Hip-Hop' },
+            { name: 'Kanye West', cn: '坎耶·韦斯特', genre: 'Hip-Hop' },
+            { name: 'Cardi B', cn: '卡迪·B', genre: 'Hip-Hop' },
+            { name: 'Kendrick Lamar', cn: '肯德里克·拉马尔', genre: 'Hip-Hop' },
+            { name: 'J. Cole', cn: 'J·科尔', genre: 'Hip-Hop' },
+            { name: 'Post Malone', cn: '波斯特·马龙', genre: 'Hip-Hop' },
+            { name: 'Lil Baby', cn: '小宝贝', genre: 'Hip-Hop' },
+            { name: 'Future', cn: '未来', genre: 'Hip-Hop' },
+            { name: '21 Savage', cn: '21·萨维奇', genre: 'Hip-Hop' },
+            { name: 'Megan Thee Stallion', cn: '梅根·西·斯塔里昂', genre: 'Hip-Hop' },
+            { name: 'Nicki Minaj', cn: '妮琪·米娜', genre: 'Hip-Hop' },
+            { name: 'Eminem', cn: '埃米纳姆', genre: 'Hip-Hop' },
+            { name: 'Jay-Z', cn: '杰斯', genre: 'Hip-Hop' },
+            { name: 'Lil Wayne', cn: '小韦恩', genre: 'Hip-Hop' },
+            { name: 'Tyler, The Creator', cn: '泰勒·创造者', genre: 'Hip-Hop' },
+            { name: 'A$AP Rocky', cn: 'A$AP洛基', genre: 'Hip-Hop' },
+            { name: 'Metro Boomin', cn: '都市轰鸣', genre: 'Hip-Hop' },
+            { name: 'Playboi Carti', cn: '花花公子卡地', genre: 'Hip-Hop' },
+            { name: 'Doja Cat', cn: '多贾猫', genre: 'Hip-Hop' },
+            
+            // Pop
+            { name: 'Taylor Swift', cn: '泰勒·斯威夫特', genre: 'Pop' },
+            { name: 'Ed Sheeran', cn: '艾德·希兰', genre: 'Pop' },
+            { name: 'Ariana Grande', cn: '爱莉安娜·格兰德', genre: 'Pop' },
+            { name: 'Billie Eilish', cn: '比莉·艾利什', genre: 'Pop' },
+            { name: 'The Weeknd', cn: '威肯', genre: 'Pop' },
+            { name: 'Justin Bieber', cn: '贾斯汀·比伯', genre: 'Pop' },
+            { name: 'Bruno Mars', cn: '布鲁诺·马尔斯', genre: 'Pop' },
+            { name: 'Dua Lipa', cn: '杜阿·利帕', genre: 'Pop' },
+            { name: 'Harry Styles', cn: '哈里·斯泰尔斯', genre: 'Pop' },
+            { name: 'Olivia Rodrigo', cn: '奥利维亚·罗德里戈', genre: 'Pop' },
+            { name: 'Lady Gaga', cn: '嘎嘎小姐', genre: 'Pop' },
+            { name: 'Beyoncé', cn: '碧昂丝', genre: 'Pop' },
+            { name: 'Rihanna', cn: '蕾哈娜', genre: 'Pop' },
+            { name: 'Katy Perry', cn: '凯蒂·佩里', genre: 'Pop' },
+            { name: 'Selena Gomez', cn: '赛琳娜·戈麦斯', genre: 'Pop' },
+            { name: 'Miley Cyrus', cn: '麦莉·赛勒斯', genre: 'Pop' },
+            { name: 'Shawn Mendes', cn: '肖恩·门德斯', genre: 'Pop' },
+            { name: 'Charlie Puth', cn: '查理·普斯', genre: 'Pop' },
+            { name: 'Sia', cn: '希雅', genre: 'Pop' },
+            { name: 'Adele', cn: '阿黛尔', genre: 'Pop' },
+            { name: 'Sam Smith', cn: '萨姆·史密斯', genre: 'Pop' },
+            { name: 'Sabrina Carpenter', cn: '萨布丽娜·卡彭特', genre: 'Pop' },
+            { name: 'Chappell Roan', cn: '查佩尔·罗恩', genre: 'Pop' },
+            
+            // Latin
+            { name: 'Bad Bunny', cn: '坏兔子', genre: 'Latin' },
+            { name: 'J Balvin', cn: 'J·巴尔文', genre: 'Latin' },
+            { name: 'Daddy Yankee', cn: '洋基老爹', genre: 'Latin' },
+            { name: 'Ozuna', cn: '奥祖纳', genre: 'Latin' },
+            { name: 'Maluma', cn: '马卢马', genre: 'Latin' },
+            { name: 'Karol G', cn: '卡罗尔·G', genre: 'Latin' },
+            { name: 'Shakira', cn: '夏奇拉', genre: 'Latin' },
+            { name: 'Rauw Alejandro', cn: '劳·亚历杭德罗', genre: 'Latin' },
+            
+            // R&B / Soul
+            { name: 'SZA', cn: 'SZA', genre: 'R&B' },
+            { name: 'Frank Ocean', cn: '弗兰克·奥申', genre: 'R&B' },
+            { name: 'Daniel Caesar', cn: '丹尼尔·凯撒', genre: 'R&B' },
+            { name: 'H.E.R.', cn: 'H.E.R.', genre: 'R&B' },
+            { name: 'Usher', cn: '亚瑟', genre: 'R&B' },
+            { name: 'Chris Brown', cn: '克里斯·布朗', genre: 'R&B' },
+            { name: 'Khalid', cn: '哈立德', genre: 'R&B' },
+            
+            // Rock / Alternative
+            { name: 'Coldplay', cn: '酷玩乐队', genre: 'Rock' },
+            { name: 'Imagine Dragons', cn: '梦龙乐队', genre: 'Rock' },
+            { name: 'Maroon 5', cn: '魔力红', genre: 'Rock' },
+            { name: 'OneRepublic', cn: '共和时代', genre: 'Rock' },
+            { name: 'The 1975', cn: 'The 1975', genre: 'Rock' },
+            { name: 'Arctic Monkeys', cn: '北极猴', genre: 'Rock' },
+            { name: 'Twenty One Pilots', cn: '二十一名飞行员', genre: 'Rock' },
+            { name: 'Foo Fighters', cn: '喷火战机', genre: 'Rock' },
+            { name: 'Green Day', cn: '绿日乐队', genre: 'Rock' },
+            { name: 'Linkin Park', cn: '林肯公园', genre: 'Rock' },
+            
+            // Electronic / DJ
+            { name: 'Calvin Harris', cn: '卡尔文·哈里斯', genre: 'Electronic' },
+            { name: 'Marshmello', cn: '棉花糖', genre: 'Electronic' },
+            { name: 'The Chainsmokers', cn: '烟鬼组合', genre: 'Electronic' },
+            { name: 'David Guetta', cn: '大卫·库塔', genre: 'Electronic' },
+            { name: 'Kygo', cn: 'Kygo', genre: 'Electronic' },
+            { name: 'Tiësto', cn: '铁斯托', genre: 'Electronic' },
+            { name: 'Skrillex', cn: '史奇雷克斯', genre: 'Electronic' },
+            { name: 'Zedd', cn: '泽德', genre: 'Electronic' },
+            { name: 'Martin Garrix', cn: '马丁·盖瑞斯', genre: 'Electronic' },
+            
+            // K-Pop crossover (有在欧美市场活动的)
+            { name: 'BTS', cn: '防弹少年团', genre: 'K-Pop' },
+            { name: 'BLACKPINK', cn: 'BLACKPINK', genre: 'K-Pop' },
+            { name: 'Lisa', cn: 'Lisa', genre: 'K-Pop' },
+            { name: 'Rosé', cn: 'Rosé', genre: 'K-Pop' },
+        ];
+        
         // 初始化
         document.addEventListener('DOMContentLoaded', async () => {
             // 加载默认参数
             const res = await fetch('/api/params/default');
             currentParams = await res.json();
             console.log('Loaded default params:', currentParams);
+            
+            // 初始化自动补全
+            initAutocomplete();
         });
+        
+        // ==================== 自动补全功能 ====================
+        function initAutocomplete() {
+            const input = document.getElementById('ai-artist-input');
+            const dropdown = document.getElementById('autocomplete-dropdown');
+            let selectedIndex = -1;
+            
+            // 输入事件
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.trim().toLowerCase();
+                selectedIndex = -1;
+                
+                if (value.length < 1) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                
+                // 搜索匹配的艺人
+                const matches = ARTIST_DATABASE.filter(artist => 
+                    artist.name.toLowerCase().includes(value) || 
+                    artist.cn.includes(value)
+                ).slice(0, 8);  // 最多显示8个
+                
+                if (matches.length === 0) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                
+                // 渲染下拉列表
+                dropdown.innerHTML = matches.map((artist, index) => \`
+                    <div class="autocomplete-item px-4 py-3 hover:bg-purple-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0"
+                         data-name="\${artist.name}" data-index="\${index}">
+                        <div>
+                            <span class="font-medium text-gray-800">\${highlightMatch(artist.name, value)}</span>
+                            <span class="text-gray-400 text-sm ml-2">\${artist.cn}</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">\${artist.genre}</span>
+                    </div>
+                \`).join('');
+                
+                dropdown.classList.remove('hidden');
+                
+                // 点击选项
+                dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        input.value = item.dataset.name;
+                        dropdown.classList.add('hidden');
+                        input.focus();
+                    });
+                });
+            });
+            
+            // 键盘导航
+            input.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    input.value = items[selectedIndex].dataset.name;
+                    dropdown.classList.add('hidden');
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // 点击外部关闭
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // 聚焦时如果有内容则显示建议
+            input.addEventListener('focus', () => {
+                if (input.value.trim().length >= 1) {
+                    input.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+        
+        function highlightMatch(text, query) {
+            const regex = new RegExp(\`(\${query})\`, 'gi');
+            return text.replace(regex, '<span class="text-purple-600 font-semibold">$1</span>');
+        }
+        
+        function updateSelection(items, index) {
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('bg-purple-50');
+                } else {
+                    item.classList.remove('bg-purple-50');
+                }
+            });
+        }
         
         // ==================== 标签切换 ====================
         function switchTab(tabName) {
