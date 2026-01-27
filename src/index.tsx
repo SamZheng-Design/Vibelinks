@@ -1532,13 +1532,18 @@ app.get('/', (c) => {
                         <i class="\${p.icon} text-\${p.color}-500"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm font-medium text-gray-700 truncate">\${p.name}</label>
+                        <div class="flex items-center gap-2 mb-1">
+                            <input type="text" value="\${p.name}" 
+                                onchange="updateDimensionName('\${p.id}', this.value)"
+                                onblur="updateDimensionName('\${p.id}', this.value)"
+                                class="text-sm font-medium text-gray-700 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 focus:outline-none px-1 py-0.5 -ml-1 max-w-[120px]"
+                                title="点击编辑维度名称">
                             \${p.unit ? '<span class="text-xs text-gray-400">(' + p.unit + ')</span>' : ''}
+                            <i class="fas fa-pencil-alt text-gray-300 text-xs" title="可编辑"></i>
                         </div>
                         <input type="number" id="input-\${p.id}" value="\${artistInputValues[p.id] ?? getDefaultValue(p.id)}" step="0.1"
                             onchange="artistInputValues['\${p.id}'] = parseFloat(this.value) || 0"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 mt-1">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
                     <button onclick="removeArtistDataDimension('\${p.id}')" 
                         class="px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all flex-shrink-0"
@@ -1552,6 +1557,18 @@ app.get('/', (c) => {
             const countHint = document.getElementById('dimension-count-hint');
             if (countHint) {
                 countHint.textContent = \`当前 \${weightParams.length} 个维度\`;
+            }
+        }
+        
+        // 更新维度名称（统一函数，同步更新艺人输入区和权重区）
+        function updateDimensionName(id, name) {
+            const param = weightParams.find(p => p.id === id);
+            if (param && param.name !== name) {
+                param.name = name;
+                // 重新渲染两个区域以保持同步
+                renderArtistDataInputs();
+                renderWeightParams();
+                renderBenchmarks();
             }
         }
         
@@ -1710,10 +1727,8 @@ app.get('/', (c) => {
         }
         
         function updateWeightName(id, name) {
-            const param = weightParams.find(p => p.id === id);
-            if (param) param.name = name;
-            renderArtistDataInputs();
-            renderBenchmarks();
+            // 复用统一的维度名称更新函数
+            updateDimensionName(id, name);
         }
         
         function updateWeightValue(id, value) {
