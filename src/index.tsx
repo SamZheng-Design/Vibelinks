@@ -513,7 +513,7 @@ app.get('/', (c) => {
                     </button>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-6">
+                <div class="grid md:grid-cols-3 gap-6">
                     <!-- 左侧：数据输入 -->
                     <div class="space-y-4">
                         <!-- 艺人名称搜索（自动匹配） -->
@@ -523,16 +523,13 @@ app.get('/', (c) => {
                             </label>
                             <div class="relative">
                                 <input type="text" id="artist-search-input" 
-                                    placeholder="输入艺人英文名，如: Drake, Taylor Swift..."
+                                    placeholder="输入艺人英文名..."
                                     autocomplete="off"
                                     class="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 bg-white">
                                 <div id="artist-autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                                     <!-- 动态填充 -->
                                 </div>
                             </div>
-                            <p class="text-xs text-purple-500 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i>选择艺人后将自动填充已知数据
-                            </p>
                         </div>
                         
                         <div id="artist-data-inputs">
@@ -544,27 +541,18 @@ app.get('/', (c) => {
                             <h4 class="font-medium text-purple-700 mb-3">
                                 <i class="fas fa-city mr-2"></i>目标城市级别
                             </h4>
-                            <div class="grid grid-cols-3 gap-2">
-                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier1" checked class="mr-2 text-purple-600">
-                                    <div>
-                                        <p class="font-medium text-gray-800">一线城市</p>
-                                        <p class="text-xs text-gray-500">深圳/杭州/上海</p>
-                                    </div>
+                            <div class="grid grid-cols-3 gap-1">
+                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier1" checked class="mr-1 text-purple-600">
+                                    <span class="text-sm font-medium">一线</span>
                                 </label>
-                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier2" class="mr-2 text-purple-600">
-                                    <div>
-                                        <p class="font-medium text-gray-800">二线城市</p>
-                                        <p class="text-xs text-gray-500">成都/武汉/南京</p>
-                                    </div>
+                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier2" class="mr-1 text-purple-600">
+                                    <span class="text-sm font-medium">二线</span>
                                 </label>
-                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier3" class="mr-2 text-purple-600">
-                                    <div>
-                                        <p class="font-medium text-gray-800">三线城市</p>
-                                        <p class="text-xs text-gray-500">长沙/郑州/济南</p>
-                                    </div>
+                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier3" class="mr-1 text-purple-600">
+                                    <span class="text-sm font-medium">三线</span>
                                 </label>
                             </div>
                         </div>
@@ -575,7 +563,7 @@ app.get('/', (c) => {
                         </button>
                     </div>
                     
-                    <!-- 右侧：预测结果 -->
+                    <!-- 中间：预测结果 -->
                     <div class="bg-gray-50 rounded-xl p-4">
                         <h4 class="font-medium text-gray-700 mb-4">
                             <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
@@ -586,6 +574,33 @@ app.get('/', (c) => {
                                 <i class="fas fa-arrow-left text-3xl mb-3"></i>
                                 <p>输入数据后点击"开始预测"</p>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：艺人档案 -->
+                    <div class="bg-gradient-to-b from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-medium text-amber-700">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                艺人档案
+                            </h4>
+                            <span class="text-xs text-amber-500" id="archive-count">0 条记录</span>
+                        </div>
+                        
+                        <!-- 档案列表 -->
+                        <div id="artist-archive-list" class="space-y-2 max-h-80 overflow-y-auto">
+                            <div class="text-center text-amber-400 py-6">
+                                <i class="fas fa-archive text-2xl mb-2"></i>
+                                <p class="text-sm">暂无档案</p>
+                                <p class="text-xs mt-1">完成预测后可建档保存</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 快速操作 -->
+                        <div class="mt-4 pt-4 border-t border-amber-200">
+                            <button onclick="clearAllArchives()" class="w-full py-2 text-sm text-amber-600 hover:bg-amber-100 rounded-lg transition-all">
+                                <i class="fas fa-trash-alt mr-1"></i>清空全部档案
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1770,8 +1785,18 @@ app.get('/', (c) => {
                             \`).join('')}
                         </div>
                     </details>
+                    
+                    <!-- 建档按钮 -->
+                    <button onclick="showArchiveDialog()" 
+                        class="w-full mt-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all">
+                        <i class="fas fa-folder-plus mr-2"></i>建立档案
+                    </button>
                 </div>
             \`;
+            
+            // 保存当前预测结果供建档使用
+            window.currentPredictionResult = result;
+            window.currentTargetTier = targetTier;
         }
         
         // ==================== 参数管理 ====================
@@ -1934,7 +1959,332 @@ app.get('/', (c) => {
             
             // 初始化预测面板
             setTimeout(initPredictPanel, 50);
+            
+            // 加载艺人档案
+            setTimeout(loadArtistArchives, 100);
         });
+        
+        // ==================== 艺人档案管理 ====================
+        let artistArchives = [];  // 档案数组
+        
+        // 加载档案
+        function loadArtistArchives() {
+            const saved = localStorage.getItem('artistArchives');
+            if (saved) {
+                try {
+                    artistArchives = JSON.parse(saved);
+                } catch (e) {
+                    artistArchives = [];
+                }
+            }
+            renderArchiveList();
+        }
+        
+        // 保存档案到本地存储
+        function saveArtistArchives() {
+            localStorage.setItem('artistArchives', JSON.stringify(artistArchives));
+            renderArchiveList();
+        }
+        
+        // 显示建档对话框
+        function showArchiveDialog() {
+            if (!window.currentPredictionResult) {
+                alert('请先进行预测');
+                return;
+            }
+            
+            const artistName = document.getElementById('artist-search-input')?.value?.trim() || '';
+            
+            // 创建对话框
+            const dialog = document.createElement('div');
+            dialog.id = 'archive-dialog';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            dialog.innerHTML = \`
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 fade-in">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-folder-plus text-amber-500"></i>
+                        建立艺人档案
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-1">艺人名称 *</label>
+                            <input type="text" id="archive-artist-name" value="\${artistName}" 
+                                placeholder="输入艺人名称"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-1">备注（可选）</label>
+                            <textarea id="archive-notes" rows="2" 
+                                placeholder="添加备注信息..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                        </div>
+                        
+                        <div class="bg-amber-50 rounded-lg p-3">
+                            <p class="text-sm text-amber-700 font-medium mb-2">将保存以下数据：</p>
+                            <ul class="text-xs text-amber-600 space-y-1">
+                                <li>• 平台数据（百度指数、网易云、小红书等）</li>
+                                <li>• 预测结果（保守/中性/激进）</li>
+                                <li>• 目标城市级别</li>
+                                <li>• 建档时间</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="closeArchiveDialog()" 
+                            class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all">
+                            取消
+                        </button>
+                        <button onclick="confirmArchive()" 
+                            class="flex-1 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all">
+                            <i class="fas fa-check mr-1"></i>确认建档
+                        </button>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(dialog);
+            
+            // 聚焦到名称输入框
+            setTimeout(() => {
+                document.getElementById('archive-artist-name')?.focus();
+            }, 100);
+        }
+        
+        // 关闭对话框
+        function closeArchiveDialog() {
+            const dialog = document.getElementById('archive-dialog');
+            if (dialog) dialog.remove();
+        }
+        
+        // 确认建档
+        function confirmArchive() {
+            const artistName = document.getElementById('archive-artist-name')?.value?.trim();
+            const notes = document.getElementById('archive-notes')?.value?.trim();
+            
+            if (!artistName) {
+                alert('请输入艺人名称');
+                return;
+            }
+            
+            // 收集当前输入的艺人数据
+            const inputData = {};
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                inputData[p.id] = parseFloat(input?.value || 0);
+            });
+            
+            // 创建档案记录
+            const archive = {
+                id: 'archive_' + Date.now(),
+                artistName: artistName,
+                notes: notes || '',
+                createdAt: new Date().toISOString(),
+                inputData: inputData,
+                targetTier: window.currentTargetTier,
+                result: {
+                    conservative: window.currentPredictionResult.output.conservative.value,
+                    neutral: window.currentPredictionResult.output.neutral.value,
+                    aggressive: window.currentPredictionResult.output.aggressive.value
+                },
+                indices: window.currentPredictionResult.indices?.find(i => i.id === 'target') || {}
+            };
+            
+            // 添加到档案列表
+            artistArchives.unshift(archive);  // 最新的在前面
+            saveArtistArchives();
+            
+            closeArchiveDialog();
+            showFillNotification(artistName, '档案已建立');
+        }
+        
+        // 渲染档案列表
+        function renderArchiveList() {
+            const container = document.getElementById('artist-archive-list');
+            const countEl = document.getElementById('archive-count');
+            
+            if (!container) return;
+            
+            if (countEl) {
+                countEl.textContent = artistArchives.length + ' 条记录';
+            }
+            
+            if (artistArchives.length === 0) {
+                container.innerHTML = \`
+                    <div class="text-center text-amber-400 py-6">
+                        <i class="fas fa-archive text-2xl mb-2"></i>
+                        <p class="text-sm">暂无档案</p>
+                        <p class="text-xs mt-1">完成预测后可建档保存</p>
+                    </div>
+                \`;
+                return;
+            }
+            
+            const tierNames = { tier1: '一线', tier2: '二线', tier3: '三线' };
+            
+            container.innerHTML = artistArchives.map(a => \`
+                <div class="bg-white rounded-lg p-3 border border-amber-100 hover:border-amber-300 transition-all cursor-pointer group"
+                    onclick="showArchiveDetail('\${a.id}')">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-800 truncate">\${a.artistName}</p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                \${new Date(a.createdAt).toLocaleDateString('zh-CN')}
+                                <span class="ml-2 px-1.5 py-0.5 bg-gray-100 rounded">\${tierNames[a.targetTier] || '一线'}</span>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-purple-600">\${a.result.neutral.toFixed(1)}</p>
+                            <p class="text-xs text-gray-400">百万</p>
+                        </div>
+                    </div>
+                    \${a.notes ? '<p class="text-xs text-gray-500 mt-2 truncate">' + a.notes + '</p>' : ''}
+                    <div class="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="event.stopPropagation(); loadArchiveData('\${a.id}')" 
+                            class="flex-1 py-1 text-xs bg-purple-100 text-purple-600 rounded hover:bg-purple-200">
+                            <i class="fas fa-redo mr-1"></i>复用
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteArchive('\${a.id}')" 
+                            class="px-2 py-1 text-xs text-red-500 hover:bg-red-50 rounded">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            \`).join('');
+        }
+        
+        // 显示档案详情
+        function showArchiveDetail(archiveId) {
+            const archive = artistArchives.find(a => a.id === archiveId);
+            if (!archive) return;
+            
+            const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            
+            const dialog = document.createElement('div');
+            dialog.id = 'archive-detail-dialog';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            dialog.innerHTML = \`
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4 fade-in max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">\${archive.artistName}</h3>
+                            <p class="text-sm text-gray-500">\${new Date(archive.createdAt).toLocaleString('zh-CN')}</p>
+                        </div>
+                        <button onclick="this.closest('#archive-detail-dialog').remove()" 
+                            class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    \${archive.notes ? '<p class="text-gray-600 mb-4 p-3 bg-gray-50 rounded-lg">' + archive.notes + '</p>' : ''}
+                    
+                    <!-- 输入数据 -->
+                    <div class="bg-blue-50 rounded-lg p-4 mb-4">
+                        <h4 class="font-medium text-blue-700 mb-2">
+                            <i class="fas fa-database mr-1"></i>输入数据
+                        </h4>
+                        <div class="grid grid-cols-3 gap-2 text-sm">
+                            \${Object.entries(archive.inputData).map(([key, val]) => {
+                                const param = weightParams.find(p => p.id === key);
+                                return \`
+                                    <div class="bg-white rounded p-2 text-center">
+                                        <p class="text-xs text-gray-500">\${param?.name || key}</p>
+                                        <p class="font-bold text-gray-800">\${val}</p>
+                                    </div>
+                                \`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- 预测结果 -->
+                    <div class="bg-purple-50 rounded-lg p-4 mb-4">
+                        <h4 class="font-medium text-purple-700 mb-2">
+                            <i class="fas fa-chart-line mr-1"></i>预测结果
+                            <span class="text-sm font-normal ml-2">(\${tierNames[archive.targetTier]})</span>
+                        </h4>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-yellow-100 rounded p-3 text-center">
+                                <p class="text-xs text-yellow-600">保守</p>
+                                <p class="text-lg font-bold text-yellow-700">\${archive.result.conservative.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万</p>
+                            </div>
+                            <div class="bg-purple-100 rounded p-3 text-center border-2 border-purple-300">
+                                <p class="text-xs text-purple-600">中性</p>
+                                <p class="text-xl font-bold text-purple-700">\${archive.result.neutral.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万</p>
+                            </div>
+                            <div class="bg-green-100 rounded p-3 text-center">
+                                <p class="text-xs text-green-600">激进</p>
+                                <p class="text-lg font-bold text-green-700">\${archive.result.aggressive.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-3">
+                        <button onclick="loadArchiveData('\${archive.id}'); this.closest('#archive-detail-dialog').remove();" 
+                            class="flex-1 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
+                            <i class="fas fa-redo mr-1"></i>复用此数据预测
+                        </button>
+                        <button onclick="deleteArchive('\${archive.id}'); this.closest('#archive-detail-dialog').remove();" 
+                            class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(dialog);
+        }
+        
+        // 加载档案数据进行复用
+        function loadArchiveData(archiveId) {
+            const archive = artistArchives.find(a => a.id === archiveId);
+            if (!archive) return;
+            
+            // 填充艺人名称
+            const searchInput = document.getElementById('artist-search-input');
+            if (searchInput) searchInput.value = archive.artistName;
+            
+            // 填充输入数据
+            Object.entries(archive.inputData).forEach(([key, val]) => {
+                artistInputValues[key] = val;
+                const input = document.getElementById('input-' + key);
+                if (input) {
+                    input.value = val;
+                    input.classList.add('ring-2', 'ring-amber-400');
+                    setTimeout(() => input.classList.remove('ring-2', 'ring-amber-400'), 1000);
+                }
+            });
+            
+            // 设置目标城市
+            const tierRadio = document.querySelector(\`input[name="targetTier"][value="\${archive.targetTier}"]\`);
+            if (tierRadio) tierRadio.checked = true;
+            
+            showFillNotification(archive.artistName, '已加载档案数据，可进行预测');
+        }
+        
+        // 删除档案
+        function deleteArchive(archiveId) {
+            if (!confirm('确定要删除此档案吗？')) return;
+            
+            artistArchives = artistArchives.filter(a => a.id !== archiveId);
+            saveArtistArchives();
+        }
+        
+        // 清空全部档案
+        function clearAllArchives() {
+            if (artistArchives.length === 0) {
+                alert('暂无档案可清空');
+                return;
+            }
+            
+            if (!confirm(\`确定要清空全部 \${artistArchives.length} 条档案吗？此操作不可恢复。\`)) return;
+            
+            artistArchives = [];
+            saveArtistArchives();
+        }
     </script>
 </body>
 </html>`)
