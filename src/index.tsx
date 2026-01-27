@@ -75,7 +75,7 @@ function calculateComparable(
   params: any = DEFAULT_PARAMS,
   targetTier: string = 'tier1'  // 目标城市级别
 ) {
-  const { benchmarks, weights, lc, tierPremiums } = params
+  const { benchmarks, weights, lc, tierPremiums, cityTiers } = params
   
   // 获取权重对象（兼容新旧格式）
   const weightsObj: Record<string, number> = Array.isArray(weights)
@@ -84,13 +84,13 @@ function calculateComparable(
   
   // 获取锚点数据（兼容新旧格式）
   const benchmarkList = Array.isArray(benchmarks) ? benchmarks : [
-    { id: 'travis', name: benchmarks.travis?.name || 'Travis Scott', boxOffice: benchmarks.travis?.boxOffice || 78.15, data: benchmarks.travis || { baidu: 280, netease: 126.6, xhs: 1.0 }},
-    { id: 'kanye', name: benchmarks.kanye?.name || 'Kanye West', boxOffice: benchmarks.kanye?.boxOffice || 51.00, data: benchmarks.kanye || { baidu: 616, netease: 99.7, xhs: 13.9 }}
+    { id: 'travis', name: benchmarks.travis?.name || 'Travis Scott', boxOffice: benchmarks.travis?.boxOffice || 78.15, tier: 'tier3', data: benchmarks.travis || { baidu: 280, netease: 126.6, xhs: 1.0 }},
+    { id: 'kanye', name: benchmarks.kanye?.name || 'Kanye West', boxOffice: benchmarks.kanye?.boxOffice || 51.00, tier: 'tier3', data: benchmarks.kanye || { baidu: 616, netease: 99.7, xhs: 13.9 }}
   ]
   
   // 合并所有艺人数据用于归一化
   const allArtists = [
-    ...benchmarkList.map((b: any) => ({ ...b.data, name: b.name, id: b.id, boxOffice: b.boxOffice })),
+    ...benchmarkList.map((b: any) => ({ ...b.data, name: b.name, id: b.id, boxOffice: b.boxOffice, tier: b.tier || 'tier3' })),
     { ...artistData, name: 'Target', id: 'target' }
   ]
   
@@ -102,7 +102,7 @@ function calculateComparable(
   })
   
   const normalize = (artist: any) => {
-    const normalized: any = { name: artist.name, id: artist.id, boxOffice: artist.boxOffice }
+    const normalized: any = { name: artist.name, id: artist.id, boxOffice: artist.boxOffice, tier: artist.tier }
     dimensions.forEach(dim => {
       normalized[`${dim}_norm`] = maxValues[dim] > 0 ? (artist[dim] || 0) / maxValues[dim] : 0
     })
@@ -139,25 +139,57 @@ function calculateComparable(
   const targetIdx = indices.find(i => i.id === 'target')!
   const benchmarkIndices = indices.filter(i => i.id !== 'target')
   
-  // Step E: 多锚点校准 - 支持多个锚点
-  const anchorResults = benchmarkIndices.map(anchor => {
+  // 城市级别乘数配置（用于将不同级别城市票房标准化到基准）
+  const tierMultipliers = cityTiers || {
+    tier1: { multiplier: 1.0 },
+    tier2: { multiplier: 0.85 },
+    tier3: { multiplier: 0.70 }
+  }
+  
+  // 获取目标城市的乘数
+  const targetMultiplier = tierMultipliers[targetTier]?.multiplier || 1.0
+  
+  // Step E: 多锚点校准 - 支持多个锚点，且每个锚点可以有不同的城市级别
+  // 计算思路：
+  // 1. 先用 F 比值计算出锚点城市级别的票房
+  // 2. 再根据锚点城市与目标城市的级别差异计算溢价/折价
+  const anchorResults = benchmarkIndices.map((anchor: any) => {
     const ratio = anchor.F > 0 ? targetIdx.F / anchor.F : 0
+    const anchorTier = anchor.tier || 'tier3'
+    const anchorMultiplier = tierMultipliers[anchorTier]?.multiplier || 0.70
+    
+    // 锚点级别票房（用F比值映射）
+    const anchorTierBoxOffice = anchor.boxOffice * ratio
+    
+    // 从锚点级别转换到目标级别的溢价系数
+    // 如果锚点在三线，目标在一线，需要用 toTier1 的溢价
+    // 如果锚点在一线，目标在三线，需要用反向折价
+    const tierKey = `to${targetTier.charAt(0).toUpperCase()}${targetTier.slice(1)}`
+    const fromTierKey = `from${anchorTier.charAt(0).toUpperCase()}${anchorTier.slice(1)}`
+    
+    // 标准化到三线基准，再应用到目标级别的逻辑
+    // 基准票房 = 锚点票房 / 锚点级别乘数 * 三线乘数 (0.7)
+    const tier3BaseBoxOffice = anchorTierBoxOffice * (0.70 / anchorMultiplier)
+    
     return {
       name: anchor.name,
       id: anchor.id,
       ratio,
-      tier3BoxOffice: anchor.boxOffice * ratio
+      anchorTier,
+      anchorTierBoxOffice,  // 锚点城市级别的预测票房
+      tier3BoxOffice: tier3BaseBoxOffice  // 标准化到三线的基准票房
     }
   })
   
-  // 计算三线城市票房范围
-  const tier3Values = anchorResults.map(a => a.tier3BoxOffice)
+  // 计算三线城市基准票房范围（用于标准化比较）
+  const tier3Values = anchorResults.map((a: any) => a.tier3BoxOffice)
   const tier3Min = Math.min(...tier3Values)
   const tier3Max = Math.max(...tier3Values)
-  const tier3Avg = tier3Values.reduce((a, b) => a + b, 0) / tier3Values.length
+  const tier3Avg = tier3Values.reduce((a: number, b: number) => a + b, 0) / tier3Values.length
   
-  // Step F: 城市溢价计算 - 根据目标城市级别
-  const premiums = tierPremiums?.[`to${targetTier.charAt(0).toUpperCase()}${targetTier.slice(1)}`] || 
+  // Step F: 城市溢价计算 - 从三线基准转换到目标城市级别
+  const tierKey = `to${targetTier.charAt(0).toUpperCase()}${targetTier.slice(1)}`
+  const premiums = tierPremiums?.[tierKey] || 
     tierPremiums?.toTier1 || { conservative: 1.15, neutral: 1.25, aggressive: 1.35 }
   
   const conservative = tier3Min * premiums.conservative
@@ -174,7 +206,7 @@ function calculateComparable(
     indices,
     // 多锚点比例映射
     anchorResults,
-    // 三线城市票房
+    // 三线城市基准票房
     tier3: {
       values: tier3Values,
       min: tier3Min,
@@ -685,7 +717,8 @@ app.get('/', (c) => {
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="font-medium text-orange-700">
                             <i class="fas fa-anchor mr-2"></i>
-                            Benchmark锚点数据（三线城市真实票房）
+                            Benchmark锚点数据
+                            <span class="text-sm font-normal text-orange-500 ml-2">（可选择各锚点所属城市级别）</span>
                         </h4>
                         <button onclick="addBenchmark()" class="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600">
                             <i class="fas fa-plus mr-1"></i>添加锚点
@@ -1387,16 +1420,23 @@ app.get('/', (c) => {
                         </div>
                         <p class="text-gray-600 mb-4">\${explanation.step5}</p>
                         <div class="grid md:grid-cols-2 gap-4">
-                            \${(result.anchorResults || []).map((a, idx) => \`
+                            \${(result.anchorResults || []).map((a, idx) => {
+                                const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+                                const tierColor = a.anchorTier === 'tier1' ? 'purple' : a.anchorTier === 'tier2' ? 'blue' : 'orange';
+                                return \`
                                 <div class="bg-\${idx === 0 ? 'red' : 'amber'}-50 rounded-lg p-4">
-                                    <p class="font-medium text-\${idx === 0 ? 'red' : 'amber'}-700">\${a.name} 锚点</p>
-                                    <p class="text-sm mt-2">ratio = \${a.ratio.toFixed(3)}</p>
-                                    <p class="text-sm">三线票房 = <strong>\${a.tier3BoxOffice.toFixed(2)} 百万元</strong></p>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <p class="font-medium text-\${idx === 0 ? 'red' : 'amber'}-700">\${a.name} 锚点</p>
+                                        <span class="px-2 py-0.5 text-xs rounded bg-\${tierColor}-100 text-\${tierColor}-600">\${tierNames[a.anchorTier] || '三线城市'}</span>
+                                    </div>
+                                    <p class="text-sm">ratio = \${a.ratio.toFixed(3)}</p>
+                                    <p class="text-sm">锚点城市票房 = \${a.anchorTierBoxOffice?.toFixed(2) || a.tier3BoxOffice.toFixed(2)} 百万元</p>
+                                    <p class="text-sm">→ 三线基准 = <strong>\${a.tier3BoxOffice.toFixed(2)} 百万元</strong></p>
                                 </div>
-                            \`).join('')}
+                            \`}).join('')}
                         </div>
                         <div class="mt-4 bg-gray-100 rounded-lg p-4 text-center">
-                            <p class="text-sm text-gray-600">三线城市单场票房区间</p>
+                            <p class="text-sm text-gray-600">三线城市基准票房区间</p>
                             <p class="text-xl font-bold text-gray-800">\${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万元</p>
                         </div>
                     </div>
@@ -1544,6 +1584,31 @@ app.get('/', (c) => {
                                 onchange="updateBenchmark('\${b.id}', 'city', this.value)"
                                 class="w-full px-2 py-1 border rounded mt-1">
                         </div>
+                        <div class="col-span-2">
+                            <label class="text-xs text-gray-500 mb-1 block">
+                                <i class="fas fa-map-marker-alt mr-1 text-orange-500"></i>锚点城市级别
+                            </label>
+                            <div class="flex gap-1">
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier1' ? 'bg-purple-100 border-purple-400 text-purple-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier1" \${b.tier === 'tier1' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier1'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">一线</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier2' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier2" \${b.tier === 'tier2' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier2'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">二线</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier3' ? 'bg-orange-100 border-orange-400 text-orange-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier3" \${b.tier === 'tier3' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier3'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">三线</span>
+                                </label>
+                            </div>
+                        </div>
                         \${weightParams.map(w => \`
                         <div>
                             <label class="text-xs text-gray-500">\${w.name}</label>
@@ -1671,12 +1736,13 @@ app.get('/', (c) => {
         function displayPredictionResult(result, targetTier) {
             const container = document.getElementById('prediction-result');
             const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            const tierColors = { tier1: 'purple', tier2: 'blue', tier3: 'orange' };
             
             container.innerHTML = \`
                 <div class="fade-in space-y-4">
                     <div class="text-center mb-4">
                         <span class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
-                            <i class="fas fa-map-marker-alt mr-1"></i>\${tierNames[targetTier]}
+                            <i class="fas fa-map-marker-alt mr-1"></i>目标：\${tierNames[targetTier]}
                         </span>
                     </div>
                     
@@ -1699,10 +1765,29 @@ app.get('/', (c) => {
                         </div>
                     </div>
                     
-                    <!-- 三线基准 -->
+                    <!-- 锚点校准详情 -->
                     <div class="bg-orange-50 rounded-lg p-3 mt-4">
-                        <p class="text-sm text-orange-700 font-medium mb-1">三线城市基准（锚点均值）</p>
-                        <p class="text-gray-600 text-sm">\${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万</p>
+                        <p class="text-sm text-orange-700 font-medium mb-2">
+                            <i class="fas fa-anchor mr-1"></i>锚点校准详情
+                        </p>
+                        <div class="space-y-2">
+                            \${(result.anchorResults || []).map(a => \`
+                                <div class="flex items-center justify-between text-sm bg-white rounded p-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-medium">\${a.name}</span>
+                                        <span class="px-1.5 py-0.5 text-xs rounded \${
+                                            a.anchorTier === 'tier1' ? 'bg-purple-100 text-purple-600' :
+                                            a.anchorTier === 'tier2' ? 'bg-blue-100 text-blue-600' :
+                                            'bg-orange-100 text-orange-600'
+                                        }">\${tierNames[a.anchorTier] || '三线城市'}</span>
+                                    </div>
+                                    <span class="text-gray-600">→ 三线基准: \${a.tier3BoxOffice.toFixed(2)}百万</span>
+                                </div>
+                            \`).join('')}
+                        </div>
+                        <p class="text-gray-500 text-xs mt-2">
+                            三线基准范围: \${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万
+                        </p>
                     </div>
                     
                     <!-- 指数详情 -->
@@ -1740,7 +1825,14 @@ app.get('/', (c) => {
                 max: 1.00
             };
             
-            // 收集城市溢价
+            // 收集城市级别乘数配置
+            const cityTiers = {
+                tier1: { name: '一线城市', multiplier: 1.0 },
+                tier2: { name: '二线城市', multiplier: 0.85 },
+                tier3: { name: '三线城市', multiplier: 0.70 }
+            };
+            
+            // 收集城市溢价（从三线到各级别的溢价）
             const tierPremiums = {
                 toTier1: {
                     conservative: parseFloat(document.getElementById('tier1-conservative')?.value || 1.15),
@@ -1759,7 +1851,13 @@ app.get('/', (c) => {
                 }
             };
             
-            return { weights, lc, tierPremiums, benchmarks };
+            // 锚点数据（包含城市级别）
+            const benchmarksWithTier = benchmarks.map(b => ({
+                ...b,
+                tier: b.tier || 'tier3'  // 确保每个锚点都有tier属性
+            }));
+            
+            return { weights, lc, cityTiers, tierPremiums, benchmarks: benchmarksWithTier };
         }
         
         function saveAllParams() {
