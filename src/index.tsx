@@ -488,9 +488,6 @@ app.get('/', (c) => {
                 <button onclick="switchTab('predict')" id="tab-predict" class="tab-active py-4 px-2 text-sm font-medium">
                     <i class="fas fa-chart-line mr-2"></i>演唱会票房预测入口
                 </button>
-                <button onclick="switchTab('ai')" id="tab-ai" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-robot mr-2"></i>AI智能预测
-                </button>
                 <button onclick="switchTab('cardib')" id="tab-cardib" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
                     <i class="fas fa-graduation-cap mr-2"></i>Cardi B案例讲解
                 </button>
@@ -519,6 +516,25 @@ app.get('/', (c) => {
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- 左侧：数据输入 -->
                     <div class="space-y-4">
+                        <!-- 艺人名称搜索（自动匹配） -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-4">
+                            <label class="text-sm font-medium text-purple-700 mb-2 block">
+                                <i class="fas fa-search mr-1"></i>搜索艺人（自动匹配）
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="artist-search-input" 
+                                    placeholder="输入艺人英文名，如: Drake, Taylor Swift..."
+                                    autocomplete="off"
+                                    class="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 bg-white">
+                                <div id="artist-autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                                    <!-- 动态填充 -->
+                                </div>
+                            </div>
+                            <p class="text-xs text-purple-500 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>选择艺人后将自动填充已知数据
+                            </p>
+                        </div>
+                        
                         <div id="artist-data-inputs">
                             <!-- 动态生成的输入项 -->
                         </div>
@@ -736,71 +752,6 @@ app.get('/', (c) => {
             </div>
         </div>
         
-        <!-- AI智能预测面板 -->
-        <div id="panel-ai" class="hidden space-y-6">
-            <div class="glass rounded-2xl shadow-xl p-8">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                        <i class="fas fa-magic text-3xl text-purple-600"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800">AI智能票房预测</h2>
-                    <p class="text-gray-500 mt-2">输入任意欧美艺人名称，AI自动分析并预测票房</p>
-                </div>
-                
-                <div class="max-w-xl mx-auto">
-                    <div class="flex gap-4">
-                        <div class="flex-1 relative">
-                            <input type="text" id="ai-artist-input" 
-                                placeholder="输入艺人英文名，如: Drake, Taylor Swift, Bad Bunny..."
-                                autocomplete="off"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg">
-                            <!-- 自动补全下拉框 -->
-                            <div id="autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                                <!-- 动态填充 -->
-                            </div>
-                        </div>
-                        <button onclick="runAIAnalysis()" id="ai-analyze-btn"
-                            class="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all flex items-center gap-2">
-                            <i class="fas fa-search"></i>
-                            分析预测
-                        </button>
-                    </div>
-                    
-                    <!-- OpenAI Key 输入（可选） -->
-                    <details class="mt-4">
-                        <summary class="text-sm text-gray-500 cursor-pointer hover:text-gray-700">
-                            <i class="fas fa-key mr-1"></i>配置 OpenAI API Key（可选）
-                        </summary>
-                        <div class="mt-2 p-4 bg-gray-50 rounded-lg">
-                            <input type="password" id="openai-key-input" 
-                                placeholder="sk-..."
-                                class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
-                            <p class="text-xs text-gray-400 mt-2">您的Key只在本地使用，不会被存储</p>
-                        </div>
-                    </details>
-                </div>
-                
-                <!-- AI 分析结果 -->
-                <div id="ai-result" class="mt-8 hidden">
-                    <!-- 动态填充 -->
-                </div>
-            </div>
-            
-            <!-- 快速测试按钮 -->
-            <div class="text-center">
-                <p class="text-gray-500 mb-3">快速测试：</p>
-                <div class="flex flex-wrap justify-center gap-2">
-                    <button onclick="quickTest('Drake')" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50">Drake</button>
-                    <button onclick="quickTest('Taylor Swift')" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50">Taylor Swift</button>
-                    <button onclick="quickTest('Bad Bunny')" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50">Bad Bunny</button>
-                    <button onclick="quickTest('Dua Lipa')" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50">Dua Lipa</button>
-                    <button onclick="quickTest('Post Malone')" class="px-4 py-2 bg-white border border-gray-300 rounded-full text-sm hover:bg-gray-50">Post Malone</button>
-                </div>
-            </div>
-        </div>
-
-
-
         <!-- Cardi B 案例讲解面板 -->
         <div id="panel-cardib" class="hidden space-y-6">
             <div class="glass rounded-2xl shadow-xl p-8">
@@ -949,8 +900,11 @@ app.get('/', (c) => {
         
         // ==================== 自动补全功能 ====================
         function initAutocomplete() {
-            const input = document.getElementById('ai-artist-input');
-            const dropdown = document.getElementById('autocomplete-dropdown');
+            const input = document.getElementById('artist-search-input');
+            const dropdown = document.getElementById('artist-autocomplete-dropdown');
+            
+            if (!input || !dropdown) return;
+            
             let selectedIndex = -1;
             
             // 输入事件
@@ -977,7 +931,7 @@ app.get('/', (c) => {
                 // 渲染下拉列表
                 dropdown.innerHTML = matches.map((artist, index) => \`
                     <div class="autocomplete-item px-4 py-3 hover:bg-purple-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0"
-                         data-name="\${artist.name}" data-index="\${index}">
+                         data-name="\${artist.name}" data-cn="\${artist.cn}" data-index="\${index}">
                         <div>
                             <span class="font-medium text-gray-800">\${highlightMatch(artist.name, value)}</span>
                             <span class="text-gray-400 text-sm ml-2">\${artist.cn}</span>
@@ -991,9 +945,11 @@ app.get('/', (c) => {
                 // 点击选项
                 dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
                     item.addEventListener('click', () => {
-                        input.value = item.dataset.name;
+                        const artistName = item.dataset.name;
+                        input.value = artistName;
                         dropdown.classList.add('hidden');
-                        input.focus();
+                        // 自动填充艺人数据
+                        fillArtistData(artistName);
                     });
                 });
             });
@@ -1012,8 +968,11 @@ app.get('/', (c) => {
                     updateSelection(items, selectedIndex);
                 } else if (e.key === 'Enter' && selectedIndex >= 0) {
                     e.preventDefault();
-                    input.value = items[selectedIndex].dataset.name;
+                    const artistName = items[selectedIndex].dataset.name;
+                    input.value = artistName;
                     dropdown.classList.add('hidden');
+                    // 自动填充艺人数据
+                    fillArtistData(artistName);
                 } else if (e.key === 'Escape') {
                     dropdown.classList.add('hidden');
                 }
@@ -1032,6 +991,79 @@ app.get('/', (c) => {
                     input.dispatchEvent(new Event('input'));
                 }
             });
+        }
+        
+        // 已知艺人数据（基准数据）
+        const KNOWN_ARTIST_DATA = {
+            'Travis Scott': { baidu: 280, netease: 126.6, xhs: 1.0 },
+            'Kanye West': { baidu: 616, netease: 99.7, xhs: 13.9 },
+            'Cardi B': { baidu: 388, netease: 80.6, xhs: 82.0 },
+            'Drake': { baidu: 520, netease: 150.0, xhs: 25.0 },
+            'Taylor Swift': { baidu: 890, netease: 280.0, xhs: 150.0 },
+            'The Weeknd': { baidu: 450, netease: 180.0, xhs: 35.0 },
+            'Beyoncé': { baidu: 380, netease: 95.0, xhs: 45.0 },
+            'Ed Sheeran': { baidu: 680, netease: 220.0, xhs: 60.0 },
+            'Billie Eilish': { baidu: 350, netease: 120.0, xhs: 95.0 },
+            'Dua Lipa': { baidu: 420, netease: 140.0, xhs: 88.0 },
+            'Post Malone': { baidu: 380, netease: 110.0, xhs: 20.0 },
+            'Bad Bunny': { baidu: 280, netease: 45.0, xhs: 15.0 },
+            'Ariana Grande': { baidu: 560, netease: 190.0, xhs: 120.0 },
+            'Justin Bieber': { baidu: 720, netease: 210.0, xhs: 85.0 },
+            'Bruno Mars': { baidu: 480, netease: 160.0, xhs: 40.0 },
+            'Rihanna': { baidu: 420, netease: 130.0, xhs: 75.0 },
+            'Coldplay': { baidu: 580, netease: 250.0, xhs: 55.0 },
+            'BTS': { baidu: 950, netease: 380.0, xhs: 280.0 },
+            'BLACKPINK': { baidu: 780, netease: 320.0, xhs: 220.0 },
+        };
+        
+        // 填充艺人数据
+        function fillArtistData(artistName) {
+            const data = KNOWN_ARTIST_DATA[artistName];
+            if (data) {
+                // 填充已知数据
+                Object.keys(data).forEach(key => {
+                    artistInputValues[key] = data[key];
+                    const input = document.getElementById('input-' + key);
+                    if (input) {
+                        input.value = data[key];
+                        // 添加高亮动画效果
+                        input.classList.add('ring-2', 'ring-green-400');
+                        setTimeout(() => {
+                            input.classList.remove('ring-2', 'ring-green-400');
+                        }, 1000);
+                    }
+                });
+                
+                // 显示提示
+                showFillNotification(artistName, '已自动填充数据');
+            } else {
+                // 没有已知数据，提示用户手动输入
+                showFillNotification(artistName, '暂无预设数据，请手动输入');
+            }
+        }
+        
+        // 显示填充通知
+        function showFillNotification(artistName, message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 fade-in';
+            notification.innerHTML = \`
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">\${artistName}</p>
+                        <p class="text-sm text-gray-500">\${message}</p>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(notification);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
         
         function highlightMatch(text, query) {
@@ -1063,142 +1095,6 @@ app.get('/', (c) => {
             });
             document.getElementById('tab-' + tabName).classList.add('tab-active');
             document.getElementById('tab-' + tabName).classList.remove('text-gray-500');
-        }
-        
-        // ==================== AI 分析 ====================
-        async function runAIAnalysis() {
-            const artistName = document.getElementById('ai-artist-input').value.trim();
-            if (!artistName) {
-                alert('请输入艺人名称');
-                return;
-            }
-            
-            const btn = document.getElementById('ai-analyze-btn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI分析中...';
-            
-            try {
-                const apiKey = document.getElementById('openai-key-input').value.trim();
-                const customParams = getCustomParams();
-                
-                const res = await fetch('/api/ai/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        artistName, 
-                        apiKey: apiKey || undefined,
-                        customParams
-                    })
-                });
-                
-                const data = await res.json();
-                
-                if (data.error) {
-                    throw new Error(data.error + (data.message ? ': ' + data.message : ''));
-                }
-                
-                displayAIResult(data);
-            } catch (error) {
-                alert('分析失败: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-search"></i> 分析预测';
-            }
-        }
-        
-        function displayAIResult(data) {
-            const container = document.getElementById('ai-result');
-            container.classList.remove('hidden');
-            
-            const { ai, calculation, summary } = data;
-            
-            container.innerHTML = \`
-                <div class="fade-in space-y-6">
-                    <!-- 艺人信息 -->
-                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                                \${summary.artistName.charAt(0)}
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">\${summary.artistName}</h3>
-                                \${summary.artistNameCn ? '<p class="text-gray-500">' + summary.artistNameCn + '</p>' : ''}
-                                <span class="inline-block mt-1 px-2 py-0.5 text-xs rounded-full \${
-                                    ai.confidence === 'high' ? 'bg-green-100 text-green-700' :
-                                    ai.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-red-100 text-red-700'
-                                }">
-                                    数据可信度: \${ai.confidence}
-                                </span>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 text-sm">\${ai.reasoning}</p>
-                        \${ai.notes ? '<p class="text-gray-500 text-sm mt-2 italic">' + ai.notes + '</p>' : ''}
-                    </div>
-                    
-                    <!-- 数据输入 -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-blue-50 rounded-xl p-4 text-center">
-                            <i class="fab fa-searchengin text-blue-500 text-2xl mb-2"></i>
-                            <p class="text-sm text-gray-500">百度指数</p>
-                            <p class="text-2xl font-bold text-gray-800">\${ai.data.baidu}</p>
-                        </div>
-                        <div class="bg-red-50 rounded-xl p-4 text-center">
-                            <i class="fas fa-music text-red-500 text-2xl mb-2"></i>
-                            <p class="text-sm text-gray-500">网易云粉丝</p>
-                            <p class="text-2xl font-bold text-gray-800">\${ai.data.netease}万</p>
-                        </div>
-                        <div class="bg-pink-50 rounded-xl p-4 text-center">
-                            <i class="fas fa-book-open text-pink-500 text-2xl mb-2"></i>
-                            <p class="text-sm text-gray-500">小红书粉丝</p>
-                            <p class="text-2xl font-bold text-gray-800">\${ai.data.xhs}万</p>
-                        </div>
-                    </div>
-                    
-                    <!-- 票房预测 -->
-                    <div class="bg-white rounded-xl border-2 border-purple-200 p-6">
-                        <h4 class="text-lg font-bold text-gray-800 mb-4 text-center">
-                            <i class="fas fa-ticket-alt text-purple-600 mr-2"></i>
-                            深圳/杭州 单场票房预测
-                        </h4>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                                <p class="text-sm text-yellow-600 font-medium">保守</p>
-                                <p class="text-2xl font-bold text-yellow-700">\${calculation.output.conservative.value.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万元</p>
-                                <p class="text-sm text-yellow-600 mt-1">\${(calculation.output.conservative.value * 100).toFixed(0)}万</p>
-                            </div>
-                            <div class="text-center p-4 bg-purple-100 rounded-lg border-2 border-purple-300">
-                                <p class="text-sm text-purple-600 font-medium">中性</p>
-                                <p class="text-3xl font-bold text-purple-700">\${calculation.output.neutral.value.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万元</p>
-                                <p class="text-sm text-purple-600 mt-1">\${(calculation.output.neutral.value * 100).toFixed(0)}万</p>
-                            </div>
-                            <div class="text-center p-4 bg-green-50 rounded-lg">
-                                <p class="text-sm text-green-600 font-medium">激进</p>
-                                <p class="text-2xl font-bold text-green-700">\${calculation.output.aggressive.value.toFixed(2)}</p>
-                                <p class="text-xs text-gray-500">百万元</p>
-                                <p class="text-sm text-green-600 mt-1">\${(calculation.output.aggressive.value * 100).toFixed(0)}万</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 计算详情（折叠） -->
-                    <details class="bg-gray-50 rounded-xl">
-                        <summary class="p-4 cursor-pointer font-medium text-gray-700 hover:bg-gray-100 rounded-xl">
-                            <i class="fas fa-info-circle mr-2"></i>查看详细计算过程
-                        </summary>
-                        <div class="p-4 pt-0 space-y-4">
-                            \${generateCalculationDetails(calculation)}
-                        </div>
-                    </details>
-                </div>
-            \`;
-        }
-        
-        function quickTest(name) {
-            document.getElementById('ai-artist-input').value = name;
-            runAIAnalysis();
         }
         
         // ==================== 手动计算 ====================
