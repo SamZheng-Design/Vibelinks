@@ -5,6 +5,7 @@ import { serveStatic } from 'hono/cloudflare-pages'
 // 类型定义
 type Bindings = {
   OPENAI_API_KEY?: string
+  OPENAI_BASE_URL?: string
 }
 
 type Variables = {}
@@ -280,15 +281,16 @@ app.post('/api/ai/analyze', async (c) => {
   "notes": "其他相关说明（如近期活动、争议等可能影响票房的因素）"
 }`
 
-    // 调用OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // 调用OpenAI API (使用环境变量的BASE_URL)
+    const baseUrl = c.env.OPENAI_BASE_URL || 'https://api.openai.com/v1'
+    const response = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${openaiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5',  // 使用GenSpark支持的模型
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
