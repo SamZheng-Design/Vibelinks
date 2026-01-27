@@ -492,9 +492,6 @@ app.get('/', (c) => {
                     <i class="fas fa-folder-open mr-2"></i>艺人档案
                     <span id="archive-badge" class="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-600 rounded-full hidden">0</span>
                 </button>
-                <button onclick="switchTab('cardib')" id="tab-cardib" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-graduation-cap mr-2"></i>Cardi B案例讲解
-                </button>
             </div>
         </div>
     </nav>
@@ -520,14 +517,14 @@ app.get('/', (c) => {
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- 左侧：数据输入 -->
                     <div class="space-y-4">
-                        <!-- 艺人名称搜索（自动匹配） -->
+                        <!-- 艺人名称输入 -->
                         <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-4">
                             <label class="text-sm font-medium text-purple-700 mb-2 block">
-                                <i class="fas fa-search mr-1"></i>搜索艺人（自动匹配）
+                                <i class="fas fa-user mr-1"></i>艺人名称
                             </label>
                             <div class="relative">
                                 <input type="text" id="artist-search-input" 
-                                    placeholder="输入艺人英文名，如: Drake, Taylor Swift..."
+                                    placeholder="输入艺人名称，如: Drake, Taylor Swift, 周杰伦..."
                                     autocomplete="off"
                                     class="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 bg-white">
                                 <div id="artist-autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
@@ -535,7 +532,7 @@ app.get('/', (c) => {
                                 </div>
                             </div>
                             <p class="text-xs text-purple-500 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i>选择艺人后将自动填充已知数据
+                                <i class="fas fa-info-circle mr-1"></i>输入时会显示常见艺人供快速选择
                             </p>
                         </div>
                         
@@ -796,29 +793,6 @@ app.get('/', (c) => {
             </div>
         </div>
         
-        <!-- Cardi B 案例讲解面板 -->
-        <div id="panel-cardib" class="hidden space-y-6">
-            <div class="glass rounded-2xl shadow-xl p-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">
-                        <i class="fas fa-graduation-cap text-purple-600 mr-2"></i>
-                        Cardi B 票房预测案例详解
-                    </h2>
-                    <p class="text-gray-500 mt-2">完整展示 Comparable 模型的6步计算过程</p>
-                </div>
-                
-                <div id="cardib-steps" class="space-y-6">
-                    <!-- 动态加载 -->
-                    <div class="text-center py-8">
-                        <button onclick="loadCardiDemo()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                            <i class="fas fa-play mr-2"></i>加载案例演示
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
     </main>
 
     <!-- 底部 -->
@@ -992,8 +966,6 @@ app.get('/', (c) => {
                         const artistName = item.dataset.name;
                         input.value = artistName;
                         dropdown.classList.add('hidden');
-                        // 自动填充艺人数据
-                        fillArtistData(artistName);
                     });
                 });
             });
@@ -1015,8 +987,6 @@ app.get('/', (c) => {
                     const artistName = items[selectedIndex].dataset.name;
                     input.value = artistName;
                     dropdown.classList.add('hidden');
-                    // 自动填充艺人数据
-                    fillArtistData(artistName);
                 } else if (e.key === 'Escape') {
                     dropdown.classList.add('hidden');
                 }
@@ -1037,56 +1007,7 @@ app.get('/', (c) => {
             });
         }
         
-        // 已知艺人数据（基准数据）
-        const KNOWN_ARTIST_DATA = {
-            'Travis Scott': { baidu: 280, netease: 126.6, xhs: 1.0 },
-            'Kanye West': { baidu: 616, netease: 99.7, xhs: 13.9 },
-            'Cardi B': { baidu: 388, netease: 80.6, xhs: 82.0 },
-            'Drake': { baidu: 520, netease: 150.0, xhs: 25.0 },
-            'Taylor Swift': { baidu: 890, netease: 280.0, xhs: 150.0 },
-            'The Weeknd': { baidu: 450, netease: 180.0, xhs: 35.0 },
-            'Beyoncé': { baidu: 380, netease: 95.0, xhs: 45.0 },
-            'Ed Sheeran': { baidu: 680, netease: 220.0, xhs: 60.0 },
-            'Billie Eilish': { baidu: 350, netease: 120.0, xhs: 95.0 },
-            'Dua Lipa': { baidu: 420, netease: 140.0, xhs: 88.0 },
-            'Post Malone': { baidu: 380, netease: 110.0, xhs: 20.0 },
-            'Bad Bunny': { baidu: 280, netease: 45.0, xhs: 15.0 },
-            'Ariana Grande': { baidu: 560, netease: 190.0, xhs: 120.0 },
-            'Justin Bieber': { baidu: 720, netease: 210.0, xhs: 85.0 },
-            'Bruno Mars': { baidu: 480, netease: 160.0, xhs: 40.0 },
-            'Rihanna': { baidu: 420, netease: 130.0, xhs: 75.0 },
-            'Coldplay': { baidu: 580, netease: 250.0, xhs: 55.0 },
-            'BTS': { baidu: 950, netease: 380.0, xhs: 280.0 },
-            'BLACKPINK': { baidu: 780, netease: 320.0, xhs: 220.0 },
-        };
-        
-        // 填充艺人数据
-        function fillArtistData(artistName) {
-            const data = KNOWN_ARTIST_DATA[artistName];
-            if (data) {
-                // 填充已知数据
-                Object.keys(data).forEach(key => {
-                    artistInputValues[key] = data[key];
-                    const input = document.getElementById('input-' + key);
-                    if (input) {
-                        input.value = data[key];
-                        // 添加高亮动画效果
-                        input.classList.add('ring-2', 'ring-green-400');
-                        setTimeout(() => {
-                            input.classList.remove('ring-2', 'ring-green-400');
-                        }, 1000);
-                    }
-                });
-                
-                // 显示提示
-                showFillNotification(artistName, '已自动填充数据');
-            } else {
-                // 没有已知数据，提示用户手动输入
-                showFillNotification(artistName, '暂无预设数据，请手动输入');
-            }
-        }
-        
-        // 显示填充通知
+        // 显示通知
         function showFillNotification(artistName, message) {
             // 创建通知元素
             const notification = document.createElement('div');
@@ -2001,6 +1922,31 @@ app.get('/', (c) => {
         // ==================== 艺人档案管理 ====================
         let artistArchives = [];  // 档案数组
         
+        // Cardi B 预置档案（示例数据）
+        const CARDI_B_PRESET_ARCHIVE = {
+            id: 'preset_cardib',
+            artistName: 'Cardi B',
+            notes: '【示例档案】深圳/杭州单场票房预测案例 - 基于Comparable模型六步计算',
+            createdAt: '2026-01-15T10:00:00.000Z',
+            inputData: {
+                baidu: 388,
+                netease: 80.6,
+                xhs: 82.0
+            },
+            targetTier: 'tier1',
+            result: {
+                conservative: 76.02,
+                neutral: 85.07,
+                aggressive: 94.50
+            },
+            indices: {
+                D: 0.6817,
+                LC: 0.8523,
+                F: 0.5811
+            },
+            isPreset: true  // 标记为预置档案
+        };
+        
         // 加载档案
         function loadArtistArchives() {
             const saved = localStorage.getItem('artistArchives');
@@ -2011,6 +1957,13 @@ app.get('/', (c) => {
                     artistArchives = [];
                 }
             }
+            
+            // 确保 Cardi B 预置档案存在
+            const hasCardiB = artistArchives.some(a => a.id === 'preset_cardib');
+            if (!hasCardiB) {
+                artistArchives.push(CARDI_B_PRESET_ARCHIVE);
+            }
+            
             renderArchiveList();
         }
         
@@ -2179,16 +2132,20 @@ app.get('/', (c) => {
             
             container.innerHTML = artistArchives.map(a => {
                 const tierColor = tierColorClasses[a.targetTier] || tierColorClasses.tier3;
+                const isPreset = a.isPreset;
                 return \`
-                <div class="bg-white rounded-xl p-4 border border-amber-100 hover:border-amber-300 hover:shadow-lg transition-all cursor-pointer group"
+                <div class="bg-white rounded-xl p-4 border \${isPreset ? 'border-amber-300 ring-1 ring-amber-200' : 'border-amber-100'} hover:border-amber-300 hover:shadow-lg transition-all cursor-pointer group"
                     onclick="showArchiveDetail('\${a.id}')">
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                            <div class="w-10 h-10 bg-gradient-to-br \${isPreset ? 'from-purple-500 to-indigo-600' : 'from-amber-400 to-orange-500'} rounded-full flex items-center justify-center text-white font-bold">
                                 \${a.artistName.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <p class="font-bold text-gray-800">\${a.artistName}</p>
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold text-gray-800">\${a.artistName}</p>
+                                    \${isPreset ? '<span class="px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">示例</span>' : ''}
+                                </div>
                                 <p class="text-xs text-gray-400">
                                     \${new Date(a.createdAt).toLocaleDateString('zh-CN')}
                                 </p>
@@ -2221,10 +2178,12 @@ app.get('/', (c) => {
                             class="flex-1 py-2 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all">
                             <i class="fas fa-redo mr-1"></i>复用预测
                         </button>
+                        \${!isPreset ? \`
                         <button onclick="event.stopPropagation(); deleteArchive('\${a.id}')" 
                             class="px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-all">
                             <i class="fas fa-trash"></i>
                         </button>
+                        \` : ''}
                     </div>
                 </div>
             \`;
@@ -2237,6 +2196,48 @@ app.get('/', (c) => {
             if (!archive) return;
             
             const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            const isPreset = archive.isPreset;
+            
+            // 预置档案的计算步骤说明
+            const calculationSteps = isPreset ? \`
+                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 mb-4">
+                    <h4 class="font-medium text-purple-700 mb-3">
+                        <i class="fas fa-graduation-cap mr-1"></i>Comparable模型计算步骤
+                    </h4>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step A: 归一化 (Normalization)</p>
+                            <p class="text-gray-500 text-xs mt-1">各维度除以最大值，使数据可比</p>
+                            <p class="text-purple-600 text-xs mt-1">百度' = 388/616 = 0.63 | 网易云' = 80.6/126.6 = 0.64 | 小红书' = 82/82 = 1.00</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step B: 需求指数 D</p>
+                            <p class="text-gray-500 text-xs mt-1">D = Σ(权重i × 维度i')</p>
+                            <p class="text-purple-600 text-xs mt-1">D = 0.45×0.63 + 0.35×0.64 + 0.20×1.00 = 0.6817</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step C: 转化率 LC</p>
+                            <p class="text-gray-500 text-xs mt-1">LC = clip(0.60 + 0.40×网易云' - 0.20×小红书', 0.60, 1.00)</p>
+                            <p class="text-purple-600 text-xs mt-1">LC = 0.60 + 0.40×0.64 - 0.20×1.00 = 0.8523</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step D: 出票指数 F</p>
+                            <p class="text-gray-500 text-xs mt-1">F = D × LC</p>
+                            <p class="text-purple-600 text-xs mt-1">F = 0.6817 × 0.8523 = 0.5811</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step E: 双锚点校准</p>
+                            <p class="text-gray-500 text-xs mt-1">用F的比值映射到锚点艺人的真实票房</p>
+                            <p class="text-purple-600 text-xs mt-1">Travis锚点(78.15M): r=0.83 → 65.03M | Kanye锚点(51M): r=0.69 → 35.24M</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3">
+                            <p class="font-medium text-gray-700">Step F: 城市溢价</p>
+                            <p class="text-gray-500 text-xs mt-1">根据目标城市级别（一线）应用溢价系数</p>
+                            <p class="text-purple-600 text-xs mt-1">保守×1.15 | 中性×1.25 | 激进×1.35</p>
+                        </div>
+                    </div>
+                </div>
+            \` : '';
             
             const dialog = document.createElement('div');
             dialog.id = 'archive-detail-dialog';
@@ -2245,7 +2246,10 @@ app.get('/', (c) => {
                 <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4 fade-in max-h-[90vh] overflow-y-auto">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h3 class="text-xl font-bold text-gray-800">\${archive.artistName}</h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-800">\${archive.artistName}</h3>
+                                \${isPreset ? '<span class="px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-full">示例档案</span>' : ''}
+                            </div>
                             <p class="text-sm text-gray-500">\${new Date(archive.createdAt).toLocaleString('zh-CN')}</p>
                         </div>
                         <button onclick="this.closest('#archive-detail-dialog').remove()" 
@@ -2274,6 +2278,8 @@ app.get('/', (c) => {
                         </div>
                     </div>
                     
+                    \${calculationSteps}
+                    
                     <!-- 预测结果 -->
                     <div class="bg-purple-50 rounded-lg p-4 mb-4">
                         <h4 class="font-medium text-purple-700 mb-2">
@@ -2301,14 +2307,16 @@ app.get('/', (c) => {
                     
                     <!-- 操作按钮 -->
                     <div class="flex gap-3">
-                        <button onclick="loadArchiveData('\${archive.id}'); this.closest('#archive-detail-dialog').remove();" 
+                        <button onclick="loadArchiveData('\${archive.id}'); switchTab('predict'); this.closest('#archive-detail-dialog').remove();" 
                             class="flex-1 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all">
                             <i class="fas fa-redo mr-1"></i>复用此数据预测
                         </button>
+                        \${!isPreset ? \`
                         <button onclick="deleteArchive('\${archive.id}'); this.closest('#archive-detail-dialog').remove();" 
                             class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all">
                             <i class="fas fa-trash"></i>
                         </button>
+                        \` : ''}
                     </div>
                 </div>
             \`;
