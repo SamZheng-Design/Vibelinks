@@ -505,11 +505,16 @@ app.get('/', (c) => {
         <div id="panel-predict" class="space-y-6">
             <!-- 艺人数据输入区（放在最上面） -->
             <div class="glass rounded-2xl shadow-xl p-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <i class="fas fa-user-tie text-purple-600"></i>
-                    艺人数据输入
-                    <span class="text-sm font-normal text-gray-500 ml-2">（手动输入三维度数据进行票房预测）</span>
-                </h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-user-tie text-purple-600"></i>
+                        艺人数据输入
+                        <span class="text-sm font-normal text-gray-500 ml-2">（可添加/删除数据维度）</span>
+                    </h3>
+                    <button onclick="addArtistDataDimension()" class="px-3 py-1.5 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 transition-all">
+                        <i class="fas fa-plus mr-1"></i>添加维度
+                    </button>
+                </div>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- 左侧：数据输入 -->
@@ -1511,26 +1516,97 @@ app.get('/', (c) => {
             renderBenchmarks();
         }
         
+        // 艺人输入数据存储（用于保留用户输入值）
+        let artistInputValues = {
+            baidu: 388,
+            netease: 80.6,
+            xhs: 82
+        };
+        
         // 渲染艺人数据输入区
         function renderArtistDataInputs() {
             const container = document.getElementById('artist-data-inputs');
-            container.innerHTML = weightParams.map(p => \`
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-\${p.color}-100 rounded-lg flex items-center justify-center">
+            container.innerHTML = weightParams.map((p, idx) => \`
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3" data-dim-id="\${p.id}">
+                    <div class="w-10 h-10 bg-\${p.color}-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <i class="\${p.icon} text-\${p.color}-500"></i>
                     </div>
-                    <div class="flex-1">
-                        <label class="text-sm font-medium text-gray-700">\${p.name}\${p.unit ? '(' + p.unit + ')' : ''}</label>
-                        <input type="number" id="input-\${p.id}" value="\${getDefaultValue(p.id)}" step="0.1"
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-medium text-gray-700 truncate">\${p.name}</label>
+                            \${p.unit ? '<span class="text-xs text-gray-400">(' + p.unit + ')</span>' : ''}
+                        </div>
+                        <input type="number" id="input-\${p.id}" value="\${artistInputValues[p.id] ?? getDefaultValue(p.id)}" step="0.1"
+                            onchange="artistInputValues['\${p.id}'] = parseFloat(this.value) || 0"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 mt-1">
                     </div>
+                    <button onclick="removeArtistDataDimension('\${p.id}')" 
+                        class="px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all flex-shrink-0"
+                        title="删除此维度">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             \`).join('');
+            
+            // 显示维度数量提示
+            const countHint = document.getElementById('dimension-count-hint');
+            if (countHint) {
+                countHint.textContent = \`当前 \${weightParams.length} 个维度\`;
+            }
         }
         
         function getDefaultValue(id) {
             const defaults = { baidu: 388, netease: 80.6, xhs: 82 };
             return defaults[id] || 100;
+        }
+        
+        // 添加艺人数据维度
+        function addArtistDataDimension() {
+            const newId = 'dim_' + Date.now();
+            const colors = ['blue', 'red', 'pink', 'green', 'yellow', 'indigo', 'purple', 'teal'];
+            const icons = ['fas fa-chart-bar', 'fas fa-users', 'fas fa-heart', 'fas fa-star', 'fas fa-fire', 'fas fa-bolt'];
+            
+            weightParams.push({
+                id: newId,
+                name: '新维度',
+                value: 0.10,
+                icon: icons[weightParams.length % icons.length],
+                color: colors[weightParams.length % colors.length],
+                unit: ''
+            });
+            
+            // 设置默认输入值
+            artistInputValues[newId] = 100;
+            
+            // 同时更新锚点数据中的该维度
+            benchmarks.forEach(b => {
+                if (!b.data[newId]) b.data[newId] = 100;
+            });
+            
+            renderArtistDataInputs();
+            renderWeightParams();
+            renderBenchmarks();
+        }
+        
+        // 删除艺人数据维度
+        function removeArtistDataDimension(id) {
+            if (weightParams.length <= 1) {
+                alert('至少需要保留一个维度');
+                return;
+            }
+            
+            // 从权重参数中移除
+            weightParams = weightParams.filter(p => p.id !== id);
+            
+            // 从艺人输入值中移除
+            delete artistInputValues[id];
+            
+            // 从锚点数据中移除
+            benchmarks.forEach(b => delete b.data[id]);
+            
+            renderArtistDataInputs();
+            renderWeightParams();
+            renderBenchmarks();
         }
         
         // 渲染权重参数列表
@@ -1624,31 +1700,13 @@ app.get('/', (c) => {
         
         // ==================== 权重参数管理 ====================
         function addWeightParam() {
-            const newId = 'dim_' + Date.now();
-            weightParams.push({
-                id: newId,
-                name: '新维度',
-                value: 0.10,
-                icon: 'fas fa-star',
-                color: 'gray',
-                unit: ''
-            });
-            renderWeightParams();
-            renderArtistDataInputs();
-            renderBenchmarks();
+            // 复用艺人数据维度添加函数，保持同步
+            addArtistDataDimension();
         }
         
         function removeWeightParam(id) {
-            if (weightParams.length <= 1) {
-                alert('至少需要保留一个维度');
-                return;
-            }
-            weightParams = weightParams.filter(p => p.id !== id);
-            // 同时从锚点数据中移除该维度
-            benchmarks.forEach(b => delete b.data[id]);
-            renderWeightParams();
-            renderArtistDataInputs();
-            renderBenchmarks();
+            // 复用艺人数据维度删除函数，保持同步
+            removeArtistDataDimension(id);
         }
         
         function updateWeightName(id, name) {
@@ -1861,9 +1919,18 @@ app.get('/', (c) => {
         }
         
         function saveAllParams() {
+            // 先同步当前输入框的值到 artistInputValues
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                if (input) {
+                    artistInputValues[p.id] = parseFloat(input.value) || 0;
+                }
+            });
+            
             const params = {
                 weightParams,
                 benchmarks,
+                artistInputValues,  // 保存艺人输入值
                 lc: {
                     constant: parseFloat(document.getElementById('param-lc-const')?.value || 0.60),
                     netease_coef: parseFloat(document.getElementById('param-lc-netease')?.value || 0.40),
@@ -1928,6 +1995,7 @@ app.get('/', (c) => {
                     const params = JSON.parse(saved);
                     if (params.weightParams) weightParams = params.weightParams;
                     if (params.benchmarks) benchmarks = params.benchmarks;
+                    if (params.artistInputValues) artistInputValues = params.artistInputValues;  // 加载艺人输入值
                     if (params.lc) {
                         setTimeout(() => {
                             document.getElementById('param-lc-const').value = params.lc.constant;
