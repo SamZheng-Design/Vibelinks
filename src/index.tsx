@@ -488,6 +488,10 @@ app.get('/', (c) => {
                 <button onclick="switchTab('predict')" id="tab-predict" class="tab-active py-4 px-2 text-sm font-medium">
                     <i class="fas fa-chart-line mr-2"></i>演唱会票房预测入口
                 </button>
+                <button onclick="switchTab('archive')" id="tab-archive" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-folder-open mr-2"></i>艺人档案
+                    <span id="archive-badge" class="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-600 rounded-full hidden">0</span>
+                </button>
                 <button onclick="switchTab('cardib')" id="tab-cardib" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
                     <i class="fas fa-graduation-cap mr-2"></i>Cardi B案例讲解
                 </button>
@@ -513,7 +517,7 @@ app.get('/', (c) => {
                     </button>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-6">
+                <div class="grid md:grid-cols-2 gap-6">
                     <!-- 左侧：数据输入 -->
                     <div class="space-y-4">
                         <!-- 艺人名称搜索（自动匹配） -->
@@ -523,13 +527,16 @@ app.get('/', (c) => {
                             </label>
                             <div class="relative">
                                 <input type="text" id="artist-search-input" 
-                                    placeholder="输入艺人英文名..."
+                                    placeholder="输入艺人英文名，如: Drake, Taylor Swift..."
                                     autocomplete="off"
                                     class="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 bg-white">
                                 <div id="artist-autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                                     <!-- 动态填充 -->
                                 </div>
                             </div>
+                            <p class="text-xs text-purple-500 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>选择艺人后将自动填充已知数据
+                            </p>
                         </div>
                         
                         <div id="artist-data-inputs">
@@ -541,18 +548,27 @@ app.get('/', (c) => {
                             <h4 class="font-medium text-purple-700 mb-3">
                                 <i class="fas fa-city mr-2"></i>目标城市级别
                             </h4>
-                            <div class="grid grid-cols-3 gap-1">
-                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier1" checked class="mr-1 text-purple-600">
-                                    <span class="text-sm font-medium">一线</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier1" checked class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">一线城市</p>
+                                        <p class="text-xs text-gray-500">深圳/杭州/上海</p>
+                                    </div>
                                 </label>
-                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier2" class="mr-1 text-purple-600">
-                                    <span class="text-sm font-medium">二线</span>
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier2" class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">二线城市</p>
+                                        <p class="text-xs text-gray-500">成都/武汉/南京</p>
+                                    </div>
                                 </label>
-                                <label class="flex items-center justify-center p-2 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
-                                    <input type="radio" name="targetTier" value="tier3" class="mr-1 text-purple-600">
-                                    <span class="text-sm font-medium">三线</span>
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier3" class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">三线城市</p>
+                                        <p class="text-xs text-gray-500">长沙/郑州/济南</p>
+                                    </div>
                                 </label>
                             </div>
                         </div>
@@ -563,7 +579,7 @@ app.get('/', (c) => {
                         </button>
                     </div>
                     
-                    <!-- 中间：预测结果 -->
+                    <!-- 右侧：预测结果 -->
                     <div class="bg-gray-50 rounded-xl p-4">
                         <h4 class="font-medium text-gray-700 mb-4">
                             <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
@@ -574,33 +590,6 @@ app.get('/', (c) => {
                                 <i class="fas fa-arrow-left text-3xl mb-3"></i>
                                 <p>输入数据后点击"开始预测"</p>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 右侧：艺人档案 -->
-                    <div class="bg-gradient-to-b from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-medium text-amber-700">
-                                <i class="fas fa-folder-open mr-2"></i>
-                                艺人档案
-                            </h4>
-                            <span class="text-xs text-amber-500" id="archive-count">0 条记录</span>
-                        </div>
-                        
-                        <!-- 档案列表 -->
-                        <div id="artist-archive-list" class="space-y-2 max-h-80 overflow-y-auto">
-                            <div class="text-center text-amber-400 py-6">
-                                <i class="fas fa-archive text-2xl mb-2"></i>
-                                <p class="text-sm">暂无档案</p>
-                                <p class="text-xs mt-1">完成预测后可建档保存</p>
-                            </div>
-                        </div>
-                        
-                        <!-- 快速操作 -->
-                        <div class="mt-4 pt-4 border-t border-amber-200">
-                            <button onclick="clearAllArchives()" class="w-full py-2 text-sm text-amber-600 hover:bg-amber-100 rounded-lg transition-all">
-                                <i class="fas fa-trash-alt mr-1"></i>清空全部档案
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -763,6 +752,46 @@ app.get('/', (c) => {
                     <div id="benchmark-list" class="grid md:grid-cols-2 gap-4">
                         <!-- 动态生成 -->
                     </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 艺人档案面板 -->
+        <div id="panel-archive" class="hidden space-y-6">
+            <div class="glass rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-folder-open text-amber-500"></i>
+                            艺人档案库
+                        </h2>
+                        <p class="text-gray-500 mt-1">已保存的艺人预测记录，可查看详情或复用数据</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <span id="archive-total-count" class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">
+                            0 条记录
+                        </span>
+                        <button onclick="clearAllArchives()" class="px-3 py-1 text-red-500 hover:bg-red-50 rounded-lg text-sm transition-all">
+                            <i class="fas fa-trash-alt mr-1"></i>清空
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 档案列表 -->
+                <div id="archive-panel-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <!-- 空状态 -->
+                <div id="archive-empty-state" class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-4">
+                        <i class="fas fa-archive text-4xl text-amber-400"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-600 mb-2">暂无艺人档案</h3>
+                    <p class="text-gray-400 mb-6">完成票房预测后，可以保存到档案库</p>
+                    <button onclick="switchTab('predict')" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">
+                        <i class="fas fa-plus mr-2"></i>去创建预测
+                    </button>
                 </div>
             </div>
         </div>
@@ -1110,6 +1139,11 @@ app.get('/', (c) => {
             });
             document.getElementById('tab-' + tabName).classList.add('tab-active');
             document.getElementById('tab-' + tabName).classList.remove('text-gray-500');
+            
+            // 如果切换到档案面板，刷新档案列表
+            if (tabName === 'archive') {
+                renderArchivePanelList();
+            }
         }
         
         // ==================== 手动计算 ====================
@@ -2099,59 +2133,102 @@ app.get('/', (c) => {
             showFillNotification(artistName, '档案已建立');
         }
         
-        // 渲染档案列表
+        // 渲染档案列表（更新导航徽章）
         function renderArchiveList() {
-            const container = document.getElementById('artist-archive-list');
-            const countEl = document.getElementById('archive-count');
+            // 更新导航栏徽章
+            const badge = document.getElementById('archive-badge');
+            if (badge) {
+                if (artistArchives.length > 0) {
+                    badge.textContent = artistArchives.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
             
-            if (!container) return;
+            // 更新档案面板中的列表
+            renderArchivePanelList();
+        }
+        
+        // 渲染档案面板中的档案卡片
+        function renderArchivePanelList() {
+            const container = document.getElementById('archive-panel-list');
+            const countEl = document.getElementById('archive-total-count');
+            const emptyState = document.getElementById('archive-empty-state');
             
             if (countEl) {
                 countEl.textContent = artistArchives.length + ' 条记录';
             }
             
+            if (!container) return;
+            
             if (artistArchives.length === 0) {
-                container.innerHTML = \`
-                    <div class="text-center text-amber-400 py-6">
-                        <i class="fas fa-archive text-2xl mb-2"></i>
-                        <p class="text-sm">暂无档案</p>
-                        <p class="text-xs mt-1">完成预测后可建档保存</p>
-                    </div>
-                \`;
+                container.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
                 return;
             }
             
-            const tierNames = { tier1: '一线', tier2: '二线', tier3: '三线' };
+            if (emptyState) emptyState.classList.add('hidden');
             
-            container.innerHTML = artistArchives.map(a => \`
-                <div class="bg-white rounded-lg p-3 border border-amber-100 hover:border-amber-300 transition-all cursor-pointer group"
+            const tierNames = { tier1: '一线', tier2: '二线', tier3: '三线' };
+            const tierColorClasses = { 
+                tier1: { bg: 'bg-purple-100', text: 'text-purple-600' }, 
+                tier2: { bg: 'bg-blue-100', text: 'text-blue-600' }, 
+                tier3: { bg: 'bg-orange-100', text: 'text-orange-600' } 
+            };
+            
+            container.innerHTML = artistArchives.map(a => {
+                const tierColor = tierColorClasses[a.targetTier] || tierColorClasses.tier3;
+                return \`
+                <div class="bg-white rounded-xl p-4 border border-amber-100 hover:border-amber-300 hover:shadow-lg transition-all cursor-pointer group"
                     onclick="showArchiveDetail('\${a.id}')">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-800 truncate">\${a.artistName}</p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                \${new Date(a.createdAt).toLocaleDateString('zh-CN')}
-                                <span class="ml-2 px-1.5 py-0.5 bg-gray-100 rounded">\${tierNames[a.targetTier] || '一线'}</span>
-                            </p>
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                                \${a.artistName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800">\${a.artistName}</p>
+                                <p class="text-xs text-gray-400">
+                                    \${new Date(a.createdAt).toLocaleDateString('zh-CN')}
+                                </p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-purple-600">\${a.result.neutral.toFixed(1)}</p>
-                            <p class="text-xs text-gray-400">百万</p>
+                        <span class="px-2 py-1 text-xs rounded-full \${tierColor.bg} \${tierColor.text}">
+                            \${tierNames[a.targetTier] || '一线'}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="bg-yellow-50 rounded p-2 text-center">
+                            <p class="text-xs text-yellow-600">保守</p>
+                            <p class="font-bold text-yellow-700">\${a.result.conservative.toFixed(1)}</p>
+                        </div>
+                        <div class="bg-purple-50 rounded p-2 text-center border border-purple-200">
+                            <p class="text-xs text-purple-600">中性</p>
+                            <p class="font-bold text-purple-700">\${a.result.neutral.toFixed(1)}</p>
+                        </div>
+                        <div class="bg-green-50 rounded p-2 text-center">
+                            <p class="text-xs text-green-600">激进</p>
+                            <p class="font-bold text-green-700">\${a.result.aggressive.toFixed(1)}</p>
                         </div>
                     </div>
-                    \${a.notes ? '<p class="text-xs text-gray-500 mt-2 truncate">' + a.notes + '</p>' : ''}
-                    <div class="flex gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-all">
-                        <button onclick="event.stopPropagation(); loadArchiveData('\${a.id}')" 
-                            class="flex-1 py-1 text-xs bg-purple-100 text-purple-600 rounded hover:bg-purple-200">
-                            <i class="fas fa-redo mr-1"></i>复用
+                    
+                    \${a.notes ? \`<p class="text-xs text-gray-500 mb-3 p-2 bg-gray-50 rounded truncate"><i class="fas fa-sticky-note mr-1"></i>\${a.notes}</p>\` : ''}
+                    
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="event.stopPropagation(); loadArchiveData('\${a.id}'); switchTab('predict');" 
+                            class="flex-1 py-2 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all">
+                            <i class="fas fa-redo mr-1"></i>复用预测
                         </button>
                         <button onclick="event.stopPropagation(); deleteArchive('\${a.id}')" 
-                            class="px-2 py-1 text-xs text-red-500 hover:bg-red-50 rounded">
+                            class="px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-all">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
-            \`).join('');
+            \`;
+            }).join('');
         }
         
         // 显示档案详情
