@@ -24,58 +24,45 @@ app.get('/', (c) => {
             --gold-light: #F4E4BA;
             --dark: #0A0A0A;
             --dark-gray: #1A1A1A;
-            --accent: #FF2D55;
+            --olive: #6B7B3C;
+            --olive-light: #8B9B5C;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Inter', 'Noto Sans SC', sans-serif;
             background: var(--dark);
             color: #fff;
             overflow-x: hidden;
         }
+        .font-display { font-family: 'Playfair Display', serif; }
         
-        .font-display {
-            font-family: 'Playfair Display', serif;
-        }
-        
-        /* Hero Section */
-        .hero {
+        /* Custom Hero with Official Poster */
+        .hero-custom {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 50%, #0A0A0A 100%);
+            background: linear-gradient(135deg, #5a6b35 0%, #4a5b2a 50%, #3a4b1a 100%);
             position: relative;
             overflow: hidden;
         }
         
-        .hero::before {
-            content: '';
+        .hero-poster {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('https://sspark.genspark.ai/cfimages?u1=1veObvbSW3Wz8OP0E%2FxarW6Kl3qe6BpW8Blt6wxV5j7u9tQqcUGIg7D8dpunCgViNAHkpyLXL1YkEvposppCBPQoeuP28E7qq7J96%2BZl1LrzenEjvo%2FlKeERfgLEYM411ryk6YNLyP3iXBAABYJjSrduVBz21Kd1c%2Fw%3D&u2=zUZgcIM1o%2F1T%2B%2Ble&width=2560') center center;
+            background: url('https://www.genspark.ai/api/files/s/kn2Ax0az') center center;
             background-size: cover;
-            opacity: 0.3;
-            filter: grayscale(30%);
         }
         
-        .hero-overlay {
+        .hero-overlay-custom {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.9) 100%);
+            background: linear-gradient(90deg, rgba(90,107,53,0.3) 0%, transparent 50%, rgba(90,107,53,0.3) 100%);
         }
         
         .gold-text {
@@ -84,202 +71,91 @@ app.get('/', (c) => {
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+        .gold-border { border: 1px solid var(--gold); }
+        .gold-bg { background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%); }
+        .olive-bg { background: linear-gradient(135deg, #6B7B3C 0%, #8B9B5C 100%); }
         
-        .gold-border {
-            border: 1px solid var(--gold);
-        }
-        
-        .gold-bg {
-            background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%);
-        }
-        
-        /* Animated Lines */
-        .animated-line {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            height: 1px;
-            animation: moveLine 3s linear infinite;
-        }
-        
-        @keyframes moveLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        /* Stats Card */
         .stat-card {
             background: rgba(255,255,255,0.03);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(212, 175, 55, 0.2);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
         .stat-card:hover {
             transform: translateY(-10px);
             border-color: var(--gold);
             box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
         }
         
-        /* Venue Card */
         .venue-card {
             position: relative;
             overflow: hidden;
             border-radius: 20px;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
         .venue-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 100%);
             z-index: 1;
         }
+        .venue-card:hover { transform: scale(1.02); }
+        .venue-card:hover img { transform: scale(1.1); }
+        .venue-card img { transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .venue-card:hover {
-            transform: scale(1.02);
-        }
-        
-        .venue-card:hover img {
-            transform: scale(1.1);
-        }
-        
-        .venue-card img {
-            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        /* Section */
-        section {
-            position: relative;
-        }
-        
-        .section-divider {
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            margin: 4rem 0;
-        }
-        
-        /* Timeline */
-        .timeline-item {
-            position: relative;
-            padding-left: 40px;
-        }
-        
+        .timeline-item { position: relative; padding-left: 40px; }
         .timeline-item::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: 8px;
-            width: 12px;
-            height: 12px;
+            left: 0; top: 8px;
+            width: 12px; height: 12px;
             background: var(--gold);
             border-radius: 50%;
         }
-        
         .timeline-item::after {
             content: '';
             position: absolute;
-            left: 5px;
-            top: 20px;
+            left: 5px; top: 20px;
             width: 2px;
             height: calc(100% + 20px);
             background: rgba(212, 175, 55, 0.3);
         }
+        .timeline-item:last-child::after { display: none; }
         
-        .timeline-item:last-child::after {
-            display: none;
-        }
-        
-        /* Partner Logo */
-        .partner-logo {
-            filter: grayscale(100%) brightness(2);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-        }
-        
-        .partner-logo:hover {
-            filter: grayscale(0%) brightness(1);
-            opacity: 1;
-        }
-        
-        /* Scroll Animation */
         .fade-in {
             opacity: 0;
             transform: translateY(40px);
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
         
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Navigation */
-        .nav-link {
-            position: relative;
-        }
-        
+        .nav-link { position: relative; }
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
+            bottom: -4px; left: 0;
+            width: 0; height: 2px;
             background: var(--gold);
             transition: width 0.3s ease;
         }
+        .nav-link:hover::after { width: 100%; }
         
-        .nav-link:hover::after {
-            width: 100%;
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+        
+        .glow { box-shadow: 0 0 60px rgba(212, 175, 55, 0.3); }
+        .counter { font-variant-numeric: tabular-nums; }
+        
+        .case-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
         }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--dark);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 4px;
-        }
-        
-        /* Glowing Effect */
-        .glow {
-            box-shadow: 0 0 60px rgba(212, 175, 55, 0.3);
-        }
-        
-        /* Number Counter Animation */
-        .counter {
-            font-variant-numeric: tabular-nums;
-        }
-        
-        /* Floating Elements */
-        .float {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        /* Pulse Effect */
-        .pulse {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .case-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(212, 175, 55, 0.3);
         }
     </style>
 </head>
@@ -295,10 +171,11 @@ app.get('/', (c) => {
             </div>
             <div class="hidden md:flex items-center gap-8 text-sm">
                 <a href="#overview" class="nav-link text-white/70 hover:text-white transition">概览</a>
+                <a href="#organizer" class="nav-link text-white/70 hover:text-white transition">主办方</a>
                 <a href="#venues" class="nav-link text-white/70 hover:text-white transition">场馆</a>
-                <a href="#partners" class="nav-link text-white/70 hover:text-white transition">合作伙伴</a>
+                <a href="#production" class="nav-link text-white/70 hover:text-white transition">制作团队</a>
                 <a href="#marketing" class="nav-link text-white/70 hover:text-white transition">营销</a>
-                <a href="#investment" class="nav-link text-white/70 hover:text-white transition">投资亮点</a>
+                <a href="#ticketing" class="nav-link text-white/70 hover:text-white transition">票务</a>
             </div>
             <button class="gold-bg text-black px-6 py-2 rounded-full text-sm font-semibold hover:opacity-90 transition">
                 联系我们
@@ -306,37 +183,15 @@ app.get('/', (c) => {
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero flex items-center justify-center">
-        <div class="hero-overlay"></div>
-        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
-            <div class="mb-6 inline-block">
-                <span class="text-xs tracking-[0.3em] text-white/50 uppercase">Investment Presentation</span>
-            </div>
-            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-                <span class="gold-text">CARDI B</span><br>
-                <span class="text-white">CHINA TOUR</span>
-            </h1>
-            <p class="text-xl md:text-2xl text-white/60 mb-4 font-light">2025 - 2026</p>
-            <div class="flex flex-wrap justify-center gap-4 mb-12">
-                <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">杭州</span>
-                <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">深圳</span>
-            </div>
-            <p class="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed mb-12">
-                通过具有变革性的音乐体验搭建文化桥梁<br>
-                连接国际艺术家与中国多元化观众
-            </p>
-            <a href="#overview" class="inline-flex items-center gap-2 gold-border px-8 py-4 rounded-full hover:bg-white/5 transition group">
-                <span class="gold-text font-semibold">探索投资机遇</span>
-                <i class="fas fa-arrow-down gold-text group-hover:translate-y-1 transition-transform"></i>
+    <!-- Hero Section - Official Poster Style -->
+    <section class="hero-custom flex items-center justify-center">
+        <div class="hero-poster"></div>
+        <div class="hero-overlay-custom"></div>
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-10">
+            <a href="#overview" class="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-6 py-3 rounded-full hover:bg-white/20 transition">
+                <span class="text-white font-medium">探索投资机遇</span>
+                <i class="fas fa-arrow-down text-white animate-bounce"></i>
             </a>
-        </div>
-        
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2">
-            <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-                <div class="w-1 h-2 bg-white/50 rounded-full animate-bounce"></div>
-            </div>
         </div>
     </section>
 
@@ -358,7 +213,7 @@ app.get('/', (c) => {
                     <div class="text-white/50 text-sm">巡演城市</div>
                 </div>
                 <div class="stat-card rounded-2xl p-8 text-center fade-in" style="transition-delay: 0.1s">
-                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="120800">0</div>
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="93000">0</div>
                     <div class="text-white/50 text-sm">总座位容量</div>
                 </div>
                 <div class="stat-card rounded-2xl p-8 text-center fade-in" style="transition-delay: 0.2s">
@@ -366,8 +221,8 @@ app.get('/', (c) => {
                     <div class="text-white/50 text-sm">公开售票比例</div>
                 </div>
                 <div class="stat-card rounded-2xl p-8 text-center fade-in" style="transition-delay: 0.3s">
-                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="2">0</div>
-                    <div class="text-white/50 text-sm">年度跨度</div>
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2">2025-26</div>
+                    <div class="text-white/50 text-sm">巡演周期</div>
                 </div>
             </div>
             
@@ -404,6 +259,135 @@ app.get('/', (c) => {
         </div>
     </section>
 
+    <!-- Organizer Section -->
+    <section id="organizer" class="py-24 px-6 bg-gradient-to-b from-[#0A0A0A] to-black">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20 fade-in">
+                <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Co-Organizer</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">联合主办方</h2>
+            </div>
+            
+            <!-- Co-Organizer Card -->
+            <div class="stat-card rounded-3xl p-10 mb-12 fade-in">
+                <div class="grid md:grid-cols-2 gap-10 items-start">
+                    <div>
+                        <span class="inline-block px-4 py-1 gold-bg text-black text-xs font-semibold rounded-full mb-4">联合主办</span>
+                        <h3 class="text-2xl font-semibold mb-4">海南高唐文化传播有限公司</h3>
+                        <p class="text-white/50 mb-6 leading-relaxed">
+                            海南高唐文化传播有限公司是具有演出资质的省内外大型文化公司，主要业务包括承办大型演出活动、政府精品演出及涉外演出。公司拥有精英团队和丰富的大型演出运营经验。
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">演出资质</span>
+                            <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">政府合作</span>
+                            <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">涉外演出</span>
+                            <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">综艺制作</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-sm text-white/50 mb-4 uppercase tracking-wider">核心优势</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                                <i class="fas fa-check-circle gold-text"></i>
+                                <span>具备国家认可的演出经营资质</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                                <i class="fas fa-check-circle gold-text"></i>
+                                <span>与湖南卫视多年深度合作关系</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                                <i class="fas fa-check-circle gold-text"></i>
+                                <span>腾讯视频综艺节目制作经验</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                                <i class="fas fa-check-circle gold-text"></i>
+                                <span>国际巨星中国巡演承办经验</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Past Cases -->
+            <div class="fade-in">
+                <h4 class="text-xl font-semibold mb-6 gold-text text-center">过往成功案例</h4>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-tv text-red-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">湖南卫视跨年演唱会</div>
+                                <div class="text-xs text-white/50">2019-2024 连续多年</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">海口主办，全国收视率领先的跨年盛典</p>
+                    </div>
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-microphone text-blue-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">Charlie Puth 世界巡演</div>
+                                <div class="text-xs text-white/50">2024年11月 海口站</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">查理·普斯中国巡演海口站独家承办</p>
+                    </div>
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-star text-purple-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">郭富城"舞林星传"巡演</div>
+                                <div class="text-xs text-white/50">2024年5月 海口站</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">郭富城世界巡回演唱会海口站</p>
+                    </div>
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-video text-green-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">《创造营2021》</div>
+                                <div class="text-xs text-white/50">2021年1-4月 腾讯视频</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">腾讯视频现象级选秀综艺节目制作</p>
+                    </div>
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-theater-masks text-orange-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">《舞台2023》</div>
+                                <div class="text-xs text-white/50">2023年7-9月 腾讯视频</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">腾讯视频舞台竞演类综艺节目</p>
+                    </div>
+                    <div class="case-card rounded-xl p-5">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-music text-pink-400"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-sm">王力宏、张惠妹演唱会</div>
+                                <div class="text-xs text-white/50">2019年7月 三亚</div>
+                            </div>
+                        </div>
+                        <p class="text-white/40 text-xs">华语天王天后联合演唱会</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Venues Section -->
     <section id="venues" class="py-24 px-6">
         <div class="max-w-7xl mx-auto">
@@ -427,18 +411,18 @@ app.get('/', (c) => {
                             <div>
                                 <span class="inline-block px-4 py-1 gold-bg text-black text-xs font-semibold rounded-full mb-4">旗舰场馆</span>
                                 <h3 class="font-display text-3xl md:text-4xl font-bold mb-2">杭州奥体中心主体育场</h3>
-                                <p class="text-white/60 mb-4">Hangzhou Olympic Sports Centre Stadium</p>
+                                <p class="text-white/60 mb-2">Hangzhou Olympic Sports Centre Stadium "大莲花"</p>
                                 <p class="text-white/50 max-w-xl">
-                                    中国第二大体育场，2022年亚运会主场馆，屋顶采用2,800吨钢材，比鸟巢轻1,400吨
+                                    中国第二大体育场，2023年杭州亚运会主场馆，可承办最高级别单项赛事和明星演唱会
                                 </p>
                             </div>
                             <div class="flex gap-8">
                                 <div class="text-center">
                                     <div class="text-4xl font-bold gold-text">80,800</div>
-                                    <div class="text-white/50 text-sm">座位容量</div>
+                                    <div class="text-white/50 text-sm">固定座位</div>
                                 </div>
                                 <div class="text-center">
-                                    <div class="text-4xl font-bold gold-text">216,000</div>
+                                    <div class="text-4xl font-bold gold-text">22.9万</div>
                                     <div class="text-white/50 text-sm">平方米</div>
                                 </div>
                             </div>
@@ -456,19 +440,19 @@ app.get('/', (c) => {
                             <div>
                                 <span class="inline-block px-3 py-1 border border-white/30 text-xs rounded-full mb-3">华南科技中心</span>
                                 <h3 class="font-display text-2xl md:text-3xl font-bold mb-2">深圳湾体育中心</h3>
-                                <p class="text-white/60 text-sm mb-3">Shenzhen Bay Sports Center (春茧)</p>
+                                <p class="text-white/60 text-sm mb-3">Shenzhen Bay Sports Center "春茧"</p>
                                 <p class="text-white/50 max-w-xl text-sm">
-                                    深圳地标性体育场馆，被誉为"春茧"，是华南地区顶级演出场地，紧邻深圳湾超级总部基地
+                                    深圳地标性体育场馆，2011年大运会主场馆，是华南地区顶级演出场地
                                 </p>
                             </div>
                             <div class="flex gap-6">
                                 <div class="text-center">
-                                    <div class="text-3xl font-bold gold-text">40,000</div>
-                                    <div class="text-white/50 text-xs">座位容量</div>
+                                    <div class="text-3xl font-bold gold-text">~12,000</div>
+                                    <div class="text-white/50 text-xs">体育馆座位</div>
                                 </div>
                                 <div class="text-center">
                                     <div class="text-3xl font-bold gold-text">2011</div>
-                                    <div class="text-white/50 text-xs">大运会主场馆</div>
+                                    <div class="text-white/50 text-xs">大运会场馆</div>
                                 </div>
                             </div>
                         </div>
@@ -576,8 +560,8 @@ app.get('/', (c) => {
         </div>
     </section>
 
-    <!-- Partners Section -->
-    <section id="partners" class="py-24 px-6">
+    <!-- Production Partners Section -->
+    <section id="production" class="py-24 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-20 fade-in">
                 <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Production Partners</span>
@@ -587,7 +571,7 @@ app.get('/', (c) => {
                 </p>
             </div>
             
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
                 <!-- LICHAO -->
                 <div class="stat-card rounded-3xl p-8 fade-in">
                     <div class="flex items-start gap-6 mb-6">
@@ -596,16 +580,26 @@ app.get('/', (c) => {
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold mb-2">LICHAO (LC) STAGE Co., Ltd.</h3>
-                            <p class="text-white/50 text-sm">舞台结构建设 · 成立于2001年</p>
+                            <p class="text-white/50 text-sm">立超舞台 · 成立于2001年 · ISO9001认证</p>
                         </div>
                     </div>
                     <p class="text-white/60 mb-6 leading-relaxed">
-                        ISO9001认证企业，负责2022北京冬奥会舞台结构建设，拥有20+年大型活动制作经验
+                        专注舞台设计、CNC机械和结构建设，自成立以来连续入选中央广播电视总台场景设备及道具制作供应商名单
                     </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">北京冬奥会</span>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">ISO9001</span>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">央视晚会</span>
+                    <h5 class="text-sm text-white/50 mb-3">过往案例</h5>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-medal gold-text text-xs"></i>
+                            <span>2022北京冬奥会/冬残奥会 - 颁奖广场舞台结构</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-flag gold-text text-xs"></i>
+                            <span>2021大型史诗剧目《伟大征程》</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-tv gold-text text-xs"></i>
+                            <span>央视春晚及重大晚会（长期合作）</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -621,83 +615,46 @@ app.get('/', (c) => {
                         </div>
                     </div>
                     <p class="text-white/60 mb-6 leading-relaxed">
-                        专业视觉与LED设备供应商，服务于各大电视台跨年晚会及顶级明星演唱会
+                        专业LED显示设备租赁及娱乐场所视觉设备安装企业，致力于服务国内大型电视晚会、节目录制、明星演唱会
                     </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">跨年晚会</span>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">LED视觉</span>
-                        <span class="px-3 py-1 bg-white/5 rounded-full text-xs text-white/70">明星演唱会</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Co-Organizer -->
-            <div class="stat-card rounded-3xl p-10 fade-in">
-                <div class="grid md:grid-cols-2 gap-10 items-center">
-                    <div>
-                        <span class="inline-block px-4 py-1 gold-bg text-black text-xs font-semibold rounded-full mb-4">联合主办</span>
-                        <h3 class="text-2xl font-semibold mb-4">海南高唐文化传播有限公司</h3>
-                        <p class="text-white/50 mb-6 leading-relaxed">
-                            具有演出资质的省内外大型文化公司，拥有精英团队和丰富的大型演出运营经验
-                        </p>
-                    </div>
-                    <div>
-                        <h4 class="text-sm text-white/50 mb-4 uppercase tracking-wider">成功案例</h4>
-                        <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                                <i class="fas fa-tv gold-text"></i>
-                                <span>2023/2024 湖南卫视跨年晚会</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                                <i class="fas fa-microphone gold-text"></i>
-                                <span>Charlie Puth 海口巡演 (2024.11)</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                                <i class="fas fa-star gold-text"></i>
-                                <span>郭富城巡演 (2024.05)</span>
-                            </div>
+                    <h5 class="text-sm text-white/50 mb-3">服务领域</h5>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-tv gold-text text-xs"></i>
+                            <span>国内各大电视台跨年晚会</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-microphone gold-text text-xs"></i>
+                            <span>顶级明星演唱会视觉服务</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fas fa-globe-asia gold-text text-xs"></i>
+                            <span>东南亚大型活动视觉服务</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Production Showcase -->
-    <section class="py-24 px-6 bg-gradient-to-b from-black to-[#0A0A0A]">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16 fade-in">
-                <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">World-Class Production</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">世界级舞台制作</h2>
-            </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="relative h-64 rounded-2xl overflow-hidden fade-in">
-                    <img src="https://sspark.genspark.ai/cfimages?u1=fYvgBx8rcqp1aZZ88QO7raUoTE86wDjRaZ4gmCBeoJAQXL8jQTWDevR9pZT3S8P5y7dLLh4MqgRD9YC8HkN78zMxwXW%2Bswum2KELsoONUC9xcUIoDnpLotwuew4yGUK8Nk7UkUkyLqj%2FyhyLrAGVsZssKfGVZoOgHhva%2BErA6iefG%2BZmYiQFYPPEZ2xZdxdP9GMxXqCEMyqReesNLqqJbhljhR%2F4J9QAttNFoWEp7oXfl%2B4lyOyMJD%2BX2hHY%2FZw7CNgFAUztqtBPPf%2FkIzRA35bgCoryRTFqobtZzgbfeYUUNQ%3D%3D&u2=%2BKpDrgsUmbqDb9R1&width=2560" 
-                         alt="Concert Lighting" 
-                         class="w-full h-full object-cover">
+            <!-- Production Showcase -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 fade-in">
+                <div class="relative h-48 rounded-2xl overflow-hidden">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=fYvgBx8rcqp1aZZ88QO7raUoTE86wDjRaZ4gmCBeoJAQXL8jQTWDevR9pZT3S8P5y7dLLh4MqgRD9YC8HkN78zMxwXW%2Bswum2KELsoONUC9xcUIoDnpLotwuew4yGUK8Nk7UkUkyLqj%2FyhyLrAGVsZssKfGVZoOgHhva%2BErA6iefG%2BZmYiQFYPPEZ2xZdxdP9GMxXqCEMyqReesNLqqJbhljhR%2F4J9QAttNFoWEp7oXfl%2B4lyOyMJD%2BX2hHY%2FZw7CNgFAUztqtBPPf%2FkIzRA35bgCoryRTFqobtZzgbfeYUUNQ%3D%3D&u2=%2BKpDrgsUmbqDb9R1&width=2560" alt="Concert Lighting" class="w-full h-full object-cover">
                 </div>
-                <div class="relative h-64 rounded-2xl overflow-hidden fade-in" style="transition-delay: 0.1s">
-                    <img src="https://sspark.genspark.ai/cfimages?u1=vEd22F5USkUT27lUyj9RGZfzQ2azH3TvwFbjAMM%2F6XF4BfwkSyI6lQ0ldCDyuesF6DEGLrp2uuuw9wfWMYjF08U1wO9npSGWXMzp0ZUEFWHyPDS%2FAd9WRY1uwqi3EV2Rwc5z79fOhHly%2F94tCxzaka0%3D&u2=M54D46x6UuEvXblw&width=2560" 
-                         alt="Stage Production" 
-                         class="w-full h-full object-cover">
+                <div class="relative h-48 rounded-2xl overflow-hidden">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=vEd22F5USkUT27lUyj9RGZfzQ2azH3TvwFbjAMM%2F6XF4BfwkSyI6lQ0ldCDyuesF6DEGLrp2uuuw9wfWMYjF08U1wO9npSGWXMzp0ZUEFWHyPDS%2FAd9WRY1uwqi3EV2Rwc5z79fOhHly%2F94tCxzaka0%3D&u2=M54D46x6UuEvXblw&width=2560" alt="Stage Production" class="w-full h-full object-cover">
                 </div>
-                <div class="relative h-64 rounded-2xl overflow-hidden fade-in" style="transition-delay: 0.2s">
-                    <img src="https://sspark.genspark.ai/cfimages?u1=H%2B%2BrWmWwdgafQRxxp5pScPIyQuPVFeqZFpgAevBM09NPDMwLCnvcxeML2FmvOelu9UCLVeqqE3P9UeQd7vpTeyRGXGroNTYt4L91yjK021VQ7vXnBCX5QxAuWWaIO6Y%3D&u2=SX2DV1LtXmOShgrz&width=2560" 
-                         alt="Stage Lighting" 
-                         class="w-full h-full object-cover">
+                <div class="relative h-48 rounded-2xl overflow-hidden">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=H%2B%2BrWmWwdgafQRxxp5pScPIyQuPVFeqZFpgAevBM09NPDMwLCnvcxeML2FmvOelu9UCLVeqqE3P9UeQd7vpTeyRGXGroNTYt4L91yjK021VQ7vXnBCX5QxAuWWaIO6Y%3D&u2=SX2DV1LtXmOShgrz&width=2560" alt="Stage Lighting" class="w-full h-full object-cover">
                 </div>
-                <div class="relative h-64 rounded-2xl overflow-hidden fade-in" style="transition-delay: 0.3s">
-                    <img src="https://sspark.genspark.ai/cfimages?u1=PoqNM8ZSC1rHdWTA%2FQKMjmu5nkhKW01d8FI7GtHAFjiv%2Fr%2B3gtO5usccl%2BMTSMHRGBGPjUMhIgO4E5pc3ohr2ATyl5cFRLmS8Rj3Zn3wAstOGDMYiHTPm7ZlwbjrdXnxjfAwEJi7OlbimLQZyueXjrlyfANX3mPvuurQVM3UDUgyjRzGMhTdoBdYSlUJKZl8NC0Kjb%2BepV%2FUowDbNPySSqv97M%2FV1%2Bb1UqPZr%2F3XMoVOA5A%3D&u2=8Jz4NAma3A1vfEyt&width=2560" 
-                         alt="Professional Lighting" 
-                         class="w-full h-full object-cover">
+                <div class="relative h-48 rounded-2xl overflow-hidden">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=PoqNM8ZSC1rHdWTA%2FQKMjmu5nkhKW01d8FI7GtHAFjiv%2Fr%2B3gtO5usccl%2BMTSMHRGBGPjUMhIgO4E5pc3ohr2ATyl5cFRLmS8Rj3Zn3wAstOGDMYiHTPm7ZlwbjrdXnxjfAwEJi7OlbimLQZyueXjrlyfANX3mPvuurQVM3UDUgyjRzGMhTdoBdYSlUJKZl8NC0Kjb%2BepV%2FUowDbNPySSqv97M%2FV1%2Bb1UqPZr%2F3XMoVOA5A%3D&u2=8Jz4NAma3A1vfEyt&width=2560" alt="Professional Lighting" class="w-full h-full object-cover">
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Marketing Section -->
-    <section id="marketing" class="py-24 px-6">
+    <section id="marketing" class="py-24 px-6 bg-gradient-to-b from-black to-[#0A0A0A]">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-20 fade-in">
                 <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Marketing Strategy</span>
@@ -708,90 +665,174 @@ app.get('/', (c) => {
             </div>
             
             <!-- Timeline -->
-            <div class="grid md:grid-cols-2 gap-12 mb-20">
+            <div class="grid md:grid-cols-2 gap-12 mb-16">
                 <div class="fade-in">
                     <h3 class="text-2xl font-semibold mb-8 gold-text">营销节奏</h3>
                     <div class="space-y-8">
                         <div class="timeline-item">
                             <div class="text-lg font-semibold mb-2">T-12 个月</div>
-                            <p class="text-white/50">项目官宣，媒体预热，艺人社交媒体互动</p>
+                            <p class="text-white/50">确定日期场馆，制定整体营销计划</p>
                         </div>
                         <div class="timeline-item">
                             <div class="text-lg font-semibold mb-2">T-6 个月</div>
-                            <p class="text-white/50">杂志合作，深度报道，粉丝社区运营</p>
+                            <p class="text-white/50">启动线上线下活动，杂志合作，KOL预热</p>
                         </div>
                         <div class="timeline-item">
                             <div class="text-lg font-semibold mb-2">T-3 个月</div>
-                            <p class="text-white/50">票务开放，户外广告投放，KOL营销</p>
+                            <p class="text-white/50">强化宣传互动，票务开放，户外广告投放</p>
                         </div>
                         <div class="timeline-item">
                             <div class="text-lg font-semibold mb-2">T-1 个月</div>
-                            <p class="text-white/50">冲刺营销，现场活动预热，最终造势</p>
+                            <p class="text-white/50">最后冲刺宣传，现场活动预热，快闪店</p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="fade-in" style="transition-delay: 0.2s">
                     <h3 class="text-2xl font-semibold mb-8 gold-text">媒体矩阵</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="stat-card rounded-xl p-6">
-                            <i class="fab fa-weibo text-3xl gold-text mb-3"></i>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="stat-card rounded-xl p-5">
+                            <i class="fab fa-weibo text-2xl gold-text mb-2"></i>
                             <div class="text-sm font-semibold">微博</div>
-                            <div class="text-xs text-white/50">话题营销</div>
+                            <div class="text-xs text-white/50">官方账号+KOL+话题互动</div>
                         </div>
-                        <div class="stat-card rounded-xl p-6">
-                            <i class="fab fa-tiktok text-3xl gold-text mb-3"></i>
-                            <div class="text-sm font-semibold">抖音</div>
-                            <div class="text-xs text-white/50">短视频传播</div>
+                        <div class="stat-card rounded-xl p-5">
+                            <i class="fab fa-tiktok text-2xl gold-text mb-2"></i>
+                            <div class="text-sm font-semibold">抖音/快手</div>
+                            <div class="text-xs text-white/50">预告片+幕后花絮</div>
                         </div>
-                        <div class="stat-card rounded-xl p-6">
-                            <i class="fab fa-weixin text-3xl gold-text mb-3"></i>
+                        <div class="stat-card rounded-xl p-5">
+                            <i class="fab fa-weixin text-2xl gold-text mb-2"></i>
                             <div class="text-sm font-semibold">微信</div>
-                            <div class="text-xs text-white/50">私域运营</div>
+                            <div class="text-xs text-white/50">公众号+购票指南</div>
                         </div>
-                        <div class="stat-card rounded-xl p-6">
-                            <i class="fas fa-newspaper text-3xl gold-text mb-3"></i>
-                            <div class="text-sm font-semibold">官方媒体</div>
-                            <div class="text-xs text-white/50">央视/人民日报</div>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 stat-card rounded-xl p-6">
-                        <h4 class="font-semibold mb-4">杂志合作</h4>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="px-3 py-1 bg-white/10 rounded-full text-xs">Cosmopolitan 时尚</span>
-                            <span class="px-3 py-1 bg-white/10 rounded-full text-xs">National Geographic Traveler</span>
-                            <span class="px-3 py-1 bg-white/10 rounded-full text-xs">ELLE</span>
-                            <span class="px-3 py-1 bg-white/10 rounded-full text-xs">GQ</span>
+                        <div class="stat-card rounded-xl p-5">
+                            <i class="fas fa-music text-2xl gold-text mb-2"></i>
+                            <div class="text-sm font-semibold">音乐平台</div>
+                            <div class="text-xs text-white/50">QQ音乐/网易云</div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Ticketing -->
-            <div class="stat-card rounded-3xl p-10 fade-in">
-                <div class="grid md:grid-cols-3 gap-8 items-center">
-                    <div class="md:col-span-2">
-                        <h3 class="text-2xl font-semibold mb-4">票务系统</h3>
-                        <p class="text-white/50 mb-6 leading-relaxed">
-                            与中国两大主流票务平台合作，确保票务安全、合规、透明。根据最新反黄牛法规，
-                            演出方必须将不少于85%的门票面向公众销售，剩余15%须在演出前24小时绑定身份证。
-                        </p>
-                        <div class="flex gap-4">
-                            <div class="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg">
-                                <div class="w-8 h-8 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold">大麦</div>
-                                <span class="text-sm">Damai</span>
+            <!-- Media Partnerships -->
+            <div class="grid md:grid-cols-3 gap-6 fade-in">
+                <div class="stat-card rounded-2xl p-6">
+                    <h4 class="font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-book gold-text"></i>
+                        杂志合作
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-white/5 rounded-lg">
+                            <div class="font-medium text-sm">《时尚 COSMOPOLITAN》</div>
+                            <div class="text-xs text-white/50">中国风封面大片、专访、抖音纪录片</div>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-lg">
+                            <div class="font-medium text-sm">《时尚旅游》National Geographic</div>
+                            <div class="text-xs text-white/50">中国景色主题封面、特色Vlog</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card rounded-2xl p-6">
+                    <h4 class="font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-newspaper gold-text"></i>
+                        官方媒体
+                    </h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm p-2 bg-white/5 rounded">
+                            <span class="text-red-400">●</span> 中央电视台 CCTV
+                        </div>
+                        <div class="flex items-center gap-2 text-sm p-2 bg-white/5 rounded">
+                            <span class="text-red-400">●</span> 人民日报 / 人民网
+                        </div>
+                        <div class="flex items-center gap-2 text-sm p-2 bg-white/5 rounded">
+                            <span class="text-red-400">●</span> 新华日报 / 新华网
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card rounded-2xl p-6">
+                    <h4 class="font-semibold mb-4 flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt gold-text"></i>
+                        线下营销
+                    </h4>
+                    <div class="space-y-2 text-sm text-white/70">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-building text-xs gold-text"></i>
+                            万达广场/壹方城/海岸城 广告牌
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-subway text-xs gold-text"></i>
+                            地铁/公交 公共交通广告
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-store text-xs gold-text"></i>
+                            快闪店及主题展览
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ticketing Section -->
+    <section id="ticketing" class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Ticketing System</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">票务系统</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="stat-card rounded-3xl p-8 fade-in">
+                    <h3 class="text-xl font-semibold mb-6">票务平台</h3>
+                    <p class="text-white/50 mb-6">
+                        与中国两大主流票务平台合作，相当于中国的Ticketmaster，确保票务安全、合规、透明
+                    </p>
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex items-center gap-2 px-4 py-3 bg-white/5 rounded-xl flex-1">
+                            <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">大麦</div>
+                            <div>
+                                <div class="text-sm font-semibold">Damai</div>
+                                <div class="text-xs text-white/50">阿里系</div>
                             </div>
-                            <div class="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-lg">
-                                <div class="w-8 h-8 bg-pink-500 rounded flex items-center justify-center text-white text-xs font-bold">猫眼</div>
-                                <span class="text-sm">Maoyan</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-4 py-3 bg-white/5 rounded-xl flex-1">
+                            <div class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">猫眼</div>
+                            <div>
+                                <div class="text-sm font-semibold">Maoyan</div>
+                                <div class="text-xs text-white/50">美团系</div>
                             </div>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <div class="inline-block p-8 rounded-full gold-border">
-                            <div class="text-5xl font-bold gold-text">85%</div>
-                            <div class="text-sm text-white/50 mt-2">公开售票</div>
+                    <div class="text-center p-6 gold-border rounded-2xl">
+                        <div class="text-4xl font-bold gold-text mb-2">85%</div>
+                        <div class="text-sm text-white/50">最低公开售票比例（法规要求）</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card rounded-3xl p-8 fade-in" style="transition-delay: 0.1s">
+                    <h3 class="text-xl font-semibold mb-6">实名制与反黄牛</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-id-card gold-text"></i>
+                                <span class="font-semibold">实名制购票</span>
+                            </div>
+                            <p class="text-white/50 text-sm">每张身份证单场演出限购一张票，入场需刷身份证核验</p>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-xl">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-clock gold-text"></i>
+                                <span class="font-semibold">24小时绑定</span>
+                            </div>
+                            <p class="text-white/50 text-sm">剩余15%门票需在演出前24小时完成个人信息绑定</p>
+                        </div>
+                        <div class="p-4 bg-red-500/10 rounded-xl border border-red-500/30">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-gavel text-red-400"></i>
+                                <span class="font-semibold text-red-400">黄牛处罚</span>
+                            </div>
+                            <p class="text-white/50 text-sm">倒票行为：5-15天拘留+罚款，严重者最高3年有期徒刑</p>
                         </div>
                     </div>
                 </div>
@@ -800,7 +841,7 @@ app.get('/', (c) => {
     </section>
 
     <!-- Investment Highlights -->
-    <section id="investment" class="py-24 px-6 bg-gradient-to-b from-[#0A0A0A] to-black">
+    <section class="py-24 px-6 bg-gradient-to-b from-[#0A0A0A] to-black">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-20 fade-in">
                 <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Investment Opportunity</span>
@@ -826,17 +867,17 @@ app.get('/', (c) => {
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.3s">
                     <div class="text-4xl mb-4">📈</div>
                     <h3 class="text-xl font-semibold mb-3">市场潜力</h3>
-                    <p class="text-white/50">覆盖华东、华南两大最具消费力的城市群，年轻人口占比高，娱乐消费强劲增长</p>
+                    <p class="text-white/50">覆盖华东、华南两大最具消费力的城市群，年轻人口占比高</p>
                 </div>
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.4s">
                     <div class="text-4xl mb-4">🎯</div>
                     <h3 class="text-xl font-semibold mb-3">合规运营</h3>
-                    <p class="text-white/50">严格遵守票务法规，与主流平台合作，确保运营合规透明</p>
+                    <p class="text-white/50">严格遵守票务法规，实名制购票+反黄牛机制，运营合规透明</p>
                 </div>
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.5s">
                     <div class="text-4xl mb-4">🌐</div>
                     <h3 class="text-xl font-semibold mb-3">全渠道营销</h3>
-                    <p class="text-white/50">线上线下全方位营销矩阵，最大化曝光和转化</p>
+                    <p class="text-white/50">一年期全周期营销计划，官方媒体+社交平台+线下广告全覆盖</p>
                 </div>
             </div>
         </div>
@@ -889,20 +930,15 @@ app.get('/', (c) => {
     <script>
         // Scroll Animation
         const fadeElements = document.querySelectorAll('.fade-in');
-        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
+                if (entry.isIntersecting) entry.target.classList.add('visible');
             });
         }, { threshold: 0.1 });
-        
         fadeElements.forEach(el => observer.observe(el));
         
         // Counter Animation
         const counters = document.querySelectorAll('.counter');
-        
         const counterObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -910,47 +946,33 @@ app.get('/', (c) => {
                     const target = parseInt(counter.dataset.target);
                     const duration = 2000;
                     const startTime = performance.now();
-                    
                     const updateCounter = (currentTime) => {
                         const elapsed = currentTime - startTime;
                         const progress = Math.min(elapsed / duration, 1);
                         const easeOut = 1 - Math.pow(1 - progress, 3);
-                        const current = Math.floor(easeOut * target);
-                        
-                        counter.textContent = current.toLocaleString();
-                        
-                        if (progress < 1) {
-                            requestAnimationFrame(updateCounter);
-                        }
+                        counter.textContent = Math.floor(easeOut * target).toLocaleString();
+                        if (progress < 1) requestAnimationFrame(updateCounter);
                     };
-                    
                     requestAnimationFrame(updateCounter);
                     counterObserver.unobserve(counter);
                 }
             });
         }, { threshold: 0.5 });
-        
         counters.forEach(counter => counterObserver.observe(counter));
         
-        // Smooth scroll for navigation
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
         
-        // Navbar background on scroll
+        // Navbar
         const nav = document.querySelector('nav');
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                nav.classList.add('bg-black/95');
-            } else {
-                nav.classList.remove('bg-black/95');
-            }
+            nav.classList.toggle('bg-black/95', window.scrollY > 100);
         });
     </script>
 </body>
@@ -958,7 +980,7 @@ app.get('/', (c) => {
   `)
 })
 
-// API endpoint for contact form (future use)
+// API endpoint
 app.post('/api/contact', async (c) => {
   const body = await c.req.json()
   return c.json({ success: true, message: 'Thank you for your interest!' })
