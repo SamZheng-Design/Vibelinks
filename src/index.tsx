@@ -319,9 +319,8 @@ app.get('/', (c) => {
             </h1>
             <p class="text-xl md:text-2xl text-white/60 mb-4 font-light">2025 - 2026</p>
             <div class="flex flex-wrap justify-center gap-4 mb-12">
-                <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">三亚</span>
                 <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">杭州</span>
-                <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">成都</span>
+                <span class="px-4 py-1 border border-white/20 rounded-full text-sm text-white/70">深圳</span>
             </div>
             <p class="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed mb-12">
                 通过具有变革性的音乐体验搭建文化桥梁<br>
@@ -348,18 +347,18 @@ app.get('/', (c) => {
                 <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Project Overview</span>
                 <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">项目概览</h2>
                 <p class="text-white/50 max-w-2xl mx-auto">
-                    全球顶级说唱天后Cardi B首次中国巡演，横跨三大核心城市，预计触达百万级观众
+                    全球顶级说唱天后Cardi B首次中国巡演，横跨两大核心城市，预计触达百万级观众
                 </p>
             </div>
             
             <!-- Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
                 <div class="stat-card rounded-2xl p-8 text-center fade-in">
-                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="3">0</div>
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="2">0</div>
                     <div class="text-white/50 text-sm">巡演城市</div>
                 </div>
                 <div class="stat-card rounded-2xl p-8 text-center fade-in" style="transition-delay: 0.1s">
-                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="185800">0</div>
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2 counter" data-target="120800">0</div>
                     <div class="text-white/50 text-sm">总座位容量</div>
                 </div>
                 <div class="stat-card rounded-2xl p-8 text-center fade-in" style="transition-delay: 0.2s">
@@ -412,7 +411,7 @@ app.get('/', (c) => {
                 <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Tour Venues</span>
                 <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">巡演场馆</h2>
                 <p class="text-white/50 max-w-2xl mx-auto">
-                    精选中国三大顶级体育场馆，覆盖南部、东部、西南部核心市场
+                    精选中国两大顶级体育场馆，覆盖华东、华南核心市场
                 </p>
             </div>
             
@@ -447,46 +446,29 @@ app.get('/', (c) => {
                     </div>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-8">
-                    <!-- Chengdu -->
-                    <div class="venue-card h-[400px] relative fade-in">
-                        <img src="https://sspark.genspark.ai/cfimages?u1=PXcYVjGe7LZf7%2B1dE3WH73mpnh7buDYjHJxrMLOoYH6RsKyTIJ1%2F1KpQd%2BCNebtnyjIhYiYppUY2ghcjz%2B8FDKwLZzYN%2B8rzu%2FPtXUM%3D&u2=uLPVuc8YksdG2vIB&width=2560" 
-                             alt="Chengdu Phoenix Hill Stadium" 
-                             class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-8 z-10">
-                            <span class="inline-block px-3 py-1 border border-white/30 text-xs rounded-full mb-3">西南市场</span>
-                            <h3 class="font-display text-2xl md:text-3xl font-bold mb-2">成都凤凰山体育公园</h3>
-                            <p class="text-white/60 text-sm mb-3">Phoenix Hill Stadium</p>
-                            <div class="flex gap-6">
-                                <div>
-                                    <div class="text-2xl font-bold gold-text">60,000</div>
-                                    <div class="text-white/50 text-xs">座位</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold gold-text">43.67</div>
-                                    <div class="text-white/50 text-xs">公顷</div>
-                                </div>
+                <!-- Shenzhen -->
+                <div class="venue-card h-[400px] relative fade-in">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=oqKdduK3jkMMkLTe3EwgkaXPbyivvilO7Q%2Bn%2FQU0AEM3kvYJUG2FcsF59M91hBctY4NXpbICBK5mceigDLTHtKIbjtyBhxG4MMzDI%2B5TCmoQjEu1kFBmL9GkICTIf2zZv6RdYo%2F6U8Axllp%2FP4Iu%2F5iH%2F8TiDYQdjBHxGd9JQilRMvnW8bX9nMfCMATJ&u2=OVgYRz8A133JOH8t&width=2560" 
+                         alt="Shenzhen Skyline" 
+                         class="w-full h-full object-cover">
+                    <div class="absolute bottom-0 left-0 right-0 p-8 md:p-12 z-10">
+                        <div class="flex flex-wrap items-end justify-between gap-6">
+                            <div>
+                                <span class="inline-block px-3 py-1 border border-white/30 text-xs rounded-full mb-3">华南科技中心</span>
+                                <h3 class="font-display text-2xl md:text-3xl font-bold mb-2">深圳湾体育中心</h3>
+                                <p class="text-white/60 text-sm mb-3">Shenzhen Bay Sports Center (春茧)</p>
+                                <p class="text-white/50 max-w-xl text-sm">
+                                    深圳地标性体育场馆，被誉为"春茧"，是华南地区顶级演出场地，紧邻深圳湾超级总部基地
+                                </p>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Sanya -->
-                    <div class="venue-card h-[400px] relative fade-in" style="transition-delay: 0.1s">
-                        <img src="https://sspark.genspark.ai/cfimages?u1=AAg0z8A48xDrOWsIfdMqB%2BiklaOq3%2BTT%2F9y42Hq3JrYUmRNJvXMk%2BUiPlNnp8c1EIMDS4H9kYBP4XlvPzdaXg3%2FjrFShNwl%2FlrVJ9%2FkYFVmMGUzgoY4%3D&u2=Kp2hCUcFTlyRGlda&width=2560" 
-                             alt="Sanya Bai Lu Stadium" 
-                             class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-8 z-10">
-                            <span class="inline-block px-3 py-1 border border-white/30 text-xs rounded-full mb-3">热带度假市场</span>
-                            <h3 class="font-display text-2xl md:text-3xl font-bold mb-2">三亚白鹭体育场</h3>
-                            <p class="text-white/60 text-sm mb-3">Bai Lu Stadium</p>
                             <div class="flex gap-6">
-                                <div>
-                                    <div class="text-2xl font-bold gold-text">45,000</div>
-                                    <div class="text-white/50 text-xs">座位</div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold gold-text">40,000</div>
+                                    <div class="text-white/50 text-xs">座位容量</div>
                                 </div>
-                                <div>
-                                    <div class="text-2xl font-bold gold-text">#1</div>
-                                    <div class="text-white/50 text-xs">海南最大</div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold gold-text">2011</div>
+                                    <div class="text-white/50 text-xs">大运会主场馆</div>
                                 </div>
                             </div>
                         </div>
@@ -496,15 +478,15 @@ app.get('/', (c) => {
         </div>
     </section>
 
-    <!-- Chengdu Market Analysis -->
+    <!-- Shenzhen Market Analysis -->
     <section class="py-24 px-6 bg-gradient-to-b from-[#0A0A0A] to-black">
         <div class="max-w-7xl mx-auto">
             <div class="grid md:grid-cols-2 gap-12 items-center">
                 <div class="fade-in">
                     <span class="text-xs tracking-[0.3em] gold-text uppercase mb-4 block">Market Analysis</span>
-                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">成都市场分析</h2>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">深圳市场分析</h2>
                     <p class="text-white/50 mb-8 leading-relaxed">
-                        成都作为西南重镇，拥有强劲的消费力和年轻化人口结构，是音乐演出的理想市场
+                        深圳作为中国改革开放的前沿阵地，是全国最具活力和消费力的城市之一，年轻人口密度极高
                     </p>
                     
                     <div class="space-y-6">
@@ -513,8 +495,8 @@ app.get('/', (c) => {
                                 <i class="fas fa-chart-line text-black"></i>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold">¥2.35 万亿</div>
-                                <div class="text-white/50 text-sm">2024年GDP（约3,250亿美元）</div>
+                                <div class="text-2xl font-bold">¥3.46 万亿</div>
+                                <div class="text-white/50 text-sm">2024年GDP（约4,800亿美元）</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
@@ -522,7 +504,7 @@ app.get('/', (c) => {
                                 <i class="fas fa-users text-black"></i>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold">2,140 万</div>
+                                <div class="text-2xl font-bold">1,780 万</div>
                                 <div class="text-white/50 text-sm">常住人口</div>
                             </div>
                         </div>
@@ -531,17 +513,17 @@ app.get('/', (c) => {
                                 <i class="fas fa-user-graduate text-black"></i>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold">74.2%</div>
-                                <div class="text-white/50 text-sm">18-45岁人口占比</div>
+                                <div class="text-2xl font-bold">79.5%</div>
+                                <div class="text-white/50 text-sm">18-45岁人口占比（全国最高）</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 gold-bg rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-music text-black"></i>
+                                <i class="fas fa-building text-black"></i>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold">¥187 亿</div>
-                                <div class="text-white/50 text-sm">ISY音乐节带动收入</div>
+                                <div class="text-2xl font-bold">Top 3</div>
+                                <div class="text-white/50 text-sm">全国演出市场规模</div>
                             </div>
                         </div>
                     </div>
@@ -553,8 +535,17 @@ app.get('/', (c) => {
                         <div class="space-y-4">
                             <div>
                                 <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-white/70">人均消费支出</span>
-                                    <span class="gold-text font-semibold">¥8,887 / Q1 2025</span>
+                                    <span class="text-white/70">人均可支配收入</span>
+                                    <span class="gold-text font-semibold">¥76,910 / 年</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full gold-bg rounded-full" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-white/70">娱乐消费增长</span>
+                                    <span class="gold-text font-semibold">+28% YoY</span>
                                 </div>
                                 <div class="h-2 bg-white/10 rounded-full overflow-hidden">
                                     <div class="h-full gold-bg rounded-full" style="width: 85%"></div>
@@ -562,20 +553,20 @@ app.get('/', (c) => {
                             </div>
                             <div>
                                 <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-white/70">娱乐消费增长</span>
-                                    <span class="gold-text font-semibold">+23% YoY</span>
+                                    <span class="text-white/70">演出市场渗透率</span>
+                                    <span class="gold-text font-semibold">Top 3 全国</span>
                                 </div>
                                 <div class="h-2 bg-white/10 rounded-full overflow-hidden">
-                                    <div class="h-full gold-bg rounded-full" style="width: 75%"></div>
+                                    <div class="h-full gold-bg rounded-full" style="width: 92%"></div>
                                 </div>
                             </div>
                             <div>
                                 <div class="flex justify-between text-sm mb-2">
-                                    <span class="text-white/70">演出市场渗透率</span>
-                                    <span class="gold-text font-semibold">Top 5 全国</span>
+                                    <span class="text-white/70">科技/金融从业者占比</span>
+                                    <span class="gold-text font-semibold">35%+</span>
                                 </div>
                                 <div class="h-2 bg-white/10 rounded-full overflow-hidden">
-                                    <div class="h-full gold-bg rounded-full" style="width: 90%"></div>
+                                    <div class="h-full gold-bg rounded-full" style="width: 88%"></div>
                                 </div>
                             </div>
                         </div>
@@ -825,7 +816,7 @@ app.get('/', (c) => {
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.1s">
                     <div class="text-4xl mb-4">🏟️</div>
                     <h3 class="text-xl font-semibold mb-3">顶级场馆</h3>
-                    <p class="text-white/50">三大城市均选用当地最大、最现代化的体育场馆，确保演出规模和体验</p>
+                    <p class="text-white/50">两大城市均选用当地最大、最现代化的体育场馆，确保演出规模和体验</p>
                 </div>
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.2s">
                     <div class="text-4xl mb-4">👥</div>
@@ -835,7 +826,7 @@ app.get('/', (c) => {
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.3s">
                     <div class="text-4xl mb-4">📈</div>
                     <h3 class="text-xl font-semibold mb-3">市场潜力</h3>
-                    <p class="text-white/50">覆盖中国最具消费力的城市群，年轻人口占比高，娱乐消费强劲增长</p>
+                    <p class="text-white/50">覆盖华东、华南两大最具消费力的城市群，年轻人口占比高，娱乐消费强劲增长</p>
                 </div>
                 <div class="stat-card rounded-2xl p-8 fade-in" style="transition-delay: 0.4s">
                     <div class="text-4xl mb-4">🎯</div>
