@@ -535,8 +535,8 @@ app.get('/', (c) => {
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, rgba(90, 107, 53, 0.4), rgba(212, 175, 55, 0.2));">
                         <i class="fas fa-chart-line gold-text text-xl"></i>
                     </div>
-                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2">1.24<span class="text-2xl">亿</span></div>
-                    <div class="text-white/70 text-sm font-medium">总票房收入</div>
+                    <div class="text-4xl md:text-5xl font-bold gold-text mb-2">1.1<span class="text-2xl">亿</span></div>
+                    <div class="text-white/70 text-sm font-medium">总票仓</div>
                     <div class="text-white/40 text-xs mt-2">Gross Revenue</div>
                 </div>
                 
@@ -553,7 +553,7 @@ app.get('/', (c) => {
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(229, 115, 115, 0.2);">
                         <i class="fas fa-calculator text-red-400 text-xl"></i>
                     </div>
-                    <div class="text-4xl md:text-5xl font-bold text-red-400 mb-2">7202<span class="text-2xl">万</span></div>
+                    <div class="text-4xl md:text-5xl font-bold text-red-400 mb-2">7000<span class="text-2xl">万</span></div>
                     <div class="text-white/70 text-sm font-medium">总成本支出</div>
                     <div class="text-white/40 text-xs mt-2">Total Expenses</div>
                 </div>
@@ -574,7 +574,7 @@ app.get('/', (c) => {
                     <div class="text-white/50 text-xs mt-1">分成比例</div>
                 </div>
                 <div class="stat-card rounded-xl p-4 text-center fade-in" style="transition-delay: 0.35s">
-                    <div class="text-2xl font-bold text-green-400">25.1%</div>
+                    <div class="text-2xl font-bold text-green-400">25.5%</div>
                     <div class="text-white/50 text-xs mt-1">保本点</div>
                 </div>
                 <div class="stat-card rounded-xl p-4 text-center fade-in" style="transition-delay: 0.4s">
@@ -913,9 +913,9 @@ app.get('/', (c) => {
                                 <td>艺人秀费约719.2万USD + 运营支出约7260万人民币</td>
                             </tr>
                             <tr>
-                                <td><span class="highlight">最新测算</span></td>
-                                <td><strong>7,201.9万人民币</strong></td>
-                                <td>艺人费用5,271万 + 制作535万 + 场地751万 + 其他646万</td>
+                                <td><span class="highlight">调整后方案</span></td>
+                                <td><strong>7,000万人民币</strong></td>
+                                <td>原7500万，通过成本优化压缩</td>
                             </tr>
                         </tbody>
                     </table>
@@ -935,9 +935,9 @@ app.get('/', (c) => {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>总票房收入</td>
-                                <td class="highlight">1.2428亿人民币</td>
-                                <td>2场演出 × 44,000可售容量 × 平均票价1,412元</td>
+                                <td>总票仓</td>
+                                <td class="highlight">1.1亿人民币</td>
+                                <td>调整后方案总票仓基数</td>
                             </tr>
                             <tr>
                                 <td>净调整票务收入</td>
@@ -1482,9 +1482,9 @@ app.get('/', (c) => {
                         <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: rgba(0, 200, 83, 0.2);">
                             <i class="fas fa-shield-alt text-green-400 text-2xl"></i>
                         </div>
-                        <div class="text-5xl font-bold text-green-400 mb-2">25.1%</div>
+                        <div class="text-5xl font-bold text-green-400 mb-2">25.5%</div>
                         <div class="text-white/70 font-medium">保本点</div>
-                        <p class="text-sm text-white/50 mt-3">需票房收入3,118万即可保本<br/>占总票房1.24亿的25.1%</p>
+                        <p class="text-sm text-white/50 mt-3">需票房收入2,800万即可保本<br/>占总票仓1.1亿的25.5%</p>
                     </div>
                 </div>
             </div>
@@ -1530,7 +1530,7 @@ app.get('/', (c) => {
                     <h3 class="subsection-title text-base"><i class="fas fa-coins"></i>票务收入数据</h3>
                     <table class="data-table text-sm">
                         <tbody>
-                            <tr><td>总票房收入</td><td class="highlight">1.2428亿</td></tr>
+                            <tr><td>总票仓</td><td class="highlight">1.1亿</td></tr>
                             <tr><td>净票务收入</td><td class="highlight">1.187亿</td></tr>
                             <tr><td>平均票价</td><td class="highlight">1,412元</td></tr>
                             <tr><td>可售容量/场</td><td class="highlight">44,000张</td></tr>
@@ -1558,7 +1558,7 @@ app.get('/', (c) => {
                     <h3 class="subsection-title text-base"><i class="fas fa-chart-line"></i>利润数据</h3>
                     <table class="data-table text-sm">
                         <tbody>
-                            <tr><td>总成本支出</td><td class="highlight">7,202万</td></tr>
+                            <tr><td>总成本支出</td><td class="highlight">7,000万</td></tr>
                             <tr><td>赞助净收入</td><td class="highlight">2,012万</td></tr>
                             <tr><td>净收入(含赞助)</td><td class="highlight">6,680万</td></tr>
                             <tr><td><strong>税后净利润</strong></td><td class="gold-text font-bold">5,678万</td></tr>
@@ -1572,8 +1572,8 @@ app.get('/', (c) => {
                     <table class="data-table text-sm">
                         <tbody>
                             <tr><td>滴灌通分成比例</td><td class="highlight">70%</td></tr>
-                            <tr><td>保本点</td><td class="highlight">25.1%</td></tr>
-                            <tr><td>保本收入</td><td class="highlight">3,118万</td></tr>
+                            <tr><td>保本点</td><td class="highlight">25.5%</td></tr>
+                            <tr><td>保本收入</td><td class="highlight">2,800万</td></tr>
                             <tr><td>税后净利润</td><td class="highlight">5,678万</td></tr>
                         </tbody>
                     </table>
