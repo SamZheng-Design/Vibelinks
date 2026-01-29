@@ -971,7 +971,7 @@ app.get('/', (c) => {
             
             <div class="info-box mb-8">
                 <i class="fas fa-lightbulb mr-2 gold-text"></i>
-                <strong>核心说明：</strong>秀费按<span class="highlight">300万USD/场</span>核算，<span class="highlight">T0 = 拿到5000万投资款</span>
+                <strong>核心说明：</strong>秀费按<span class="highlight">300万USD/场</span>核算，<span class="highlight">T0 = 拿到5000万投资款</span>，汇率 <span class="highlight">1 USD = 6.95 RMB</span>（2026.01.29实时）
             </div>
 
             <div class="stat-card rounded-2xl p-8 mb-8 fade-in">
@@ -992,7 +992,7 @@ app.get('/', (c) => {
                                 <td><span class="highlight">T-30</span></td>
                                 <td><strong>签约完成</strong></td>
                                 <td>10% Shows Fee × 1.16(税)</td>
-                                <td><strong>69.6万USD</strong></td>
+                                <td><strong>483.72万</strong></td>
                                 <td><span class="highlight-green">Refundable：批文不下可退还</span></td>
                             </tr>
                             <tr style="background: rgba(212, 175, 55, 0.05);">
@@ -1004,7 +1004,7 @@ app.get('/', (c) => {
                                 <td><span class="highlight">T+7</span></td>
                                 <td><strong>拿到批文</strong></td>
                                 <td>50% Shows Fee × 1.16(税)</td>
-                                <td><strong>348万USD</strong></td>
+                                <td><strong>2,418.6万</strong></td>
                                 <td>通过担保账号自动支付</td>
                             </tr>
                             <tr>
@@ -1023,7 +1023,7 @@ app.get('/', (c) => {
                                 <td><span class="highlight">T+21</span></td>
                                 <td><strong>艺人到达中国</strong></td>
                                 <td>剩余40% Shows Fee × 1.16(税)</td>
-                                <td><strong>278.4万USD</strong></td>
+                                <td><strong>1,934.88万</strong></td>
                                 <td>基于60%阶段的剩余部分</td>
                             </tr>
                             <tr>
@@ -1057,7 +1057,7 @@ app.get('/', (c) => {
                     <div class="flow-step">
                         <div class="text-xs text-white/50 mb-1">T-30</div>
                         <div class="gold-text font-bold">签约</div>
-                        <div class="text-sm">10% = 69.6万USD</div>
+                        <div class="text-sm">483.72万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step" style="border-color: rgba(0, 200, 83, 0.5); background: linear-gradient(135deg, rgba(0, 200, 83, 0.2), rgba(0, 200, 83, 0.05));">
@@ -1069,25 +1069,25 @@ app.get('/', (c) => {
                     <div class="flow-step">
                         <div class="text-xs text-white/50 mb-1">T+7</div>
                         <div class="gold-text font-bold">拿到批文</div>
-                        <div class="text-sm">50% = 348万USD</div>
+                        <div class="text-sm">2,418.6万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
                         <div class="text-xs text-white/50 mb-1">T+14</div>
                         <div class="gold-text font-bold">艺人在美国</div>
-                        <div class="text-sm">运营费1,080万RMB</div>
+                        <div class="text-sm">1,080.25万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
                         <div class="text-xs text-white/50 mb-1">T+21</div>
                         <div class="gold-text font-bold">艺人到华</div>
-                        <div class="text-sm">40% = 278.4万USD</div>
+                        <div class="text-sm">1,934.88万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
                         <div class="text-xs text-white/50 mb-1">T+28</div>
                         <div class="gold-text font-bold">演出前1天</div>
-                        <div class="text-sm">结清700.75万RMB</div>
+                        <div class="text-sm">700.75万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step" style="border-color: rgba(212, 175, 55, 0.6); background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));">
@@ -1099,7 +1099,7 @@ app.get('/', (c) => {
                 
                 <div class="info-box mt-6">
                     <i class="fas fa-calculator mr-2 gold-text"></i>
-                    <strong>秀费计算：</strong>300万USD/场 × 2场 × 1.16(税) = <span class="highlight">696万USD</span>（约4,942万RMB @7.1汇率）
+                    <strong>秀费计算：</strong>300万USD/场 × 2场 × 1.16(税) × 6.95汇率 = <span class="highlight">4,837.2万RMB</span>
                 </div>
             </div>
         </div>
