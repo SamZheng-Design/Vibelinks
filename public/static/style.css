@@ -1,1 +1,145 @@
-h1 { font-family: Arial, Helvetica, sans-serif; }
+/**
+ * Cardi B Brand Color System
+ * Version: 2.0
+ * 核心配色体系 - 奢华街头 + 张扬个性
+ */
+
+/* ===== CSS Variables ===== */
+:root {
+  /* 基础主色 - 视觉核心/大面积使用：背景、主视觉基底、Logo/标题文字 */
+  --cb-black: #0b0704;
+  --cb-gold-brown: #b5733f;
+  
+  /* 基础辅助色 - 中等面积使用：副标题、装饰元素、视觉分区 */
+  --cb-light-brown-pink: #d9aa9a;
+  --cb-pure-white: #ffffff;
+  
+  /* 标志性强调色 - 小面积点睛/重点突出：视觉焦点、高光元素、关键符号 */
+  --cb-deep-gold: #c39907;
+  --cb-light-gold: #d5ac04;
+  --cb-hot-pink: #f96daa;
+  --cb-lemon-yellow: #feff00;
+  --cb-apple-red: #ff0000;
+  --cb-magenta: #9b227f;
+  --cb-emerald: #00a651;
+  --cb-mustard: #e2b13c;
+  --cb-navy: #0f2e5a;
+  
+  /* 个人标志性限定色 - 按需选用/风格强化 */
+  --cb-cl-red: #cc0000;      /* CL红底鞋同色 */
+  --cb-royal-blue: #0000FF;   /* 艺人最爱色 */
+}
+
+/* ===== Global Styles ===== */
+h1 { 
+  font-family: 'Playfair Display', Arial, Helvetica, sans-serif; 
+}
+
+/* Gold gradient text */
+.gold-text {
+  background: linear-gradient(135deg, var(--cb-gold-brown) 0%, var(--cb-light-gold) 50%, var(--cb-gold-brown) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gold gradient background */
+.gold-bg {
+  background: linear-gradient(135deg, var(--cb-gold-brown) 0%, var(--cb-deep-gold) 50%, var(--cb-gold-brown) 100%);
+}
+
+/* Hot pink gradient */
+.pink-gradient {
+  background: linear-gradient(135deg, var(--cb-hot-pink) 0%, var(--cb-magenta) 100%);
+}
+
+/* Black base gradient with gold accent */
+.dark-gradient {
+  background: linear-gradient(135deg, var(--cb-black) 0%, #1a1208 50%, var(--cb-black) 100%);
+}
+
+/* Accent text colors */
+.text-accent-gold { color: var(--cb-gold-brown); }
+.text-accent-pink { color: var(--cb-hot-pink); }
+.text-accent-red { color: var(--cb-apple-red); }
+.text-accent-green { color: var(--cb-emerald); }
+.text-accent-yellow { color: var(--cb-mustard); }
+.text-accent-navy { color: var(--cb-navy); }
+
+/* Border colors */
+.border-gold { border-color: var(--cb-gold-brown); }
+.border-pink { border-color: var(--cb-hot-pink); }
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 40px rgba(181, 115, 63, 0.3);
+}
+
+.glow-pink {
+  box-shadow: 0 0 40px rgba(249, 109, 170, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cb-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cb-gold-brown);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cb-deep-gold);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(181, 115, 63, 0.4);
+  color: var(--cb-pure-white);
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--cb-gold-brown);
+  outline-offset: 2px;
+}
+
+/* Button base styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--cb-hot-pink) 0%, var(--cb-magenta) 100%);
+  color: var(--cb-pure-white);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 25px rgba(249, 109, 170, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--cb-gold-brown) 0%, var(--cb-deep-gold) 100%);
+  color: var(--cb-pure-white);
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  box-shadow: 0 8px 25px rgba(181, 115, 63, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Card with gold border effect */
+.card-gold {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 115, 63, 0.3);
+  transition: all 0.3s ease;
+}
+
+.card-gold:hover {
+  border-color: var(--cb-gold-brown);
+  box-shadow: 0 15px 40px rgba(181, 115, 63, 0.15);
+}

@@ -11,23 +11,54 @@ export const predictorPageHTML = `<!DOCTYPE html>
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* ===== Cardi B 核心配色体系 ===== */
+        :root {
+            /* 基础主色 */
+            --black: #0b0704;
+            --gold-brown: #b5733f;
+            /* 基础辅助色 */
+            --light-brown-pink: #d9aa9a;
+            --pure-white: #ffffff;
+            /* 强调色 */
+            --deep-gold: #c39907;
+            --light-gold: #d5ac04;
+            --hot-pink: #f96daa;
+            --lemon-yellow: #feff00;
+            --apple-red: #ff0000;
+            --magenta: #9b227f;
+            --emerald: #00a651;
+            --mustard: #e2b13c;
+            --navy: #0f2e5a;
         }
+        
+        /* 主渐变背景 - 黑金体系 */
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--black) 0%, #1a1208 50%, var(--black) 100%);
+            position: relative;
+        }
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 30% 50%, rgba(181,115,63,0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        
         .glass {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(181,115,63,0.1);
         }
         .step-card {
             transition: all 0.3s ease;
         }
         .step-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(181,115,63,0.15);
         }
         .tab-active {
-            border-bottom: 3px solid #667eea;
-            color: #667eea;
+            border-bottom: 3px solid var(--gold-brown);
+            color: var(--gold-brown);
         }
         .pulse-dot {
             animation: pulse 2s infinite;
@@ -46,40 +77,209 @@ export const predictorPageHTML = `<!DOCTYPE html>
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Gold theme variables for consistency with main site */
-        :root {
-            --gold: #D4AF37;
-            --gold-light: #F4E4BA;
-        }
+        
         .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%);
+            background: linear-gradient(135deg, var(--gold-brown) 0%, var(--light-gold) 50%, var(--gold-brown) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .gold-bg { background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%); }
+        .gold-bg { background: linear-gradient(135deg, var(--gold-brown) 0%, var(--deep-gold) 50%, var(--gold-brown) 100%); }
+        
+        /* 主按钮 - 亮粉系 */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(249, 109, 170, 0.4);
+        }
+        
+        /* 辅助按钮 - 金棕系 */
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold-brown) 0%, var(--deep-gold) 100%);
+            color: white;
+        }
+        .btn-gold:hover {
+            box-shadow: 0 8px 25px rgba(181, 115, 63, 0.4);
+        }
+        
+        /* 强调文字 */
+        .text-accent-pink { color: var(--hot-pink); }
+        .text-accent-gold { color: var(--gold-brown); }
+        .text-accent-red { color: var(--apple-red); }
+        .text-accent-green { color: var(--emerald); }
+        .text-accent-yellow { color: var(--mustard); }
+        
+        /* 覆盖Tailwind紫色为金棕/亮粉 */
+        .from-purple-600, .from-purple-500 { --tw-gradient-from: var(--gold-brown); }
+        .to-purple-700, .to-indigo-600, .to-purple-600 { --tw-gradient-to: var(--deep-gold); }
+        .bg-purple-600 { background-color: var(--gold-brown); }
+        .bg-purple-500 { background-color: var(--gold-brown); }
+        .bg-purple-100 { background-color: rgba(181,115,63,0.15); }
+        .bg-purple-50 { background-color: rgba(181,115,63,0.08); }
+        .text-purple-600 { color: var(--gold-brown); }
+        .text-purple-700 { color: var(--gold-brown); }
+        .text-purple-500 { color: var(--gold-brown); }
+        .border-purple-500 { border-color: var(--gold-brown); }
+        .border-purple-400 { border-color: rgba(181,115,63,0.6); }
+        .border-purple-300 { border-color: rgba(181,115,63,0.4); }
+        .border-purple-200 { border-color: rgba(181,115,63,0.3); }
+        .ring-purple-500 { --tw-ring-color: var(--gold-brown); }
+        .hover\\:bg-purple-700:hover { background-color: var(--deep-gold); }
+        .hover\\:bg-purple-600:hover { background-color: var(--gold-brown); }
+        .from-indigo-500 { --tw-gradient-from: var(--hot-pink); }
+        .to-indigo-600 { --tw-gradient-to: var(--magenta); }
+        .bg-indigo-600 { background-color: var(--hot-pink); }
+        .text-purple-100 { color: var(--light-brown-pink); }
+        .text-purple-200 { color: var(--light-brown-pink); }
+        .text-purple-300 { color: var(--light-brown-pink); }
+        .text-purple-400 { color: rgba(181,115,63,0.7); }
+        .bg-gradient-to-r.from-purple-600.to-indigo-600 {
+            background: linear-gradient(135deg, var(--hot-pink) 0%, var(--magenta) 100%);
+        }
+        
+        /* 小标签颜色 */
+        .bg-amber-100 { background-color: rgba(195,153,7,0.2); }
+        .bg-amber-500 { background-color: var(--mustard); }
+        .text-amber-600 { color: var(--mustard); }
+        .text-amber-700 { color: var(--deep-gold); }
+        .text-amber-500 { color: var(--mustard); }
+        .text-amber-400 { color: var(--light-gold); }
+        .from-amber-400 { --tw-gradient-from: var(--mustard); }
+        .to-orange-500 { --tw-gradient-to: var(--gold-brown); }
+        .border-amber-300 { border-color: rgba(195,153,7,0.4); }
+        .border-amber-200 { border-color: rgba(195,153,7,0.3); }
+        .border-amber-100 { border-color: rgba(195,153,7,0.2); }
+        .ring-amber-200 { --tw-ring-color: rgba(195,153,7,0.3); }
+        .ring-amber-400 { --tw-ring-color: var(--mustard); }
+        .hover\\:bg-amber-600:hover { background-color: var(--deep-gold); }
+        
+        /* 危险/警告色 */
+        .bg-red-50 { background-color: rgba(255,0,0,0.08); }
+        .text-red-500 { color: var(--apple-red); }
+        .text-red-400 { color: rgba(255,0,0,0.8); }
+        .text-red-600 { color: var(--apple-red); }
+        .hover\\:text-red-600:hover { color: var(--apple-red); }
+        .hover\\:bg-red-50:hover { background-color: rgba(255,0,0,0.1); }
+        
+        /* 成功/绿色 */
+        .bg-green-50 { background-color: rgba(0,166,81,0.1); }
+        .bg-green-100 { background-color: rgba(0,166,81,0.15); }
+        .text-green-600 { color: var(--emerald); }
+        .text-green-700 { color: var(--emerald); }
+        .text-green-400 { color: rgba(0,166,81,0.8); }
+        .border-green-200 { border-color: rgba(0,166,81,0.3); }
+        
+        /* 蓝色覆盖 */
+        .bg-blue-50 { background-color: rgba(15,46,90,0.08); }
+        .bg-blue-100 { background-color: rgba(15,46,90,0.15); }
+        .bg-blue-500 { background-color: var(--navy); }
+        .bg-blue-600 { background-color: var(--navy); }
+        .text-blue-500 { color: var(--navy); }
+        .text-blue-600 { color: var(--navy); }
+        .text-blue-700 { color: var(--navy); }
+        .border-blue-400 { border-color: rgba(15,46,90,0.5); }
+        .hover\\:bg-blue-600:hover { background-color: rgba(15,46,90,0.9); }
+        
+        /* 橙色覆盖 */
+        .bg-orange-50 { background-color: rgba(181,115,63,0.1); }
+        .bg-orange-100 { background-color: rgba(181,115,63,0.18); }
+        .bg-orange-200 { background-color: rgba(181,115,63,0.25); }
+        .bg-orange-500 { background-color: var(--gold-brown); }
+        .text-orange-500 { color: var(--gold-brown); }
+        .text-orange-600 { color: var(--gold-brown); }
+        .text-orange-700 { color: var(--gold-brown); }
+        .border-orange-100 { border-color: rgba(181,115,63,0.2); }
+        .border-orange-200 { border-color: rgba(181,115,63,0.3); }
+        .border-orange-400 { border-color: rgba(181,115,63,0.5); }
+        .from-orange-50 { --tw-gradient-from: rgba(181,115,63,0.1); }
+        .to-amber-50 { --tw-gradient-to: rgba(195,153,7,0.1); }
+        .hover\\:bg-orange-600:hover { background-color: var(--deep-gold); }
+        
+        /* 黄色覆盖 */
+        .bg-yellow-50 { background-color: rgba(226,177,60,0.12); }
+        .bg-yellow-100 { background-color: rgba(226,177,60,0.2); }
+        .text-yellow-600 { color: var(--mustard); }
+        .text-yellow-700 { color: var(--deep-gold); }
+        .border-yellow-200 { border-color: rgba(226,177,60,0.3); }
+        
+        /* 滑块选项卡覆盖 */
+        .bg-slate-800 { background-color: var(--black); }
+        .text-slate-300 { color: var(--light-brown-pink); }
+        .hover\\:bg-slate-700:hover { background-color: rgba(11,7,4,0.8); }
+        .bg-slate-200 { background-color: rgba(181,115,63,0.15); }
+        .text-slate-700 { color: var(--black); }
+        .hover\\:bg-slate-300:hover { background-color: rgba(181,115,63,0.25); }
+        .bg-slate-600 { background-color: rgba(11,7,4,0.6); }
+        .bg-slate-50 { background-color: rgba(181,115,63,0.05); }
+        
+        /* 灰色覆盖 */
+        .bg-gray-800 { background-color: var(--black); }
+        .bg-gray-50 { background-color: #faf8f6; }
+        .bg-gray-100 { background-color: rgba(181,115,63,0.08); }
+        .text-gray-400 { color: rgba(11,7,4,0.5); }
+        .text-gray-500 { color: rgba(11,7,4,0.6); }
+        .text-gray-600 { color: rgba(11,7,4,0.75); }
+        .text-gray-700 { color: rgba(11,7,4,0.85); }
+        .text-gray-800 { color: var(--black); }
+        .border-gray-200 { border-color: rgba(181,115,63,0.15); }
+        .border-gray-300 { border-color: rgba(181,115,63,0.2); }
+        .hover\\:text-gray-700:hover { color: var(--black); }
+        .hover\\:bg-gray-300:hover { background-color: rgba(181,115,63,0.2); }
+        .hover\\:bg-gray-50:hover { background-color: rgba(181,115,63,0.06); }
+        
+        /* teal覆盖为翠绿 */
+        .bg-teal-500 { background-color: var(--emerald); }
+        .bg-teal-50 { background-color: rgba(0,166,81,0.1); }
+        .text-teal-700 { color: var(--emerald); }
+        .border-teal-400 { border-color: rgba(0,166,81,0.5); }
+        .border-teal-100 { border-color: rgba(0,166,81,0.2); }
+        
+        /* emerald覆盖 */
+        .text-emerald-400 { color: var(--emerald); }
+        .bg-emerald-600 { background-color: var(--emerald); }
+        .border-emerald-400 { border-color: rgba(0,166,81,0.5); }
+        
+        /* 输入框焦点 */
+        input:focus, textarea:focus {
+            border-color: var(--gold-brown) !important;
+            box-shadow: 0 0 0 3px rgba(181,115,63,0.2) !important;
+        }
+        
+        /* 单选框 */
+        input[type="radio"]:checked {
+            background-color: var(--gold-brown);
+            border-color: var(--gold-brown);
+        }
+        
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(181,115,63,0.1); }
+        ::-webkit-scrollbar-thumb { background: var(--gold-brown); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--deep-gold); }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- 头部 -->
-    <header class="gradient-bg text-white py-8 px-4 shadow-lg">
-        <div class="max-w-6xl mx-auto">
+    <!-- 头部 - Cardi B黑金风格 -->
+    <header class="gradient-bg text-white py-8 px-4 shadow-lg relative z-10">
+        <div class="max-w-6xl mx-auto relative z-10">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold flex items-center gap-3">
-                        <i class="fas fa-chart-line"></i>
-                        艺人票房测算
+                        <i class="fas fa-chart-line" style="color: var(--hot-pink);"></i>
+                        <span class="gold-text">艺人票房测算</span>
                     </h1>
-                    <p class="mt-2 text-purple-100">Comparable模型 · AI智能测算 · 专业投委会工具</p>
+                    <p class="mt-2" style="color: var(--light-brown-pink);">Comparable模型 · AI智能测算 · 专业投委会工具</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition text-sm">
+                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition text-sm" style="background: rgba(181,115,63,0.3); border: 1px solid var(--gold-brown);" onmouseover="this.style.background='rgba(181,115,63,0.5)'" onmouseout="this.style.background='rgba(181,115,63,0.3)'">
                         <i class="fas fa-arrow-left"></i>
                         <span>返回投资文档</span>
                     </a>
-                    <div class="text-right text-sm text-purple-200 hidden md:block">
+                    <div class="text-right text-sm hidden md:block" style="color: var(--light-brown-pink);">
                         <p>基于 Normalization→D→LC→F→双锚点→城市溢价 逻辑</p>
-                        <p class="mt-1">Version 2.0 | 2026-01-29</p>
+                        <p class="mt-1" style="color: var(--mustard);">Version 2.0 | 2026-01-29</p>
                     </div>
                 </div>
             </div>
@@ -87,15 +287,15 @@ export const predictorPageHTML = `<!DOCTYPE html>
     </header>
 
     <!-- 导航标签 -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <nav class="shadow-sm sticky top-0 z-50" style="background: var(--pure-white); border-bottom: 2px solid rgba(181,115,63,0.2);">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex space-x-8">
                 <button onclick="switchTab('predict')" id="tab-predict" class="tab-active py-4 px-2 text-sm font-medium">
-                    <i class="fas fa-chart-line mr-2"></i>演唱会票房预测入口
+                    <i class="fas fa-chart-line mr-2" style="color: var(--hot-pink);"></i>演唱会票房预测入口
                 </button>
-                <button onclick="switchTab('archive')" id="tab-archive" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-folder-open mr-2"></i>艺人档案
-                    <span id="archive-badge" class="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-600 rounded-full hidden">0</span>
+                <button onclick="switchTab('archive')" id="tab-archive" class="py-4 px-2 text-sm font-medium hover:text-gray-700" style="color: rgba(11,7,4,0.6);">
+                    <i class="fas fa-folder-open mr-2" style="color: var(--mustard);"></i>艺人档案
+                    <span id="archive-badge" class="ml-1 px-1.5 py-0.5 text-xs rounded-full hidden" style="background: rgba(195,153,7,0.2); color: var(--deep-gold);">0</span>
                 </button>
             </div>
         </div>
@@ -396,12 +596,12 @@ export const predictorPageHTML = `<!DOCTYPE html>
         
     </main>
 
-    <!-- 底部 -->
-    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+    <!-- 底部 - Cardi B黑金风格 -->
+    <footer class="py-8 mt-12" style="background: var(--black);">
         <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="mb-2">Comparable模型票房预测器 · Vibelinks Entertainment</p>
-            <p class="text-sm">基于 Normalization → D → LC → F → 双锚点 → 城市溢价 逻辑链</p>
-            <a href="/" class="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 transition">
+            <p class="mb-2" style="color: var(--light-brown-pink);">Comparable模型票房预测器 · <span class="gold-text">Vibelinks Entertainment</span></p>
+            <p class="text-sm" style="color: rgba(217,170,154,0.7);">基于 Normalization → D → LC → F → 双锚点 → 城市溢价 逻辑链</p>
+            <a href="/" class="inline-flex items-center gap-2 mt-4 transition" style="color: var(--hot-pink);" onmouseover="this.style.color='var(--light-brown-pink)'" onmouseout="this.style.color='var(--hot-pink)'">
                 <i class="fas fa-arrow-left"></i>返回投资文档
             </a>
         </div>
