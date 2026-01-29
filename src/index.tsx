@@ -969,6 +969,49 @@ app.get('/', (c) => {
         <div class="max-w-7xl mx-auto">
             <h2 class="section-title"><i class="fas fa-calendar-alt"></i>付款节奏/时间线</h2>
             
+            <!-- 融资结构说明 -->
+            <div class="stat-card rounded-2xl p-8 mb-8 fade-in" style="border: 2px solid rgba(0, 200, 83, 0.4); background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(90, 107, 53, 0.05));">
+                <h3 class="subsection-title"><i class="fas fa-layer-group"></i>融资结构（交易核心）</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="text-center p-6 rounded-xl" style="background: rgba(0, 200, 83, 0.1); border: 1px solid rgba(0, 200, 83, 0.3);">
+                        <div class="text-4xl font-bold text-green-400 mb-2">5,000万</div>
+                        <div class="text-white/70 font-medium mb-4">融资总金额</div>
+                        <div class="flex justify-center gap-4">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold gold-text">2,000万</div>
+                                <div class="text-white/50 text-sm">优先级</div>
+                            </div>
+                            <div class="text-white/30 text-2xl">+</div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-orange-400">3,000万</div>
+                                <div class="text-white/50 text-sm">劣后级</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 rounded-xl" style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);">
+                        <div class="text-lg font-semibold gold-text mb-4"><i class="fas fa-percentage mr-2"></i>优先级收益结构</div>
+                        <table class="w-full text-sm">
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 text-white/70">年化收益率</td>
+                                <td class="py-2 text-right"><span class="highlight">33%</span></td>
+                            </tr>
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 text-white/70">计息方式</td>
+                                <td class="py-2 text-right"><span class="highlight">按月平息</span></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-white/70">月息</td>
+                                <td class="py-2 text-right"><span class="highlight">2.75%</span></td>
+                            </tr>
+                        </table>
+                        <div class="mt-4 p-3 rounded-lg text-sm" style="background: rgba(212, 175, 55, 0.15);">
+                            <i class="fas fa-calculator mr-2 gold-text"></i>
+                            <span class="text-white/80">2,000万 × 2.75%/月 = <strong class="gold-text">55万/月</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="info-box mb-8">
                 <i class="fas fa-lightbulb mr-2 gold-text"></i>
                 <strong>核心说明：</strong>秀费按<span class="highlight">300万USD/场</span>核算，<span class="highlight">T0 = 拿到5000万投资款</span>，汇率 <span class="highlight">1 USD = 6.95 RMB</span>（2026.01.29实时）
@@ -995,10 +1038,12 @@ app.get('/', (c) => {
                                 <td><strong>483.72万</strong></td>
                                 <td><span class="highlight-green">Refundable：批文不下可退还</span></td>
                             </tr>
-                            <tr style="background: rgba(212, 175, 55, 0.05);">
-                                <td><span class="highlight" style="background: rgba(0, 200, 83, 0.2); color: #69f0ae;">T0</span></td>
+                            <tr style="background: rgba(0, 200, 83, 0.08);">
+                                <td><span class="highlight" style="background: rgba(0, 200, 83, 0.3); color: #69f0ae;">T0</span></td>
                                 <td><strong style="color: #69f0ae;">拿到5000万投资款</strong></td>
-                                <td colspan="3" style="text-align: center; color: #69f0ae;"><i class="fas fa-flag-checkered mr-2"></i>基准时间点</td>
+                                <td style="color: #69f0ae;">优先2,000万 + 劣后3,000万</td>
+                                <td style="color: #69f0ae;"><strong>5,000万</strong></td>
+                                <td><span class="highlight-green">基准时间点 | 优先级年化33%</span></td>
                             </tr>
                             <tr>
                                 <td><span class="highlight">T+7</span></td>
