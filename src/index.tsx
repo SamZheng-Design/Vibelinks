@@ -1799,8 +1799,15 @@ app.get('/', (c) => {
                     aggressive: { value: archiveData.result.aggressive, premium: premiums.aggressive }
                 },
                 indices: [{ id: 'target', D: archiveData.indices?.D || 0, LC: archiveData.indices?.LC || 0, F: archiveData.indices?.F || 0 }],
-                tier3: { min: archiveData.result.neutral / 1.25 * 0.9, max: archiveData.result.neutral / 1.25 * 1.1, avg: archiveData.result.neutral / 1.25 },
-                anchorResults: benchmarks.map(b => ({
+                tier3: archiveData.tier3Range || { min: archiveData.result.neutral / 1.25 * 0.9, max: archiveData.result.neutral / 1.25 * 1.1, avg: archiveData.result.neutral / 1.25 },
+                // 关键：包含归一化数据，优先使用档案中的数据，否则使用默认的锚点max值
+                normalization: archiveData.normalization || {
+                    maxValues: { baidu: 616, netease: 126.6, xhs: 82.0 }  // 默认使用文档中的max值
+                },
+                anchorResults: archiveData.anchorCalibration ? [
+                    { name: 'Travis Scott', anchorTier: 'tier3', ratio: archiveData.anchorCalibration.travis?.ratio || 0.832, tier3BoxOffice: archiveData.anchorCalibration.travis?.tier3BoxOffice || 65.03 },
+                    { name: 'Kanye West', anchorTier: 'tier3', ratio: archiveData.anchorCalibration.kanye?.ratio || 0.691, tier3BoxOffice: archiveData.anchorCalibration.kanye?.tier3BoxOffice || 35.24 }
+                ] : benchmarks.map(b => ({
                     name: b.name,
                     anchorTier: b.tier,
                     ratio: 0.83,
@@ -2444,7 +2451,7 @@ app.get('/', (c) => {
         const CARDI_B_PRESET_ARCHIVE = {
             id: 'preset_cardib',
             artistName: 'Cardi B',
-            notes: '【示例档案】深圳/杭州单场票房预测 - 基于Comparable模型六步计算（2026-01-26版）',
+            notes: '【示例档案】一线城市单场票房预测 - 基于Comparable模型六步计算（2026-01-26版）',
             createdAt: '2026-01-26T10:00:00.000Z',
             inputData: {
                 baidu: 388,
@@ -2461,6 +2468,11 @@ app.get('/', (c) => {
                 D: 0.706,   // 0.45×0.630 + 0.35×0.637 + 0.20×1.000
                 LC: 0.655,  // clip(0.60 + 0.40×0.637 - 0.20×1.000, 0.60, 1.00) = 0.655
                 F: 0.462    // D × LC = 0.706 × 0.655
+            },
+            // 归一化数据（基于文档计算）
+            normalization: {
+                maxValues: { baidu: 616, netease: 126.6, xhs: 82.0 },  // max取所有艺人（Travis/Kanye/Cardi B）
+                targetNormalized: { baidu: 0.630, netease: 0.637, xhs: 1.000 }  // Cardi B 归一化结果
             },
             // 锚点校准详细数据
             anchorCalibration: {
