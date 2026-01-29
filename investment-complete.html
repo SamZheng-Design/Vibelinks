@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演唱会投资项目综合文档 | Investment Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Noto Sans SC', system-ui, sans-serif; }
+        
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --gold: #f9a825;
+            --success: #00c853;
+            --warning: #ff9800;
+            --danger: #f44336;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        /* 侧边导航 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(22, 33, 62, 0.98);
+            border-right: 1px solid rgba(249, 168, 37, 0.3);
+            overflow-y: auto;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+        
+        .nav-item {
+            display: block;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(249, 168, 37, 0.1);
+            border-left-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        .nav-section {
+            padding: 15px 20px 8px;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 10px;
+        }
+        
+        .nav-section:first-of-type { border-top: none; margin-top: 0; }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 280px;
+            padding: 30px 40px;
+            min-height: 100vh;
+        }
+        
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(249, 168, 37, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(249, 168, 37, 0.1);
+        }
+        
+        /* 数据卡片 */
+        .stat-card {
+            background: linear-gradient(135deg, rgba(249, 168, 37, 0.1), rgba(233, 69, 96, 0.05));
+            border: 1px solid rgba(249, 168, 37, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background: rgba(249, 168, 37, 0.15);
+            color: var(--gold);
+            font-weight: 600;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 2px solid rgba(249, 168, 37, 0.3);
+        }
+        
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.85);
+            vertical-align: top;
+        }
+        
+        .data-table tr:hover td {
+            background: rgba(249, 168, 37, 0.05);
+        }
+        
+        .data-table th:first-child { border-radius: 8px 0 0 0; }
+        .data-table th:last-child { border-radius: 0 8px 0 0; }
+        
+        /* 风险等级标签 */
+        .risk-high { 
+            background: rgba(244, 67, 54, 0.2); 
+            color: #ff6b6b; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .risk-medium { 
+            background: rgba(255, 152, 0, 0.2); 
+            color: #ffa726; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .risk-low { 
+            background: rgba(0, 200, 83, 0.2); 
+            color: #69f0ae; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* 标题样式 */
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title i { color: var(--gold); }
+        
+        .subsection-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gold);
+            margin: 20px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 流程图 */
+        .flow-chart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        
+        .flow-step {
+            background: linear-gradient(135deg, rgba(249, 168, 37, 0.2), rgba(249, 168, 37, 0.1));
+            border: 1px solid rgba(249, 168, 37, 0.4);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            text-align: center;
+            min-width: 140px;
+        }
+        
+        .flow-arrow {
+            color: var(--gold);
+            font-size: 20px;
+        }
+        
+        /* 高亮文本 */
+        .highlight { color: var(--gold); font-weight: 600; }
+        .highlight-red { color: var(--accent); font-weight: 600; }
+        .highlight-green { color: var(--success); font-weight: 600; }
+        
+        /* 提示框 */
+        .info-box {
+            background: rgba(249, 168, 37, 0.1);
+            border-left: 4px solid var(--gold);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .warning-box {
+            background: rgba(244, 67, 54, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .sidebar { width: 240px; }
+            .main-content { margin-left: 240px; padding: 20px; }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; }
+            .mobile-menu-btn { display: block !important; }
+        }
+        
+        /* 打印样式 */
+        @media print {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 20px; }
+            body { background: white; }
+            .card { border: 1px solid #ddd; box-shadow: none; }
+            .data-table th { background: #f5f5f5 !important; color: #333 !important; }
+            .data-table td { color: #333 !important; }
+            .section-title, .subsection-title { color: #333 !important; }
+            .highlight, .stat-value { color: #c97c00 !important; }
+        }
+        
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section { animation: fadeIn 0.6s ease forwards; }
+        
+        /* 折叠面板 */
+        .accordion-header {
+            background: rgba(249, 168, 37, 0.1);
+            padding: 16px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .accordion-header:hover {
+            background: rgba(249, 168, 37, 0.2);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .accordion-content.open {
+            max-height: 2000px;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn fixed top-4 left-4 z-50 bg-gold text-black p-3 rounded-lg hidden" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 侧边导航 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="p-6 border-b border-white/10">
+            <h1 class="text-xl font-bold text-gold mb-2">
+                <i class="fas fa-music mr-2"></i>演唱会投资项目
+            </h1>
+            <p class="text-sm text-white/50">综合投资文档 v2.0</p>
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-briefcase mr-2"></i>商业条款</div>
+        <a href="#overview" class="nav-item">项目总览</a>
+        <a href="#investment" class="nav-item">总投入与融资</a>
+        <a href="#payment-timeline" class="nav-item">付款时间线</a>
+        <a href="#delayed-payment" class="nav-item">延迟付款构成</a>
+        <a href="#revenue" class="nav-item">收入构成</a>
+        <a href="#capital-flow" class="nav-item">资金流向闭环</a>
+        
+        <div class="nav-section"><i class="fas fa-shield-alt mr-2"></i>风险管理</div>
+        <a href="#risk-overview" class="nav-item">风险概览</a>
+        <a href="#risk-1-6" class="nav-item">风险1-6（核心风险）</a>
+        <a href="#risk-7-11" class="nav-item">风险7-11（运营风险）</a>
+        <a href="#risk-12-17" class="nav-item">风险12-17（补充风险）</a>
+        <a href="#loss-principle" class="nav-item">损失承担原则</a>
+        
+        <div class="nav-section"><i class="fas fa-file-contract mr-2"></i>合同条款</div>
+        <a href="#contract-1-4" class="nav-item">模块1-4（批文/资金/艺人/不可抗力）</a>
+        <a href="#contract-5-8" class="nav-item">模块5-8（支出/分账/票务/税务）</a>
+        <a href="#contract-9-12" class="nav-item">模块9-12（主体/违约/审计/Penalty）</a>
+        
+        <div class="nav-section"><i class="fas fa-university mr-2"></i>账户监管</div>
+        <a href="#account" class="nav-item">共管账户机制</a>
+        <a href="#fund-rules" class="nav-item">资金流转规则</a>
+        <a href="#supervision" class="nav-item">收支监管</a>
+        
+        <div class="nav-section"><i class="fas fa-coins mr-2"></i>分成回款</div>
+        <a href="#share-ratio" class="nav-item">分成比例</a>
+        <a href="#repayment" class="nav-item">回款顺序</a>
+        <a href="#breakeven" class="nav-item">保本点约定</a>
+        
+        <div class="nav-section"><i class="fas fa-plus-circle mr-2"></i>补充说明</div>
+        <a href="#reschedule" class="nav-item">改签规则</a>
+        <a href="#audit" class="nav-item">审计安排</a>
+        <a href="#mezzanine" class="nav-item">夹层投资</a>
+        <a href="#sponsor" class="nav-item">赞助与补贴</a>
+        <a href="#ticket-sales" class="nav-item">票务销售</a>
+        
+        <div class="nav-section"><i class="fas fa-chart-bar mr-2"></i>数据速查</div>
+        <a href="#data-summary" class="nav-item">核心数据汇总</a>
+        
+        <div class="p-4 border-t border-white/10 mt-4">
+            <button onclick="window.print()" class="w-full bg-gold/20 text-gold py-2 rounded-lg hover:bg-gold/30 transition">
+                <i class="fas fa-print mr-2"></i>打印文档
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 项目总览 -->
+        <section id="overview" class="section mb-12">
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold mb-4">
+                    <span class="text-gold">演唱会投资项目</span>
+                    <span class="text-white/80">综合文档</span>
+                </h1>
+                <p class="text-white/60 text-lg">Investment Project Documentation</p>
+                <p class="text-white/40 text-sm mt-2">更新时间：2026年1月</p>
+            </div>
+            
+            <!-- 核心数据卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+                <div class="stat-card">
+                    <div class="stat-value">7202万</div>
+                    <div class="stat-label">总成本支出</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1.24亿</div>
+                    <div class="stat-label">总票房收入</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5271万</div>
+                    <div class="stat-label">艺人费用</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">70%</div>
+                    <div class="stat-label">分成比例</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">25.1%</div>
+                    <div class="stat-label">保本点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5678万</div>
+                    <div class="stat-label">税后净利润</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 第一部分：商业条款 ==================== -->
+        <section id="investment" class="section">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i>一、总投入与融资情况</h2>
+            
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-dollar-sign"></i>1.1 总投入金额对比</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>方案阶段</th>
+                            <th>总投入金额</th>
+                            <th>构成明细</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="highlight">初始规划</span></td>
+                            <td><strong>超7700万人民币</strong></td>
+                            <td>艺人秀费约719.2万USD + 运营支出约7760万人民币</td>
+                            <td>文档1、文档2</td>
+                        </tr>
+                        <tr>
+                            <td><span class="highlight">最新测算</span></td>
+                            <td><strong>7,201.9万人民币</strong></td>
+                            <td>艺人费用5,271万 + 制作535万 + 场地751万 + 差旅154万 + 推广200万 + 行政290万</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-landmark"></i>1.2 融资目标与出资结构</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>项目</th>
+                            <th>金额</th>
+                            <th>详细说明</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>总票房收入</td>
+                            <td class="highlight">1.2428亿人民币</td>
+                            <td>2场演出 × 44,000可售容量 × 平均票价1,412元</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                        <tr>
+                            <td>净调整票务收入</td>
+                            <td class="highlight">1.187亿人民币</td>
+                            <td>扣除税款和3.5%佣金后的净票务收入</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                        <tr>
+                            <td>赞助净收入</td>
+                            <td class="highlight">2,012万人民币</td>
+                            <td>政府补贴1,000万 + 赞助1,200万 - 佣金200万</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                        <tr>
+                            <td>预计税后净利润</td>
+                            <td class="highlight">5,678万人民币</td>
+                            <td>100%售罄情况下，扣除15%企业所得税后</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-puzzle-piece"></i>1.3 资金缺口覆盖方案</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>缺口金额</th>
+                            <th>覆盖方式</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>初始缺口</td>
+                            <td class="highlight-red">2700万</td>
+                            <td>7700万总费用与5000万融资的差额，计划通过猫眼提前结票（至少50%）和赞助优先回款覆盖</td>
+                            <td>文档2</td>
+                        </tr>
+                        <tr>
+                            <td>调整后缺口</td>
+                            <td class="highlight-green">2000万</td>
+                            <td>7000万总费用与5000万总资金的差额，通过"<strong>延迟付款1002万 + 滴灌通退出时留存900-1000万</strong>"全额覆盖，<span class="highlight-green">无需引入新资方</span></td>
+                            <td>文档3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 付款时间线 -->
+        <section id="payment-timeline" class="section">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i>二、付款节奏/时间线</h2>
+            
+            <div class="info-box">
+                <i class="fas fa-lightbulb mr-2 text-gold"></i>
+                <strong>核心说明：</strong>实际秀费目标协商为<span class="highlight">300万USD/场</span>，暂按<span class="highlight">320万USD/场</span>核算
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-list-ol"></i>完整付款时间线表</h3>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width:120px">关键时间节点</th>
+                                <th style="min-width:150px">付款内容</th>
+                                <th style="min-width:180px">付款金额</th>
+                                <th>备注说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="highlight">签约完成</span></td>
+                                <td>10% Shows Fee</td>
+                                <td><strong>74.24万USD</strong><br><small class="text-white/50">计算：10%×320万×2场×1.16</small></td>
+                                <td>实际秀费目标协商为300万/场，暂按320万核算；<span class="highlight-green">仅拿到批文后该费用不可退，未拿到批文可退还</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">拿到批文</span></td>
+                                <td>50% Shows Fee</td>
+                                <td><strong>348万USD</strong><br><small class="text-white/50">计算：50%×320万×2场×1.16</small></td>
+                                <td>通过担保账号自动支付，<span class="highlight-green">拿不到批文则无需支付该笔款项</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">艺人到达中国</span></td>
+                                <td>剩余40% Shows Fee</td>
+                                <td><strong>296.96万USD</strong><br><small class="text-white/50">计算：40%×320万×2场×1.16</small></td>
+                                <td>支付节点可协商为艺人起飞前1天或抵达后，<span class="highlight-red">需与对方律师确认</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight">演出前1天</span></td>
+                                <td>100%剩余Expenses<br>（制作/舞美/设备/人员等）</td>
+                                <td>包含：<br>• 舞美定金 <strong>200万</strong><br>• 场馆租金<br>• 安保费用 <strong>150万</strong><br>• 营销/机票/行政 <strong>22万</strong></td>
+                                <td>舞美总费用500万（2场×250万），仅提前支付40%定金，剩余尾款延迟支付；行政开支22万为固定前置费用</td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight-red">正式开演</span></td>
+                                <td>/</td>
+                                <td>/</td>
+                                <td>给艺人付过的钱（拿到批文后支付的50% + 艺人到华后支付的40%）<span class="highlight-red">全部不能退，仅支持改签</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight-green">票款全额到账<br>+ 滴灌通完成70%分成</span></td>
+                                <td>延迟付款项目<br>（税费、舞美尾款、团队工资）</td>
+                                <td><strong>合计1002万人民币</strong><br>• 税费 672万<br>• 舞美尾款 300万<br>• 团队工资 30万</td>
+                                <td><span class="highlight">仅在所有票款足额到账，且滴灌通按约定提取70%分成完成退出后，方可支付该部分费用</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 付款流程图 -->
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-project-diagram"></i>付款流程可视化</h3>
+                <div class="flow-chart">
+                    <div class="flow-step">
+                        <div class="text-gold font-bold">签约</div>
+                        <div class="text-sm">10% = 74.24万USD</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step">
+                        <div class="text-gold font-bold">拿到批文</div>
+                        <div class="text-sm">50% = 348万USD</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step">
+                        <div class="text-gold font-bold">艺人到华</div>
+                        <div class="text-sm">40% = 296.96万USD</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step">
+                        <div class="text-gold font-bold">演出前1天</div>
+                        <div class="text-sm">核心成本支付</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step">
+                        <div class="text-gold font-bold">票款到账后</div>
+                        <div class="text-sm">延迟付款1002万</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 延迟付款构成 -->
+        <section id="delayed-payment" class="section">
+            <h2 class="section-title"><i class="fas fa-clock"></i>三、延迟付款成本构成</h2>
+            
+            <div class="info-box">
+                <i class="fas fa-info-circle mr-2 text-gold"></i>
+                <strong>延迟付款定义：</strong>所有票款全额到账、滴灌通完成70%分成提取后，再支付的费用项
+            </div>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>费用类型</th>
+                            <th>金额</th>
+                            <th>依据说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-file-invoice-dollar mr-2 text-gold"></i>税费</td>
+                            <td class="highlight">672万</td>
+                            <td>按规定需随艺人费用一并支付，通过海口银行特殊关系申请晚付/慢付，属于明确可延迟的核心费用</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-palette mr-2 text-gold"></i>舞美尾款</td>
+                            <td class="highlight">300万</td>
+                            <td>舞美总费用500万（2场×250万），仅需提前支付40%定金（200万），60%尾款延迟至票款到账后支付</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-users mr-2 text-gold"></i>团队工资</td>
+                            <td class="highlight">30万</td>
+                            <td>项目筹备期间暂缓发放该部分工资，行政开支22万为固定前置费用（已纳入演出前1天支出），此30万工资随项目利润在票款结算、滴灌通分成完成后一并补足</td>
+                        </tr>
+                        <tr style="background: rgba(249, 168, 37, 0.1);">
+                            <td><strong><i class="fas fa-calculator mr-2 text-gold"></i>合计</strong></td>
+                            <td><strong class="text-2xl text-gold">1002万</strong></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 收入构成 -->
+        <section id="revenue" class="section">
+            <h2 class="section-title"><i class="fas fa-money-bill-wave"></i>四、收入构成</h2>
+            
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-stream"></i>4.1 核心收入来源</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>收入类型</th>
+                            <th>说明</th>
+                            <th>确定性</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-ticket-alt mr-2 text-gold"></i>票务预售收入</td>
+                            <td>拿到批文后大麦、猫眼上架预售，可产生即时现金流</td>
+                            <td><span class="risk-low">✅ 确定</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-landmark mr-2 text-gold"></i>政府补贴</td>
+                            <td>金额可按政府公文明确标准核算，属于确定收入（参考杭州同类项目500-1000万）</td>
+                            <td><span class="risk-low">✅ 确定</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-handshake mr-2 text-gold"></i>赞助收入</td>
+                            <td>暂不确定，无明确核算依据（已洽谈1500万意向，基线2000万）</td>
+                            <td><span class="risk-medium">❓ 不确定</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-exchange-alt"></i>4.2 收入归集与核算口径</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>项目</th>
+                            <th>具体规则</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>收入归集</td>
+                            <td>所有与项目相关的收入（门票收入、赞助收入、政府补贴等）均归集至<span class="highlight">共管账户</span></td>
+                            <td>文档2</td>
+                        </tr>
+                        <tr>
+                            <td>核算口径</td>
+                            <td>仅以共管账户<span class="highlight">实际到账的现金流</span>作为收入分成依据，应收未收款项不参与当期分成，待实际到账后再行分配</td>
+                            <td>文档2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-globe"></i>4.3 境内外项目收入核算差异</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>项目类型</th>
+                            <th>纳入分账核算范围</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-flag mr-2 text-gold"></i>境内项目</td>
+                            <td>仅票务收入 + 账户利息纳入分账核算，<span class="highlight-red">赞助、周边等衍生收入不纳入预估</span></td>
+                            <td>文档3、文档4</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-globe-americas mr-2 text-gold"></i>境外项目</td>
+                            <td><span class="highlight">全量收入（含赞助/周边）纳入核算</span>，需审计报告覆盖全量项目收入</td>
+                            <td>文档4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 资金流向闭环 -->
+        <section id="capital-flow" class="section">
+            <h2 class="section-title"><i class="fas fa-sync-alt"></i>五、资金流向闭环（调整后方案）</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-arrow-up text-green-400"></i>前置支付（约5000万）</h3>
+                    <p class="text-white/60 mb-4">总资金5000万用于支付以下不可延迟的核心成本：</p>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>支出项目</th>
+                                <th>金额</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>艺人秀费（10%+50%+40%）</td><td class="highlight">719.2万USD</td></tr>
+                            <tr><td>舞美定金（40%）</td><td class="highlight">200万</td></tr>
+                            <tr><td>场馆租金</td><td>待定</td></tr>
+                            <tr><td>安保费用</td><td class="highlight">150万</td></tr>
+                            <tr><td>营销费用</td><td>待定</td></tr>
+                            <tr><td>机票</td><td>待定</td></tr>
+                            <tr><td>行政开支</td><td class="highlight">22万</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-arrow-down text-blue-400"></i>后置支付流程</h3>
+                    <div class="flow-chart flex-col">
+                        <div class="flow-step w-full">
+                            <div class="text-gold font-bold">票款到账</div>
+                            <div class="text-sm text-white/60">演出结束后7天</div>
+                        </div>
+                        <i class="fas fa-arrow-down flow-arrow my-2"></i>
+                        <div class="flow-step w-full">
+                            <div class="text-gold font-bold">滴灌通提取70%分成</div>
+                            <div class="text-sm text-white/60">完成退出</div>
+                        </div>
+                        <i class="fas fa-arrow-down flow-arrow my-2"></i>
+                        <div class="flow-step w-full">
+                            <div class="text-gold font-bold">支付延迟费用</div>
+                            <div class="text-sm">用留存资金 + 剩余票款支付</div>
+                            <div class="text-sm text-white/60">税费672万 + 舞美尾款300万 + 团队工资30万 = 1002万</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 第二部分：风险管理 ==================== -->
+        <section id="risk-overview" class="section">
+            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i>六、风险管理概览</h2>
+            
+            <div class="card">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="stat-card" style="border-color: rgba(244, 67, 54, 0.5);">
+                        <div class="stat-value text-red-400">6</div>
+                        <div class="stat-label">核心风险</div>
+                    </div>
+                    <div class="stat-card" style="border-color: rgba(255, 152, 0, 0.5);">
+                        <div class="stat-value text-orange-400">5</div>
+                        <div class="stat-label">运营风险</div>
+                    </div>
+                    <div class="stat-card" style="border-color: rgba(0, 200, 83, 0.5);">
+                        <div class="stat-value text-green-400">6</div>
+                        <div class="stat-label">补充风险</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">17</div>
+                        <div class="stat-label">风险总计</div>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <strong>风险分类说明：</strong>
+                    <ul class="mt-2 space-y-1 text-sm">
+                        <li><span class="risk-high">高风险</span> 批文、资金挪用、艺人违约、不可抗力、禁令、主办方违约</li>
+                        <li><span class="risk-medium">中风险</span> 投资不匹配、收入核算、票务数据、定价控票、极端情况</li>
+                        <li><span class="risk-low">低风险</span> 夹层条款、赞助补贴、支出超支、账户冻结、境外项目、审计</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风险1-6 -->
+        <section id="risk-1-6" class="section">
+            <h2 class="section-title"><i class="fas fa-shield-virus"></i>七、核心风险详情（风险1-6）</h2>
+            
+            <!-- 风险1：批文风险 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险1：批文风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>未拿到文旅局/公安局批文，或批文延迟发放；因政策、材料等客观原因未取得批文（非双方违约）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>项目方先行支付10%艺人定金</li>
+                                        <li>批文获取作为出资前提</li>
+                                        <li>提前核查批文申请条件及材料要求</li>
+                                        <li>约定批文未获批时定金全额退还</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><span class="highlight-green">未拿到批文：10% Shows Fee可退还</span>，已发生的行政开支、机票定金等小额损失不可收回</li>
+                                        <li>滴灌通可全额收回10% Shows Fee对应的出资，已发生的小额运营损失不承担</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险2：资金挪用风险 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险2：资金挪用风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>运营方将票务收入、共管账户资金用于非约定用途（如抵付艺人尾款、私下收款）</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>开立<span class="highlight">中国银行共管账户</span>，双方持U盾</li>
+                                        <li>大额支出（＞50万）需双方确认</li>
+                                        <li>绑定大麦售票数据与账户进账</li>
+                                        <li>禁止通过私户收取任何票务相关款项</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>约定资金挪用的违约赔偿：<span class="highlight-red">本金+20%溢价</span></li>
+                                        <li>所有票务收入需进入共管账户，违规视为违约</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险3：艺人违约风险 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险3：艺人自身原因（违约）风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>签约后因怀孕、个人意愿等放弃演出；艺人自身原因取消演出、发表不当言论、违反合规要求</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>签约前核查艺人<span class="highlight">文旅部白名单</span>状态，避免选用黑名单艺人（如Justin Bieber、Lady Gaga）</li>
+                                        <li>合同明确约定艺人签约后至演出前不得发表敏感言论，否则需退还全部秀费</li>
+                                        <li>要求艺人协议约定违约全额退秀费</li>
+                                        <li>艺人需签署<span class="highlight">爱国合规承诺</span></li>
+                                        <li>明确艺人言论需经运营方批准</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>未拿到批文：</strong>10% Shows Fee全额退还，艺人可能承担已发生的小额运营损失（需协商）</li>
+                                        <li><strong>已拿到批文/艺人到华后：</strong>全部秀费全额退还，艺人可能承担部分或全部额外损失（无业界统一标准，需协商）</li>
+                                        <li>滴灌通优先收回已出资本金，额外损失补偿按协商结果分配，不承担运营相关额外损失</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险4：不可抗力风险 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险4：不可抗力风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>演出前因天气、政治、战争等客观因素无法如期举行；战争、地震、政策变动等非人为因素导致项目终止或改期</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>与艺人、场地、供应商等签订合同时，明确不可抗力导致演出取消的费用退还条款</li>
+                                        <li>改期成本由运营方承担</li>
+                                        <li>滴灌通仅承担与收入波动相关损失，仅承担<span class="highlight">20%</span>不可抗力损失</li>
+                                        <li>剩余资金优先返还滴灌通</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>未拿到批文：</strong>10% Shows Fee可退还，已发生的少量运营损失按协商比例承担</li>
+                                        <li><strong>已拿到批文/艺人到华后：</strong>秀费不可退但可改签，滴灌通仅承担与收入波动相关损失（初步提议<span class="highlight-red">20%</span>）</li>
+                                        <li>若无法改签且秀费无法追回，按共管账户剩余资金优先偿还滴灌通</li>
+                                        <li>明确不可抗力的界定范围及改期的时间限制</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险5：禁令风险 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险5：艺人被中国禁令限制风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>签约后艺人发表不当言论等导致被禁</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>签约前核查艺人文旅部白名单状态，避免选用黑名单艺人</li>
+                                        <li>合同明确约定艺人不得发表敏感言论</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>未拿到批文：</strong>10% Shows Fee全额退还</li>
+                                        <li><strong>已拿到批文/艺人到华后：</strong>全部秀费需全额退还</li>
+                                        <li>滴灌通可全额收回已出资本金，不承担运营损失</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险6：主办方违约 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-high mr-2">高</span><strong>风险6：主办方主观原因（违约）风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content open">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>主办方因恶意取消、经营问题等非客观因素主动终止项目；运营方恶意取消项目、左手倒右手转移资金</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li>引入<span class="highlight">高唐文化</span>作为兜底方</li>
+                                        <li>约定违约时共管账户剩余资金优先返还滴灌通</li>
+                                        <li>申请财产保全</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>损失承担</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>未拿到批文：</strong>10% Shows Fee需退还，运营损失自行承担</li>
+                                        <li><strong>已拿到批文/艺人到华后：</strong>运营损失自行承担，秀费按合同约定处理</li>
+                                        <li>滴灌通可全额收回已出资本金及对应收益，<span class="highlight-red">所有损失由主办方承担</span></li>
+                                        <li>运营方主观违约需承担全部损失，兜底方承担连带责任</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风险7-11 -->
+        <section id="risk-7-11" class="section">
+            <h2 class="section-title"><i class="fas fa-cogs"></i>八、运营风险详情（风险7-11）</h2>
+            
+            <!-- 风险7 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-medium mr-2">中</span><strong>风险7：投资资金与总成本不匹配风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>项目总成本约7700万，但融资仅5000万，剩余2700万需通过猫眼提前结票（至少50%）和赞助优先回款覆盖，导致优先级投资人保本点从2000万提升至4700万</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>调整成本核算方式：</strong>艺人费用按50%预付核算，演出前总投入约4300-4400万，5000万融资可完全覆盖，剩余50%艺人费用演出结束后支付</li>
+                                        <li><strong>明确资金优先级：</strong>剩余艺人费用的支付优先级排在投资人回款之后，所有收入（含预付款、赞助款）优先用于偿还优先级投资人本金及收益</li>
+                                        <li><strong>优化资金流规划：</strong>通过向供应商赊账等方式进一步降低前期资金压力</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险8 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-medium mr-2">中</span><strong>风险8：收入分成核算风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>信息流（应收）与现金流（实收）不一致，2700万预付票款形成的应收无法作为实收参与分成，导致优先级投资人回款计算混乱</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>设立共管账户：</strong>所有与项目相关的收入均归集至共管账户，按约定比例优先分配给投资人</li>
+                                        <li><strong>明确核算口径：</strong>仅以共管账户<span class="highlight">实际到账的现金流</span>作为收入分成依据</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险9 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-medium mr-2">中</span><strong>风险9：票务销售数据核实风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>多渠道售票（大麦、猫眼、私域、黄牛等）可能存在数据无法完全归集、跑冒滴漏，甚至主办方与平台联合造假</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>数据管控核心：</strong>以大麦（总代）系统数据为核心，对接其API获取全渠道售票信息，结合公安备案人数交叉验证，所有票务销售需录入身份信息</li>
+                                        <li><strong>限制赠票数量：</strong>约定赠票上限为<span class="highlight">1000张</span>，超量部分需主办方按票面价买单，且需提前向投资人报备</li>
+                                        <li><strong>禁止私户收款：</strong>所有售票收入必须归集至共管账户</li>
+                                        <li><strong>投资人监督权限：</strong>可派志愿者参与演出当天关键闸口验票，可实时查看大麦、猫眼等平台的售票数据及公安备案数据</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险10 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-medium mr-2">中</span><strong>风险10：票务定价与控票风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>主办方可能为博取更高收益控票，或低价倾销未售罄门票，损害投资人利益；极端情况下可能通过"左手倒右手"方式转移收益</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>限定最低售价：</strong>协议约定门票最低销售价格不低于票面价的<span class="highlight">50%-60%</span>（具体比例可协商），禁止低于该价格倾销</li>
+                                        <li><strong>限制控票比例：</strong>明确主办方控票比例不得超过<span class="highlight">20%</span>，超出部分需提前向投资人说明并获得同意</li>
+                                        <li><strong>二级市场验证：</strong>通过闲鱼、小红书等二级市场价格监测票务销售情况</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 风险11 -->
+            <div class="card">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span><span class="risk-medium mr-2">中</span><strong>风险11：极端情况（演出被叫停）损失风险</strong></span>
+                    <i class="fas fa-chevron-down transition-transform"></i>
+                </div>
+                <div class="accordion-content">
+                    <table class="data-table mt-4">
+                        <tbody>
+                            <tr>
+                                <td style="width:120px;"><strong>触发条件</strong></td>
+                                <td>因政治、不可抗力等因素导致演出被叫停</td>
+                            </tr>
+                            <tr>
+                                <td><strong>应对措施</strong></td>
+                                <td>
+                                    <ul class="list-disc ml-4 space-y-1">
+                                        <li><strong>分阶段测算可退费用：</strong>
+                                            <ul class="list-circle ml-4 mt-2 space-y-1">
+                                                <li>艺人到达中国前被叫停：机票酒店扣除少量手续费后可退，艺人秀费全额退还</li>
+                                                <li>艺人在中国期间被叫停：机票酒店不可退，艺人秀费协商退还，保守按50%可退测算</li>
+                                                <li>演出当天被叫停：所有已支出费用按不可退测算，由双方共同承担损失</li>
+                                            </ul>
+                                        </li>
+                                        <li>参考滨崎步演唱会被叫停案例，制定针对性风险应对方案</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 风险12-17 -->
+        <section id="risk-12-17" class="section">
+            <h2 class="section-title"><i class="fas fa-clipboard-list"></i>九、补充风险详情（风险12-17）</h2>
+            
+            <!-- 风险12-17 以更紧凑的方式展示 -->
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 风险12 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险12：夹层投资条款不明确</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>夹层投资的额度、收益比例、偿还顺序等未明确</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>夹层投资额度控制在<span class="highlight">300万</span>内</li>
+                        <li>偿还顺序为优先级投资人回款后</li>
+                        <li>收益比例按4个月<span class="highlight">20%</span>封顶，可根据额度调整至17%-18%</li>
+                    </ul>
+                </div>
+
+                <!-- 风险13 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险13：赞助与政府补贴不确定性</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>赞助收入（基线2000万）和政府补贴金额未完全确定</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>提供无赞助、无补贴场景下的压力测试数据</li>
+                        <li>已洽谈<span class="highlight">1500万</span>赞助意向，不足部分由主办方承担</li>
+                        <li>政府补贴按杭州同类项目<span class="highlight">500-1000万</span>保守测算</li>
+                    </ul>
+                </div>
+
+                <!-- 风险14 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险14：支出超支风险</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>实际支出超出预算10%以上，或大额支出无透明报价</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>大额支出实行<span class="highlight">三家比价</span></li>
+                        <li>超预算<span class="highlight">10%</span>不予批付</li>
+                        <li>超支部分由运营方自行承担</li>
+                        <li>比价差价限制：不超最低价<span class="highlight">5%</span></li>
+                    </ul>
+                </div>
+
+                <!-- 风险15 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险15：账户冻结风险</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>运营方负债导致共管账户被司法冻结</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>优先推动仲裁及财产保全</li>
+                        <li>要求运营方提供实控人担保</li>
+                        <li>快速执行裁决优先分账</li>
+                        <li>实控人对账户安全承担连带责任</li>
+                    </ul>
+                </div>
+
+                <!-- 风险16 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险16：境外项目风险</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>资金出境困难、审计数据不透明、当地政策限制</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>第三方审计报告（项目落地后1个月内出具）</li>
+                        <li>境内收款主体纳入协议</li>
+                        <li>明确资金出境合规路径</li>
+                        <li>境内子公司作为共同签约方</li>
+                    </ul>
+                </div>
+
+                <!-- 风险17 -->
+                <div class="card">
+                    <h4 class="text-lg font-semibold text-gold mb-3"><span class="risk-low mr-2">低</span>风险17：审计风险（境外项目）</h4>
+                    <p class="text-white/70 text-sm mb-2"><strong>触发条件：</strong>审计报告延迟、底层数据不完整、收入核算遗漏</p>
+                    <p class="text-white/70 text-sm"><strong>应对措施：</strong></p>
+                    <ul class="list-disc ml-4 text-sm text-white/70">
+                        <li>约定审计完成时限（项目落地后<span class="highlight">1个月</span>）</li>
+                        <li>要求提供猫眼/大麦售票截图</li>
+                        <li>审计报告需涵盖全量项目收入</li>
+                        <li>审计延迟需支付违约金</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 损失承担原则 -->
+        <section id="loss-principle" class="section">
+            <h2 class="section-title"><i class="fas fa-balance-scale"></i>十、损失承担核心原则</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>原则编号</th>
+                            <th>核心内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="highlight">原则1</td>
+                            <td>滴灌通<strong>仅承担与票务收入波动相关的损失</strong>，不承担因运营不当、沟通失误导致的额外损失</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">原则2</td>
+                            <td>明确损失认定以<strong>共管账户资金流向</strong>为依据，避免后续定损争议</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">原则3</td>
+                            <td>未拿到批文时，仅退还10% Shows Fee，已发生的小额运营损失由主办方承担或按协商比例分摊</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">原则4</td>
+                            <td>不可抗力导致的损失：初步提议滴灌通按出资比例（五分之二）的50%承担（即<span class="highlight-red">总损失的20%</span>），最终比例需进一步协商</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================== 第三部分：合同条款 ==================== -->
+        <section id="contract-1-4" class="section">
+            <h2 class="section-title"><i class="fas fa-file-signature"></i>十一、合同条款（模块1-4）</h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 模块一：批文 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-stamp"></i>模块一：批文相关</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>申请主体</strong></td><td>明确批文申请主体及责任</td></tr>
+                            <tr><td><strong>退款流程</strong></td><td>约定批文未获批的退款流程及时限</td></tr>
+                            <tr><td><strong>禁止放弃</strong></td><td>禁止项目方擅自放弃批文申请</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块二：资金与账户 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-university"></i>模块二：资金与账户</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>共管账户</strong></td><td>境内：中国银行双U盾；境外：指定合规收款账户</td></tr>
+                            <tr><td><strong>账户变更</strong></td><td>禁止运营方擅自变更账户</td></tr>
+                            <tr><td><strong>挪用违约</strong></td><td>本金+20%溢价赔偿</td></tr>
+                            <tr><td><strong>大额支出</strong></td><td>＞50万需双方确认</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块三：艺人 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-user-tie"></i>模块三：艺人相关</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>资质审核</strong></td><td>艺人需提供无违规记录证明，无黑名单记录</td></tr>
+                            <tr><td><strong>合规承诺</strong></td><td>艺人需签署爱国合规承诺</td></tr>
+                            <tr><td><strong>违约退款</strong></td><td>约定艺人违约时全额返还已付费用</td></tr>
+                            <tr><td><strong>言论管控</strong></td><td>明确艺人言论需经运营方批准</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块四：不可抗力 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-bolt"></i>模块四：不可抗力</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>界定范围</strong></td><td>明确不可抗力的界定范围</td></tr>
+                            <tr><td><strong>损失承担</strong></td><td>约定损失承担比例（滴灌通上限20%）</td></tr>
+                            <tr><td><strong>改期规则</strong></td><td>明确改期的时间限制及成本分摊</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="contract-5-8" class="section">
+            <h2 class="section-title"><i class="fas fa-file-contract"></i>十二、合同条款（模块5-8）</h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 模块五：支出与预算 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-calculator"></i>模块五：支出与预算</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>预算明细</strong></td><td>预算明细作为合同附件</td></tr>
+                            <tr><td><strong>浮动上限</strong></td><td>约定支出浮动上限（±10%）</td></tr>
+                            <tr><td><strong>比价流程</strong></td><td>比价流程及差价限制（不超最低价5%）</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块六：收入与分账 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-chart-pie"></i>模块六：收入与分账</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>核算范围</strong></td><td>明确收入核算的具体范围</td></tr>
+                            <tr><td><strong>排除项目</strong></td><td>境内：排除赞助/周边；境外：审计覆盖全量</td></tr>
+                            <tr><td><strong>核对机制</strong></td><td>约定售票数据与进账金额的核对机制</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块七：票务 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-ticket-alt"></i>模块七：票务相关</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>赠票限制</strong></td><td>上限<span class="highlight">1000张</span>，超量按票面价买单，需提前报备</td></tr>
+                            <tr><td><strong>最低售价</strong></td><td>不低于票面价的<span class="highlight">50%-60%</span>，折价售票视为违约</td></tr>
+                            <tr><td><strong>控票比例</strong></td><td>不得超过<span class="highlight">20%</span>，超出需投资人同意</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块八：税务 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-file-invoice"></i>模块八：税务相关</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>承担主体</strong></td><td>明确税务支出的承担主体为运营方</td></tr>
+                            <tr><td><strong>支付时间</strong></td><td>约定税费支付时间（演出后）</td></tr>
+                            <tr><td><strong>优先级</strong></td><td>税费不得优先于滴灌通分账</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="contract-9-12" class="section">
+            <h2 class="section-title"><i class="fas fa-gavel"></i>十三、合同条款（模块9-12）</h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 模块九：主体合规 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-building"></i>模块九：主体合规</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>干净主体</strong></td><td>运营方为干净主体（无历史债务），需提供无债务证明</td></tr>
+                            <tr><td><strong>境外签约</strong></td><td>境外项目需母子公司共同签约，境内收款主体纳入协议</td></tr>
+                            <tr><td><strong>兜底方</strong></td><td>高唐文化资质审核</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块十：违约与赔偿 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-exclamation-circle"></i>模块十：违约与赔偿</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>运营方违约</strong></td><td>运营方主观违约需承担全部损失</td></tr>
+                            <tr><td><strong>连带责任</strong></td><td>兜底方（高唐文化）承担连带责任</td></tr>
+                            <tr><td><strong>保全流程</strong></td><td>明确保全流程及责任归属</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块十一：审计 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-search-dollar"></i>模块十一：审计相关</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>机构选定</strong></td><td>境外项目：审计机构由双方共同选定</td></tr>
+                            <tr><td><strong>完成时限</strong></td><td>项目落地后1个月内出具第三方审计报告</td></tr>
+                            <tr><td><strong>配合义务</strong></td><td>运营方需配合提供底层数据</td></tr>
+                            <tr><td><strong>覆盖范围</strong></td><td>审计报告需涵盖全量项目收入</td></tr>
+                            <tr><td><strong>违约金</strong></td><td>审计延迟需支付违约金</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 模块十二：Penalty -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-hand-holding-usd"></i>模块十二：Penalty约定</h3>
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>特别说明：</strong>艺人违约的penalty<strong>无业界统一标准</strong>，需由双方律师协商确定
+                    </div>
+                    <p class="text-white/70 mt-4"><strong>案例参考：</strong></p>
+                    <ul class="list-disc ml-4 text-white/70">
+                        <li>Frank Ocean案例中曾出现<span class="highlight-red">零penalty</span>情况</li>
+                        <li>但针对<span class="highlight">Cardi B团队</span>，将尽力争取补偿条款</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 第四部分：账户监管 ==================== -->
+        <section id="account" class="section">
+            <h2 class="section-title"><i class="fas fa-lock"></i>十四、共管账户机制</h2>
+            
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-piggy-bank"></i>账户设立</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>项目类型</th>
+                            <th>账户要求</th>
+                            <th>管理方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-flag mr-2 text-gold"></i>境内项目</td>
+                            <td>开立<span class="highlight">中国银行</span>共管账户</td>
+                            <td>双方持U盾，实现支付/收款双控</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-globe-americas mr-2 text-gold"></i>境外项目</td>
+                            <td>指定合规收款账户</td>
+                            <td>确保符合资金出境政策</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="fund-rules" class="section">
+            <h2 class="section-title"><i class="fas fa-exchange-alt"></i>十五、资金流转规则</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>规则编号</th>
+                            <th>具体内容</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="highlight">规则1</td>
+                            <td>所有与项目相关的收入（门票收入、赞助收入、政府补贴等）均需归集至共管账户</td>
+                            <td>文档2</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">规则2</td>
+                            <td>大额支出（＞<span class="highlight">50万</span>）需双方共同确认后才可支付</td>
+                            <td>文档4</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">规则3</td>
+                            <td>绑定大麦售票数据与共管账户进账，确保售票数据与资金进账一致</td>
+                            <td>文档4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="supervision" class="section">
+            <h2 class="section-title"><i class="fas fa-eye"></i>十六、收支监管</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-chart-line"></i>收入监管</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>数据核心</strong></td><td>以大麦（总代）系统数据为核心，对接其API获取全渠道售票信息，结合公安备案人数交叉验证</td></tr>
+                            <tr><td><strong>身份录入</strong></td><td>所有票务销售需录入身份信息，确保数据可追溯</td></tr>
+                            <tr><td><strong>实时查看</strong></td><td>投资人可实时查看大麦、猫眼等平台的售票数据及公安备案数据</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-hand-holding-usd"></i>支出监管</h3>
+                    <table class="data-table">
+                        <tbody>
+                            <tr><td><strong>比价制度</strong></td><td>大额支出实行<span class="highlight">三家比价</span>，确保支出合理</td></tr>
+                            <tr><td><strong>超支限制</strong></td><td>超预算<span class="highlight">10%</span>的支出不予批付，超支部分由运营方自行承担</td></tr>
+                            <tr><td><strong>合同附件</strong></td><td>预算明细作为合同附件，明确各项支出标准</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 第五部分：分成回款 ==================== -->
+        <section id="share-ratio" class="section">
+            <h2 class="section-title"><i class="fas fa-percentage"></i>十七、分成比例</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>滴灌通分成比例</th>
+                            <th>具体说明</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>初始提议</td>
+                            <td>60%-80%</td>
+                            <td>预留部分运营资金</td>
+                            <td>文档1</td>
+                        </tr>
+                        <tr>
+                            <td class="highlight">调整后方案</td>
+                            <td class="text-2xl text-gold font-bold">70%</td>
+                            <td>覆盖全部票款（含预付款和最终结算款），从第一笔票款到账即按此比例提取，<span class="highlight">30%资金始终留存账上</span></td>
+                            <td>文档3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="repayment" class="section">
+            <h2 class="section-title"><i class="fas fa-sort-amount-down"></i>十八、回款顺序</h2>
+            
+            <div class="card">
+                <div class="flow-chart">
+                    <div class="flow-step" style="background: linear-gradient(135deg, rgba(0, 200, 83, 0.3), rgba(0, 200, 83, 0.1)); border-color: rgba(0, 200, 83, 0.5);">
+                        <div class="text-green-400 font-bold text-lg">第一顺位</div>
+                        <div class="text-white">滴灌通优先级</div>
+                        <div class="text-sm text-white/60">2000万</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step" style="background: linear-gradient(135deg, rgba(255, 152, 0, 0.3), rgba(255, 152, 0, 0.1)); border-color: rgba(255, 152, 0, 0.5);">
+                        <div class="text-orange-400 font-bold text-lg">第二顺位</div>
+                        <div class="text-white">夹层</div>
+                        <div class="text-sm text-white/60">≤300万</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step" style="background: linear-gradient(135deg, rgba(244, 67, 54, 0.3), rgba(244, 67, 54, 0.1)); border-color: rgba(244, 67, 54, 0.5);">
+                        <div class="text-red-400 font-bold text-lg">第三顺位</div>
+                        <div class="text-white">劣后</div>
+                        <div class="text-sm text-white/60">3000万</div>
+                    </div>
+                </div>
+                
+                <div class="warning-box mt-4">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>特殊约定：</strong>
+                    <ul class="list-disc ml-4 mt-2">
+                        <li>反对将艺人40%尾款（296.96万USD）作为债务优先于滴灌通回款</li>
+                        <li>夹层投资偿还顺序为优先级投资人回款后</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="breakeven" class="section">
+            <h2 class="section-title"><i class="fas fa-balance-scale-right"></i>十九、保本点约定</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>保本点</th>
+                            <th>说明</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="highlight">保本点</td>
+                            <td class="text-2xl text-gold font-bold">25.1%</td>
+                            <td>需票房收入<span class="highlight">3,118万</span>即可保本，占总票房1.2428亿的25.1%</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                        <tr>
+                            <td>保本票数</td>
+                            <td class="text-2xl text-gold font-bold">22,073张</td>
+                            <td>按平均票价1,412元计算，需售出约<span class="highlight">22,073张票</span>即可保本</td>
+                            <td>Excel测算表</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="info-box mt-4">
+                    <i class="fas fa-lightbulb mr-2 text-gold"></i>
+                    <strong>测算说明：</strong>保本点仅25.1%，意味着只需售出约1/4的门票即可收支平衡，安全边际极高。88,000张可售门票中售出22,073张即可保本
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="subsection-title"><i class="fas fa-percentage"></i>计息方式</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>投资类型</th>
+                            <th>计息方式</th>
+                            <th>收益比例</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>普通投资</td>
+                            <td>按日或月平息计息</td>
+                            <td>-</td>
+                        </tr>
+                        <tr>
+                            <td>夹层投资</td>
+                            <td>按月平息计息</td>
+                            <td>4个月<span class="highlight">20%</span>封顶，可根据额度调整；若额度为300万，收益比例可下调至<span class="highlight">17%-18%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================== 第六部分：补充说明 ==================== -->
+        <section id="reschedule" class="section">
+            <h2 class="section-title"><i class="fas fa-calendar-check"></i>二十、改签规则</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>条款要点</th>
+                            <th>具体内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>核心约定</strong></td>
+                            <td>拿到批文后支付的秀费（50%+40%）<span class="highlight-red">不可退</span>，仅支持改期（可协商至次年、下一季度等）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>改期成本</strong></td>
+                            <td>改期后需重新支付运营相关期间成本（如场地、推广等），滴灌通<span class="highlight">不承担</span>改期新增的运营成本</td>
+                        </tr>
+                        <tr>
+                            <td><strong>主办方义务</strong></td>
+                            <td>改期后主办方有义务继续推进演出，不得无故终止</td>
+                        </tr>
+                        <tr>
+                            <td><strong>不可抗力改签</strong></td>
+                            <td>因不可抗力改签时，已支付的秀费由经纪公司暂存，用于改期演出，不视为沉没成本；已发生的运营损失不可收回，需按约定比例承担</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="audit" class="section">
+            <h2 class="section-title"><i class="fas fa-clipboard-check"></i>二十一、审计安排</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>条款要点</th>
+                            <th>具体内容</th>
+                            <th>来源依据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>完成时限</strong></td>
+                            <td>演出结束后<span class="highlight">5-7个工作日</span>内完成审计</td>
+                            <td>文档1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>参与权</strong></td>
+                            <td>邀请资方参与审计过程</td>
+                            <td>文档1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>分配时点</strong></td>
+                            <td>滴灌通不参与中间环节回款分配，仅在最终审计后按顺序分配</td>
+                            <td>文档1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>境外项目</strong></td>
+                            <td>财务团队需复核审计报告，确保数据准确</td>
+                            <td>文档4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="mezzanine" class="section">
+            <h2 class="section-title"><i class="fas fa-layer-group"></i>二十二、夹层投资</h2>
+            
+            <div class="card">
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-value">≤300万</div>
+                        <div class="stat-label">额度上限</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">20%</div>
+                        <div class="stat-label">4个月收益封顶</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">17%-18%</div>
+                        <div class="stat-label">满额可下调至</div>
+                    </div>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>条款要点</th>
+                            <th>具体内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>核心定位</strong></td>
+                            <td>主要用于测试投资人承诺度，金额较小，劣后投资人对收益比例无严格要求，以促成合作为主</td>
+                        </tr>
+                        <tr>
+                            <td><strong>灵活调整</strong></td>
+                            <td>投资人内部可根据出资比例分配收益，主责人可适当让利</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="sponsor" class="section">
+            <h2 class="section-title"><i class="fas fa-handshake"></i>二十三、赞助与政府补贴</h2>
+            
+            <div class="card">
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="stat-card">
+                        <div class="stat-value">1500万</div>
+                        <div class="stat-label">已洽谈赞助意向</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">2000万</div>
+                        <div class="stat-label">赞助基线</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">500-1000万</div>
+                        <div class="stat-label">政府补贴测算</div>
+                    </div>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>条款要点</th>
+                            <th>具体内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>招商力度</strong></td>
+                            <td>主办方将投入<span class="highlight">90%以上</span>精力开展赞助招商，采用矩阵式营销（含网红、社交媒体推广），开放<span class="highlight">20%佣金</span>吸引合作方，提升赞助落地概率</td>
+                        </tr>
+                        <tr>
+                            <td><strong>风险对冲</strong></td>
+                            <td>已洽谈<span class="highlight">1500万</span>赞助意向，约定最低赞助保底金额，不足部分由主办方承担补充责任</td>
+                        </tr>
+                        <tr>
+                            <td><strong>政府补贴</strong></td>
+                            <td>按杭州同类项目<span class="highlight">500-1000万</span>的标准保守测算</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="ticket-sales" class="section">
+            <h2 class="section-title"><i class="fas fa-ticket-alt"></i>二十四、票务销售补充</h2>
+            
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>条款要点</th>
+                            <th>具体内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>渠道占比</strong></td>
+                            <td>正规平台（大麦、猫眼、抖音等）售票占比约<span class="highlight">70%</span>，私域及黄牛渠道售票需录入大麦系统备案</td>
+                        </tr>
+                        <tr>
+                            <td><strong>黄牛渠道</strong></td>
+                            <td>实行"一手交钱一手交货"，溢价部分不参与投资人分成</td>
+                        </tr>
+                        <tr>
+                            <td><strong>验票监督</strong></td>
+                            <td>投资人可派志愿者参与演出当天关键闸口验票，防范无票入场</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ==================== 数据速查表 ==================== -->
+        <section id="data-summary" class="section">
+            <h2 class="section-title"><i class="fas fa-database"></i>附录：核心数据速查表</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- 票务收入数据 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-coins"></i>票务收入数据</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>总票房收入</td><td class="highlight">1.2428亿</td></tr>
+                            <tr><td>净票务收入</td><td class="highlight">1.187亿</td></tr>
+                            <tr><td>平均票价</td><td class="highlight">1,412元</td></tr>
+                            <tr><td>可售容量/场</td><td class="highlight">44,000张</td></tr>
+                            <tr><td>演出场次</td><td class="highlight">2场</td></tr>
+                            <tr><td>佣金比例</td><td class="highlight">3.5%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 成本支出数据 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-dollar-sign"></i>成本支出数据</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>艺人费用</td><td class="highlight">5,271万</td></tr>
+                            <tr><td>差旅费用</td><td class="highlight">154.3万</td></tr>
+                            <tr><td>制作费用</td><td class="highlight">535万</td></tr>
+                            <tr><td>场地费用</td><td class="highlight">751.2万</td></tr>
+                            <tr><td>推广费用</td><td class="highlight">200万</td></tr>
+                            <tr><td>行政管理</td><td class="highlight">290.4万</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 利润数据 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-chart-line"></i>利润数据</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>总成本支出</td><td class="highlight">7,202万</td></tr>
+                            <tr><td>赞助净收入</td><td class="highlight">2,012万</td></tr>
+                            <tr><td>净收入（含赞助）</td><td class="highlight">6,680万</td></tr>
+                            <tr><td><strong>税后净利润</strong></td><td class="text-gold font-bold">5,678万</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 分成与保本 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-percentage"></i>分成与保本</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>滴灌通分成比例</td><td class="highlight">70%</td></tr>
+                            <tr><td>保本点</td><td class="highlight">25.1%</td></tr>
+                            <tr><td>总票房收入</td><td class="highlight">1.24亿</td></tr>
+                            <tr><td>税后净利润</td><td class="highlight">5,678万</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 票价分档详情 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-ticket-alt"></i>票价分档详情</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>内场前排</td><td class="highlight">2,000元 (4,443张)</td></tr>
+                            <tr><td>内场后排</td><td class="highlight">1,880元 (5,312张)</td></tr>
+                            <tr><td>下层前侧</td><td class="highlight">1,580元 (5,365张)</td></tr>
+                            <tr><td>下层后侧</td><td class="highlight">1,580元 (4,365张)</td></tr>
+                            <tr><td>上层前侧</td><td class="highlight">1,280元 (7,989张)</td></tr>
+                            <tr><td>上层后侧</td><td class="highlight">1,280元 (8,990张)</td></tr>
+                            <tr><td>远处看台</td><td class="highlight">880元 (6,963张)</td></tr>
+                            <tr><td>远处看台柱旁</td><td class="highlight">580元 (573张)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 赞助收入构成 -->
+                <div class="card">
+                    <h3 class="subsection-title"><i class="fas fa-star"></i>赞助收入构成</h3>
+                    <table class="data-table text-sm">
+                        <tbody>
+                            <tr><td>政府文化局补贴</td><td class="highlight">1,000万</td></tr>
+                            <tr><td>指定赞助商</td><td class="highlight">1,200万</td></tr>
+                            <tr><td>减：佣金</td><td class="highlight">-200万</td></tr>
+                            <tr><td><strong>赞助净收入</strong></td><td class="text-gold font-bold">2,012万</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="mt-16 pt-8 border-t border-white/10 text-center text-white/40 text-sm">
+            <p>演唱会投资项目综合文档 | 更新时间：2026年1月</p>
+            <p class="mt-2">来源文档：综合文档1、文档2、文档3、文档4整理汇编</p>
+            <p class="mt-2">文档用途：演唱会投资项目尽职调查、条款谈判、风险评估参考</p>
+        </footer>
+    </main>
+
+    <script>
+        // 切换侧边栏
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // 折叠面板
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            content.classList.toggle('open');
+            icon.style.transform = content.classList.contains('open') ? 'rotate(0deg)' : 'rotate(-90deg)';
+        }
+
+        // 导航高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section[id]');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            window.addEventListener('scroll', function() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href') === '#' + current) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+
+            // 平滑滚动
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    // 移动端关闭侧边栏
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('sidebar').classList.remove('open');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演唱会投资项目综合文档</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0d1b2a 100%);
+            padding: 20px;
+            z-index: 100;
+        }
+        .main-content {
+            margin-left: 280px;
+            padding: 30px 50px;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        .nav-item {
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            border-left: 3px solid #3b82f6;
+        }
+        .nav-section {
+            font-weight: bold;
+            color: #fff;
+            padding: 15px 10px 10px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .content-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .page-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        th {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tr:hover td {
+            background: #f1f5f9;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left: 4px solid #ef4444;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .risk-high { color: #dc2626; font-weight: bold; }
+        .risk-medium { color: #f59e0b; font-weight: bold; }
+        .risk-low { color: #22c55e; font-weight: bold; }
+        h1 { font-size: 28px; color: #1e3a8a; margin-bottom: 20px; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
+        h2 { font-size: 22px; color: #1e40af; margin: 25px 0 15px; }
+        h3 { font-size: 18px; color: #1d4ed8; margin: 20px 0 10px; }
+        h4 { font-size: 16px; color: #2563eb; margin: 15px 0 10px; }
+        .stat-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: bold; }
+        .stat-label { font-size: 13px; opacity: 0.9; margin-top: 5px; }
+        .flow-diagram {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: monospace;
+            white-space: pre-line;
+            line-height: 1.8;
+        }
+        @media print {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .content-section { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 侧边栏导航 -->
+    <nav class="sidebar">
+        <div class="text-center mb-6">
+            <div class="text-2xl font-bold text-white mb-2">
+                <i class="fas fa-music mr-2"></i>演唱会投资
+            </div>
+            <div class="text-sm text-blue-300">项目综合文档</div>
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-coins mr-2"></i>商业条款</div>
+        <div class="nav-item active" onclick="scrollToSection('section1')">
+            <i class="fas fa-chart-pie mr-2"></i>总投入与融资
+        </div>
+        <div class="nav-item" onclick="scrollToSection('section2')">
+            <i class="fas fa-calendar-alt mr-2"></i>付款节奏时间线
+        </div>
+        <div class="nav-item" onclick="scrollToSection('section3')">
+            <i class="fas fa-clock mr-2"></i>延迟付款构成
+        </div>
+        <div class="nav-item" onclick="scrollToSection('section4')">
+            <i class="fas fa-hand-holding-usd mr-2"></i>收入构成
+        </div>
+        <div class="nav-item" onclick="scrollToSection('section5')">
+            <i class="fas fa-exchange-alt mr-2"></i>资金流向闭环
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-shield-alt mr-2"></i>风险管理</div>
+        <div class="nav-item" onclick="scrollToSection('section6')">
+            <i class="fas fa-exclamation-triangle mr-2"></i>17类风险详情
+        </div>
+        <div class="nav-item" onclick="scrollToSection('section7')">
+            <i class="fas fa-balance-scale mr-2"></i>损失承担原则
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-file-contract mr-2"></i>合同条款</div>
+        <div class="nav-item" onclick="scrollToSection('section8')">
+            <i class="fas fa-clipboard-list mr-2"></i>12大合同模块
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-university mr-2"></i>资金监管</div>
+        <div class="nav-item" onclick="scrollToSection('section9')">
+            <i class="fas fa-landmark mr-2"></i>共管账户机制
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-percentage mr-2"></i>分成回款</div>
+        <div class="nav-item" onclick="scrollToSection('section10')">
+            <i class="fas fa-chart-line mr-2"></i>分成与保本点
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-info-circle mr-2"></i>补充说明</div>
+        <div class="nav-item" onclick="scrollToSection('section11')">
+            <i class="fas fa-plus-circle mr-2"></i>其他重要事项
+        </div>
+        
+        <div class="nav-section"><i class="fas fa-database mr-2"></i>数据速查</div>
+        <div class="nav-item" onclick="scrollToSection('section12')">
+            <i class="fas fa-table mr-2"></i>核心数据汇总
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <div class="max-w-6xl">
+            <!-- 页面标题 -->
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-800 border-none pb-0">
+                    <i class="fas fa-music text-blue-600 mr-3"></i>
+                    演唱会投资项目综合文档
+                </h1>
+                <p class="text-gray-500 mt-3">完整分页版 · 共14页 · 整理日期：2026年1月28日</p>
+            </div>
+
+            <!-- 核心数据卡片 -->
+            <div class="grid grid-cols-5 gap-4 mb-8">
+                <div class="stat-card">
+                    <div class="stat-value">7000万</div>
+                    <div class="stat-label">总投入（调整后）</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="stat-value">5000万</div>
+                    <div class="stat-label">融资目标</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                    <div class="stat-value">70%</div>
+                    <div class="stat-label">滴灌通分成</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="stat-value">2800万</div>
+                    <div class="stat-label">保本点</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <div class="stat-value">17类</div>
+                    <div class="stat-label">风险识别</div>
+                </div>
+            </div>
+
+            <!-- Section 1: 总投入与融资 -->
+            <section id="section1" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P1</span>
+                <h1><i class="fas fa-coins mr-2"></i>一、总投入与融资情况</h1>
+                
+                <h3>1.1 总投入金额对比</h3>
+                <table>
+                    <tr>
+                        <th>方案阶段</th>
+                        <th>总投入金额</th>
+                        <th>构成明细</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>初始规划</strong></td>
+                        <td class="risk-high">超7700万人民币</td>
+                        <td>艺人秀费约719.2万USD + 运营支出约7760万人民币</td>
+                        <td>文档1、文档2</td>
+                    </tr>
+                    <tr>
+                        <td><strong>调整后方案</strong></td>
+                        <td class="risk-medium">7000万人民币</td>
+                        <td>原7500万，通过成本优化压缩，存在两三百万压缩空间</td>
+                        <td>文档3</td>
+                    </tr>
+                </table>
+
+                <h3>1.2 融资目标与出资结构</h3>
+                <table>
+                    <tr>
+                        <th>项目</th>
+                        <th>金额</th>
+                        <th>详细说明</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>融资目标</strong></td>
+                        <td>5000万人民币</td>
+                        <td>维持不变</td>
+                        <td>文档1、文档3</td>
+                    </tr>
+                    <tr>
+                        <td><strong>滴灌通出资（原计划）</strong></td>
+                        <td>1500万人民币</td>
+                        <td>初始规划金额</td>
+                        <td>文档1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>滴灌通出资（调整后）</strong></td>
+                        <td>2000万人民币</td>
+                        <td>后增加至2000万</td>
+                        <td>文档1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>资金结构划分</strong></td>
+                        <td>优先2000万 + 劣后3000万</td>
+                        <td>调整后方案中的资金结构</td>
+                        <td>文档3</td>
+                    </tr>
+                </table>
+
+                <h3>1.3 资金缺口覆盖方案</h3>
+                <table>
+                    <tr>
+                        <th>阶段</th>
+                        <th>缺口金额</th>
+                        <th>覆盖方式</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>初始缺口</strong></td>
+                        <td class="risk-high">2700万</td>
+                        <td>7700万总费用与5000万融资的差额，计划通过猫眼提前结票（至少50%）和赞助优先回款覆盖</td>
+                        <td>文档2</td>
+                    </tr>
+                    <tr>
+                        <td><strong>调整后缺口</strong></td>
+                        <td class="risk-medium">2000万</td>
+                        <td>7000万总费用与5000万总资金的差额，通过"延迟付款1002万 + 滴灌通退出时留存900-1000万"全额覆盖，<strong>无需引入新资方</strong></td>
+                        <td>文档3</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 2: 付款节奏时间线 -->
+            <section id="section2" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P2</span>
+                <h1><i class="fas fa-calendar-alt mr-2"></i>二、付款节奏/时间线</h1>
+                
+                <div class="info-box">
+                    <strong><i class="fas fa-lightbulb mr-2"></i>核心说明：</strong>实际秀费目标协商为<strong>300万/场</strong>，暂按<strong>320万</strong>核算
+                </div>
+
+                <h3>完整付款时间线表</h3>
+                <table>
+                    <tr>
+                        <th>关键时间节点</th>
+                        <th>付款内容</th>
+                        <th>付款金额</th>
+                        <th>备注说明</th>
+                    </tr>
+                    <tr>
+                        <td><strong>签约完成</strong></td>
+                        <td>10% Shows Fee</td>
+                        <td><strong>74.24万USD</strong><br><small>（10%×320万×2场×1.16）</small></td>
+                        <td>实际秀费目标协商为300万/场，暂按320万核算；<span class="risk-medium">仅拿到批文后该费用不可退，未拿到批文可退还</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>拿到批文</strong></td>
+                        <td>50% Shows Fee</td>
+                        <td><strong>348万USD</strong><br><small>（50%×320万×2场×1.16）</small></td>
+                        <td>通过担保账号自动支付，<span class="risk-low">拿不到批文则无需支付该笔款项</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>艺人到达中国</strong></td>
+                        <td>剩余40% Shows Fee</td>
+                        <td><strong>296.96万USD</strong><br><small>（40%×320万×2场×1.16）</small></td>
+                        <td>支付节点可协商为艺人起飞前1天或抵达后，需与对方律师确认</td>
+                    </tr>
+                    <tr>
+                        <td><strong>演出前1天</strong></td>
+                        <td>100%剩余Expenses<br><small>（制作/舞美/设备/人员等）</small></td>
+                        <td>舞美定金200万、场馆租金、安保150万、营销、机票、行政开支22万等</td>
+                        <td>舞美总费用500万（2场×250万），仅提前支付40%定金，剩余尾款延迟支付</td>
+                    </tr>
+                    <tr>
+                        <td><strong>正式开演</strong></td>
+                        <td>/</td>
+                        <td>/</td>
+                        <td><span class="risk-high">给艺人付过的钱（50%+40%）全部不能退，仅支持改签</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>票款全额到账 + 滴灌通完成70%分成提取后</strong></td>
+                        <td>延迟付款项目</td>
+                        <td><strong>合计1002万人民币</strong><br><small>（税费672万+舞美尾款300万+团队工资30万）</small></td>
+                        <td>仅在所有票款足额到账，且滴灌通按约定提取70%分成完成退出后，方可支付</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 3: 延迟付款构成 -->
+            <section id="section3" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P2</span>
+                <h1><i class="fas fa-clock mr-2"></i>三、延迟付款成本构成（调整后方案）</h1>
+                
+                <div class="highlight-box">
+                    <strong><i class="fas fa-info-circle mr-2"></i>延迟付款定义：</strong>所有票款全额到账、滴灌通完成70%分成提取后，再支付的费用项（文档3）
+                </div>
+
+                <table>
+                    <tr>
+                        <th>费用类型</th>
+                        <th>金额</th>
+                        <th>依据说明</th>
+                    </tr>
+                    <tr>
+                        <td><strong>税费</strong></td>
+                        <td class="risk-high">672万</td>
+                        <td>按规定需随艺人费用一并支付，通过海口银行特殊关系申请晚付/慢付，属于明确可延迟的核心费用</td>
+                    </tr>
+                    <tr>
+                        <td><strong>舞美尾款</strong></td>
+                        <td class="risk-medium">300万</td>
+                        <td>舞美总费用500万（2场×250万），仅需提前支付40%定金（200万），60%尾款延迟至票款到账后支付</td>
+                    </tr>
+                    <tr>
+                        <td><strong>团队工资</strong></td>
+                        <td>30万</td>
+                        <td>项目筹备期间暂缓发放该部分工资，行政开支22万为固定前置费用（已纳入演出前1天支出），此30万工资随项目利润在票款结算、滴灌通分成完成后一并补足</td>
+                    </tr>
+                    <tr style="background: #f0fdf4;">
+                        <td><strong>合计</strong></td>
+                        <td class="risk-high"><strong>1002万</strong></td>
+                        <td>-</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 4: 收入构成 -->
+            <section id="section4" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P3</span>
+                <h1><i class="fas fa-hand-holding-usd mr-2"></i>四、收入构成</h1>
+                
+                <h3>4.1 核心收入来源（文档1）</h3>
+                <table>
+                    <tr>
+                        <th>收入类型</th>
+                        <th>说明</th>
+                        <th>确定性</th>
+                    </tr>
+                    <tr>
+                        <td><strong>票务预售收入</strong></td>
+                        <td>拿到批文后大麦、猫眼上架预售，可产生即时现金流</td>
+                        <td><span class="risk-low">✅ 确定</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>政府补贴</strong></td>
+                        <td>金额可按政府公文明确标准核算，属于确定收入</td>
+                        <td><span class="risk-low">✅ 确定</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>赞助收入</strong></td>
+                        <td>暂不确定，无明确核算依据</td>
+                        <td><span class="risk-medium">❓ 不确定</span></td>
+                    </tr>
+                </table>
+
+                <h3>4.2 收入归集与核算口径</h3>
+                <table>
+                    <tr>
+                        <th>项目</th>
+                        <th>具体规则</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>收入归集</strong></td>
+                        <td>所有与项目相关的收入（门票收入、赞助收入、政府补贴等）均归集至<strong>共管账户</strong></td>
+                        <td>文档2</td>
+                    </tr>
+                    <tr>
+                        <td><strong>核算口径</strong></td>
+                        <td>仅以共管账户<strong>实际到账的现金流</strong>作为收入分成依据，应收未收款项不参与当期分成，待实际到账后再行分配</td>
+                        <td>文档2</td>
+                    </tr>
+                </table>
+
+                <h3>4.3 境内外项目收入核算差异</h3>
+                <table>
+                    <tr>
+                        <th>项目类型</th>
+                        <th>纳入分账核算范围</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>境内项目</strong></td>
+                        <td>仅票务收入 + 账户利息纳入分账核算，<span class="risk-medium">赞助、周边等衍生收入不纳入预估</span></td>
+                        <td>文档3、文档4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>境外项目</strong></td>
+                        <td><span class="risk-low">全量收入（含赞助/周边）纳入核算</span>，需审计报告覆盖全量项目收入</td>
+                        <td>文档4</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 5: 资金流向闭环 -->
+            <section id="section5" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P3</span>
+                <h1><i class="fas fa-exchange-alt mr-2"></i>五、资金流向闭环（调整后方案）</h1>
+                
+                <h3>5.1 前置支付（文档3）</h3>
+                <div class="info-box">
+                    <strong>总资金5000万用于支付以下不可延迟的核心成本：</strong>
+                </div>
+                <table>
+                    <tr>
+                        <th>支出项目</th>
+                        <th>金额</th>
+                    </tr>
+                    <tr><td>艺人秀费</td><td>640万</td></tr>
+                    <tr><td>舞美定金</td><td>200万</td></tr>
+                    <tr><td>场馆租金</td><td>待定</td></tr>
+                    <tr><td>安保费用</td><td>150万</td></tr>
+                    <tr><td>营销费用</td><td>待定</td></tr>
+                    <tr><td>机票</td><td>待定</td></tr>
+                </table>
+
+                <h3>5.2 后置支付流程（文档3）</h3>
+                <div class="flow-diagram">
+                    <div class="text-center">
+                        <div class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg mb-4">
+                            <i class="fas fa-ticket-alt mr-2"></i>票款到账（演出结束后7天）
+                        </div>
+                        <div class="text-3xl text-blue-600 mb-4">↓</div>
+                        <div class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg mb-4">
+                            <i class="fas fa-percentage mr-2"></i>滴灌通提取70%分成完成退出
+                        </div>
+                        <div class="text-3xl text-green-600 mb-4">↓</div>
+                        <div class="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg">
+                            <i class="fas fa-money-bill-wave mr-2"></i>用留存资金 + 剩余票款支付延迟费用<br>
+                            <small>（税费672万 + 舞美尾款300万 + 团队工资30万 = 1002万）</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: 风险详情 -->
+            <section id="section6" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P4-P7</span>
+                <h1><i class="fas fa-exclamation-triangle mr-2"></i>六、各类风险详情（17类）</h1>
+                
+                <div class="warning-box">
+                    <strong><i class="fas fa-shield-alt mr-2"></i>风险管理核心：</strong>本项目识别了17类主要风险，涵盖批文、资金、艺人、票务、审计等全流程
+                </div>
+
+                <!-- 风险1-6 -->
+                <h3>风险1：批文风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>未拿到文旅局/公安局批文，或批文延迟发放；因政策、材料等客观原因未取得批文（非双方违约）</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>1. 项目方先行支付10%艺人定金；2. 批文获取作为出资前提；3. 提前核查批文申请条件及材料要求；4. 约定批文未获批时定金全额退还</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 未拿到批文：10% Shows Fee可退还，已发生的行政开支、机票定金等小额损失不可收回；2. <span class="risk-low">滴灌通可全额收回10% Shows Fee对应的出资</span>，已发生的小额运营损失不承担</td></tr>
+                </table>
+
+                <h3>风险2：资金挪用风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>运营方将票务收入、共管账户资金用于非约定用途（如抵付艺人尾款、私下收款）</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>1. 开立中国银行共管账户，双方持U盾；2. 大额支出（＞50万）需双方确认；3. 绑定大麦售票数据与账户进账；4. 禁止通过私户收取任何票务相关款项</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 约定资金挪用的违约赔偿（<span class="risk-high">本金+20%溢价</span>）；2. 所有票务收入需进入共管账户，违规视为违约</td></tr>
+                </table>
+
+                <h3>风险3：艺人自身原因（违约）风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>签约后因怀孕、个人意愿等放弃演出；艺人自身原因取消演出、发表不当言论、违反合规要求</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>1. 签约前核查艺人文旅部白名单状态，避免选用黑名单艺人（如<span class="risk-high">Justin Bieber、Lady Gaga</span>）；2. 合同明确约定艺人签约后至演出前不得发表敏感言论；3. 要求艺人协议约定违约全额退秀费；4. 艺人需签署爱国合规承诺；5. 艺人言论需经运营方批准</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 未拿到批文：10% Shows Fee全额退还；2. 已拿到批文/艺人到华后：全部秀费全额退还；3. 滴灌通优先收回已出资本金，额外损失补偿按协商结果分配</td></tr>
+                </table>
+
+                <h3>风险4：不可抗力风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>演出前因天气、政治、战争等客观因素无法如期举行；战争、地震、政策变动等非人为因素导致项目终止或改期</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>1. 与艺人、场地、供应商等签订合同时，明确不可抗力导致演出取消的费用退还条款；2. 改期成本由运营方承担；3. <span class="risk-medium">滴灌通仅承担20%不可抗力损失</span>；4. 剩余资金优先返还滴灌通</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 未拿到批文：10% Shows Fee可退还；2. 已拿到批文/艺人到华后：秀费不可退但可改签，滴灌通仅承担与收入波动相关损失（初步提议20%）</td></tr>
+                </table>
+
+                <h3>风险5：艺人被中国禁令限制风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>签约后艺人发表不当言论等导致被禁</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>签约前核查艺人文旅部白名单状态，避免选用黑名单艺人；合同明确约定艺人不得发表敏感言论</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 未拿到批文：10% Shows Fee全额退还；2. 已拿到批文/艺人到华后：全部秀费需全额退还；3. <span class="risk-low">滴灌通可全额收回已出资本金，不承担运营损失</span></td></tr>
+                </table>
+
+                <h3>风险6：主办方主观原因（违约）风险</h3>
+                <table>
+                    <tr><th width="20%">维度</th><th>详细内容</th></tr>
+                    <tr><td><strong>触发条件</strong></td><td>主办方因恶意取消、经营问题等非客观因素主动终止项目；运营方恶意取消项目、左手倒右手转移资金</td></tr>
+                    <tr><td><strong>应对措施</strong></td><td>1. 引入<strong>高唐文化</strong>作为兜底方；2. 约定违约时共管账户剩余资金优先返还滴灌通；3. 申请财产保全</td></tr>
+                    <tr><td><strong>损失承担</strong></td><td>1. 滴灌通可全额收回已出资本金及对应收益；2. <span class="risk-high">所有损失由主办方承担，兜底方承担连带责任</span></td></tr>
+                </table>
+
+                <!-- 更多风险用简表 -->
+                <h3>风险7-17：其他风险汇总</h3>
+                <table>
+                    <tr>
+                        <th>风险类型</th>
+                        <th>触发条件</th>
+                        <th>核心应对措施</th>
+                    </tr>
+                    <tr>
+                        <td><strong>投资资金与总成本不匹配</strong></td>
+                        <td>项目总成本约7700万，融资仅5000万，缺口2700万</td>
+                        <td>艺人费用按50%预付核算；剩余艺人费用支付优先级排在投资人回款之后；通过向供应商赊账降低前期资金压力</td>
+                    </tr>
+                    <tr>
+                        <td><strong>收入分成核算风险</strong></td>
+                        <td>信息流与现金流不一致，预付票款无法参与分成</td>
+                        <td>设立共管账户；仅以共管账户实际到账的现金流作为收入分成依据</td>
+                    </tr>
+                    <tr>
+                        <td><strong>票务销售数据核实风险</strong></td>
+                        <td>多渠道售票数据无法完全归集、跑冒滴漏、联合造假</td>
+                        <td>以大麦系统数据为核心；对接API获取全渠道售票信息；结合公安备案人数交叉验证；赠票上限1000张；投资人可派志愿者验票</td>
+                    </tr>
+                    <tr>
+                        <td><strong>票务定价与控票风险</strong></td>
+                        <td>主办方控票或低价倾销损害投资人利益</td>
+                        <td>限定最低售价不低于票面价50%-60%；控票比例不超过20%；通过闲鱼、小红书监测二级市场</td>
+                    </tr>
+                    <tr>
+                        <td><strong>极端情况（演出被叫停）</strong></td>
+                        <td>因政治、不可抗力等因素导致演出被叫停</td>
+                        <td>分阶段测算可退费用；参考滨崎步演唱会被叫停案例制定方案</td>
+                    </tr>
+                    <tr>
+                        <td><strong>夹层投资条款不明确</strong></td>
+                        <td>夹层投资的额度、收益比例、偿还顺序等未明确</td>
+                        <td>夹层投资额度控制在300万内；收益比例4个月20%封顶；偿还顺序为优先级投资人回款后</td>
+                    </tr>
+                    <tr>
+                        <td><strong>赞助与政府补贴不确定性</strong></td>
+                        <td>赞助收入（基线2000万）和政府补贴金额未完全确定</td>
+                        <td>提供压力测试数据；已洽谈1500万赞助意向；政府补贴按杭州同类项目500-1000万测算</td>
+                    </tr>
+                    <tr>
+                        <td><strong>支出超支风险</strong></td>
+                        <td>实际支出超出预算10%以上，或大额支出无透明报价</td>
+                        <td>大额支出三家比价；超预算10%不予批付；超支部分由运营方自行承担</td>
+                    </tr>
+                    <tr>
+                        <td><strong>账户冻结风险</strong></td>
+                        <td>运营方负债导致共管账户被司法冻结</td>
+                        <td>优先推动仲裁及财产保全；要求运营方提供实控人担保</td>
+                    </tr>
+                    <tr>
+                        <td><strong>境外项目风险</strong></td>
+                        <td>资金出境困难、审计数据不透明、当地政策限制</td>
+                        <td>第三方审计报告（项目落地后1个月内）；境内收款主体纳入协议</td>
+                    </tr>
+                    <tr>
+                        <td><strong>审计风险（境外项目）</strong></td>
+                        <td>审计报告延迟、底层数据不完整、收入核算遗漏</td>
+                        <td>约定审计完成时限1个月；要求提供猫眼/大麦售票截图；审计延迟需支付违约金</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 7: 损失承担原则 -->
+            <section id="section7" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P7</span>
+                <h1><i class="fas fa-balance-scale mr-2"></i>七、损失承担核心原则</h1>
+                
+                <table>
+                    <tr>
+                        <th>原则编号</th>
+                        <th>核心内容</th>
+                        <th>来源依据</th>
+                    </tr>
+                    <tr>
+                        <td><strong>原则1</strong></td>
+                        <td>滴灌通<span class="risk-low">仅承担与票务收入波动相关的损失</span>，不承担因运营不当、沟通失误导致的额外损失</td>
+                        <td>文档1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>原则2</strong></td>
+                        <td>明确损失认定以<strong>共管账户资金流向</strong>为依据，避免后续定损争议</td>
+                        <td>文档1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>原则3</strong></td>
+                        <td>未拿到批文时，仅退还10% Shows Fee，已发生的小额运营损失由主办方承担或按协商比例分摊</td>
+                        <td>文档1</td>
+                    </tr>
+                    <tr>
+                        <td><strong>原则4</strong></td>
+                        <td>不可抗力导致的损失：初步提议滴灌通按出资比例（五分之二）的50%承担（即<span class="risk-medium">总损失的20%</span>），最终比例需进一步协商</td>
+                        <td>文档1</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 8: 合同条款 -->
+            <section id="section8" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P8-P10</span>
+                <h1><i class="fas fa-file-contract mr-2"></i>八、合同条款相关约定要点（12大模块）</h1>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- 模块1-6 -->
+                    <div>
+                        <h3>模块一：批文相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>明确批文申请主体及责任</li>
+                            <li>约定批文未获批的退款流程及时限</li>
+                            <li>禁止项目方擅自放弃批文申请</li>
+                        </ul>
+
+                        <h3>模块二：资金与账户相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>境内：开立中国银行共管账户，双方持U盾</li>
+                            <li>境外：指定合规收款账户</li>
+                            <li>禁止运营方擅自变更账户</li>
+                            <li>资金挪用违约：本金+20%溢价</li>
+                            <li>大额支出（＞50万）需双方确认</li>
+                            <li>所有票务收入必须进入共管账户</li>
+                        </ul>
+
+                        <h3>模块三：艺人相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>提供无违规记录证明，无黑名单记录</li>
+                            <li>签署爱国合规承诺</li>
+                            <li>违约时全额返还已付费用</li>
+                            <li>艺人言论需经运营方批准</li>
+                        </ul>
+
+                        <h3>模块四：不可抗力相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>明确不可抗力的界定范围</li>
+                            <li>损失承担比例：滴灌通上限20%</li>
+                            <li>明确改期的时间限制及成本分摊</li>
+                        </ul>
+
+                        <h3>模块五：支出与预算相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>预算明细作为合同附件</li>
+                            <li>约定支出浮动上限（±10%）</li>
+                            <li>比价流程及差价限制（不超最低价5%）</li>
+                        </ul>
+
+                        <h3>模块六：收入与分账相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>明确收入核算的具体范围</li>
+                            <li>境内排除赞助/周边，境外审计覆盖全量收入</li>
+                            <li>约定售票数据与进账金额的核对机制</li>
+                        </ul>
+                    </div>
+
+                    <!-- 模块7-12 -->
+                    <div>
+                        <h3>模块七：票务相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>赠票上限1000张，超量按票面价买单</li>
+                            <li>最低售价不低于票面价50%-60%</li>
+                            <li>控票比例不得超过20%</li>
+                        </ul>
+
+                        <h3>模块八：税务相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>税务支出承担主体为运营方</li>
+                            <li>税费支付时间为演出后</li>
+                            <li>税费不得优先于滴灌通分账</li>
+                        </ul>
+
+                        <h3>模块九：主体合规相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>运营方为干净主体（无历史债务）</li>
+                            <li>境外项目需母子公司共同签约</li>
+                            <li>高唐文化作为兜底方资质审核</li>
+                        </ul>
+
+                        <h3>模块十：违约与赔偿相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>运营方主观违约需承担全部损失</li>
+                            <li>兜底方（高唐文化）承担连带责任</li>
+                            <li>明确保全流程及责任归属</li>
+                        </ul>
+
+                        <h3>模块十一：审计相关</h3>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li>审计机构由双方共同选定</li>
+                            <li>项目落地后1个月内出具第三方审计报告</li>
+                            <li>运营方需配合提供底层数据</li>
+                            <li>审计延迟需支付违约金</li>
+                        </ul>
+
+                        <h3>模块十二：Penalty约定</h3>
+                        <div class="warning-box">
+                            艺人违约的penalty<strong>无业界统一标准</strong>，需由双方律师协商确定。<br>
+                            <small>案例参考：Frank Ocean案例中曾出现零penalty情况，但针对Cardi B团队，将尽力争取补偿条款</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 9: 共管账户 -->
+            <section id="section9" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P11</span>
+                <h1><i class="fas fa-landmark mr-2"></i>九、共管账户与资金监管</h1>
+                
+                <h3>9.1 账户设立</h3>
+                <table>
+                    <tr>
+                        <th>项目类型</th>
+                        <th>账户要求</th>
+                        <th>管理方式</th>
+                    </tr>
+                    <tr>
+                        <td><strong>境内项目</strong></td>
+                        <td>开立中国银行共管账户</td>
+                        <td>双方持U盾，实现支付/收款双控</td>
+                    </tr>
+                    <tr>
+                        <td><strong>境外项目</strong></td>
+                        <td>指定合规收款账户</td>
+                        <td>确保符合资金出境政策</td>
+                    </tr>
+                </table>
+
+                <h3>9.2 资金流转规则</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>所有与项目相关的收入（门票收入、赞助收入、政府补贴等）均需归集至共管账户</li>
+                    <li>大额支出（＞50万）需双方共同确认后才可支付</li>
+                    <li>绑定大麦售票数据与共管账户进账，确保售票数据与资金进账一致</li>
+                </ul>
+
+                <h3>9.3 收入监管</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>以大麦（总代）系统数据为核心，对接其API获取全渠道售票信息</li>
+                    <li>结合公安备案人数交叉验证</li>
+                    <li>所有票务销售需录入身份信息，确保数据可追溯</li>
+                    <li>投资人可实时查看大麦、猫眼等平台的售票数据及公安备案数据</li>
+                </ul>
+
+                <h3>9.4 支出监管</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>大额支出实行三家比价，确保支出合理</li>
+                    <li>超预算10%的支出不予批付，超支部分由运营方自行承担</li>
+                    <li>预算明细作为合同附件，明确各项支出标准</li>
+                </ul>
+            </section>
+
+            <!-- Section 10: 分成与回款 -->
+            <section id="section10" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P12</span>
+                <h1><i class="fas fa-chart-line mr-2"></i>十、分成与回款相关</h1>
+                
+                <h3>10.1 分成比例</h3>
+                <table>
+                    <tr>
+                        <th>阶段</th>
+                        <th>滴灌通分成比例</th>
+                        <th>具体说明</th>
+                    </tr>
+                    <tr>
+                        <td>初始提议</td>
+                        <td>60%-80%</td>
+                        <td>预留部分运营资金</td>
+                    </tr>
+                    <tr>
+                        <td><strong>调整后方案</strong></td>
+                        <td class="risk-high"><strong>70%</strong></td>
+                        <td>覆盖全部票款（含预付款和最终结算款），从第一笔票款到账即按此比例提取，30%资金始终留存账上</td>
+                    </tr>
+                </table>
+
+                <h3>10.2 回款顺序</h3>
+                <div class="flow-diagram text-center">
+                    <span class="inline-block bg-red-600 text-white px-4 py-2 rounded-lg mr-2">1️⃣ 滴灌通优先级</span>
+                    <span class="text-2xl">→</span>
+                    <span class="inline-block bg-yellow-500 text-white px-4 py-2 rounded-lg mx-2">2️⃣ 夹层</span>
+                    <span class="text-2xl">→</span>
+                    <span class="inline-block bg-gray-500 text-white px-4 py-2 rounded-lg ml-2">3️⃣ 劣后</span>
+                </div>
+                <div class="warning-box mt-4">
+                    <strong>特殊约定：</strong>反对将艺人40%尾款（296.96万USD）作为债务优先于滴灌通回款
+                </div>
+
+                <h3>10.3 保本点约定</h3>
+                <table>
+                    <tr>
+                        <th>阶段</th>
+                        <th>保本点</th>
+                        <th>说明</th>
+                    </tr>
+                    <tr>
+                        <td>初始争议</td>
+                        <td>滴灌通主张2000万 vs 主办方提出4500万</td>
+                        <td>存在分歧</td>
+                    </tr>
+                    <tr>
+                        <td><strong>调整后方案</strong></td>
+                        <td class="risk-medium"><strong>2800万人民币</strong></td>
+                        <td>滴灌通需收到2800万的70%即1960万，方可完成退出，对应<strong>1.1亿总票仓的25.5%</strong></td>
+                    </tr>
+                </table>
+
+                <h3>10.4 计息方式</h3>
+                <table>
+                    <tr>
+                        <th>投资类型</th>
+                        <th>计息方式</th>
+                        <th>收益比例</th>
+                    </tr>
+                    <tr>
+                        <td>普通投资</td>
+                        <td>按日或月平息计息</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>夹层投资</td>
+                        <td>按月平息计息</td>
+                        <td>4个月20%封顶；若额度为300万，可下调至17%-18%</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Section 11: 其他补充说明 -->
+            <section id="section11" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> P13-P14</span>
+                <h1><i class="fas fa-plus-circle mr-2"></i>十一、其他补充说明</h1>
+                
+                <h3>11.1 改签相关规则</h3>
+                <table>
+                    <tr><th>条款要点</th><th>具体内容</th></tr>
+                    <tr><td><strong>核心约定</strong></td><td>拿到批文后支付的秀费（50%+40%）不可退，仅支持改期（可协商至次年、下一季度等）</td></tr>
+                    <tr><td><strong>改期成本</strong></td><td>改期后需重新支付运营相关期间成本（如场地、推广等），滴灌通不承担改期新增的运营成本</td></tr>
+                    <tr><td><strong>主办方义务</strong></td><td>改期后主办方有义务继续推进演出，不得无故终止</td></tr>
+                    <tr><td><strong>不可抗力改签</strong></td><td>因不可抗力改签时，已支付的秀费由经纪公司暂存，用于改期演出，不视为沉没成本</td></tr>
+                </table>
+
+                <h3>11.2 审计相关</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>演出结束后<strong>5-7个工作日内</strong>完成审计</li>
+                    <li>邀请资方参与审计过程</li>
+                    <li>滴灌通不参与中间环节回款分配，仅在最终审计后按顺序分配</li>
+                    <li>境外项目：财务团队需复核审计报告，确保数据准确</li>
+                </ul>
+
+                <h3>11.3 出资调整背景</h3>
+                <div class="info-box">
+                    滴灌通原计划出资<strong>1500万</strong>，后增加至<strong>2000万</strong>，旨在帮助主办方避免额外融资及折扣出票，确保项目资金充足
+                </div>
+
+                <h3>11.4 票务销售补充</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>正规平台（大麦、猫眼、抖音等）售票占比约<strong>70%</strong>，私域及黄牛渠道售票需录入大麦系统备案</li>
+                    <li>黄牛渠道实行"一手交钱一手交货"，溢价部分不参与投资人分成</li>
+                    <li>投资人可派志愿者参与演出当天关键闸口验票，防范无票入场</li>
+                </ul>
+
+                <h3>11.5 关键注意事项（调整后方案）</h3>
+                <table>
+                    <tr><th>注意事项</th><th>具体内容</th></tr>
+                    <tr><td><strong>分成执行规则</strong></td><td>滴灌通的70%分成比例覆盖全部票款，从第一笔票款到账即按此比例提取，确保30%资金始终留存账上</td></tr>
+                    <tr><td><strong>延迟付款执行</strong></td><td>需提前与舞美公司明确尾款支付时间（票款结算后），并与海口银行确认税费延迟操作的可行性</td></tr>
+                    <tr><td><strong>票款监管</strong></td><td>仅认可大麦/猫眼等正规渠道的可监管票款收入，赞助、周边等衍生收入不纳入预估</td></tr>
+                    <tr><td><strong>保本点保障</strong></td><td>2800万保本点对应1.1亿总票仓的25.5%，结合行业惯例（1亿票仓预售可收2500-3000万预付款），风险可控</td></tr>
+                </table>
+
+                <h3>11.6 夹层投资补充说明</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>核心定位：</strong>主要用于测试投资人承诺度，金额较小，劣后投资人对收益比例无严格要求，以促成合作为主</li>
+                    <li><strong>灵活调整：</strong>投资人内部可根据出资比例分配收益，主责人可适当让利</li>
+                </ul>
+
+                <h3>11.7 赞助与政府补贴补充</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>招商力度：</strong>主办方将投入90%以上精力开展赞助招商，采用矩阵式营销（含网红、社交媒体推广），开放<strong>20%佣金</strong>吸引合作方</li>
+                    <li><strong>风险对冲：</strong>已洽谈<strong>1500万</strong>赞助意向，约定最低赞助保底金额，不足部分由主办方承担补充责任</li>
+                    <li><strong>政府补贴：</strong>按杭州同类项目<strong>500-1000万</strong>的标准保守测算</li>
+                </ul>
+            </section>
+
+            <!-- Section 12: 核心数据汇总 -->
+            <section id="section12" class="content-section">
+                <span class="page-header"><i class="fas fa-file-alt mr-1"></i> 附录</span>
+                <h1><i class="fas fa-database mr-2"></i>十二、核心数据速查表</h1>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h3>资金数据</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>总投入（初始）</td><td>超7700万人民币</td></tr>
+                            <tr><td>总投入（调整后）</td><td><strong>7000万人民币</strong></td></tr>
+                            <tr><td>融资目标</td><td>5000万人民币</td></tr>
+                            <tr><td>滴灌通出资</td><td>2000万人民币（优先）</td></tr>
+                            <tr><td>劣后资金</td><td>3000万人民币</td></tr>
+                            <tr><td>资金缺口（调整后）</td><td>2000万人民币</td></tr>
+                        </table>
+
+                        <h3>秀费数据</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>艺人秀费目标</td><td>300万USD/场</td></tr>
+                            <tr><td>艺人秀费暂按</td><td>320万USD/场</td></tr>
+                            <tr><td>10% Shows Fee</td><td>74.24万USD</td></tr>
+                            <tr><td>50% Shows Fee</td><td>348万USD</td></tr>
+                            <tr><td>40% Shows Fee</td><td>296.96万USD</td></tr>
+                        </table>
+
+                        <h3>延迟付款</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>税费</td><td>672万人民币</td></tr>
+                            <tr><td>舞美尾款</td><td>300万人民币</td></tr>
+                            <tr><td>团队工资</td><td>30万人民币</td></tr>
+                            <tr><td><strong>合计</strong></td><td><strong>1002万人民币</strong></td></tr>
+                        </table>
+                    </div>
+
+                    <div>
+                        <h3>分成与保本</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>滴灌通分成比例</td><td><strong>70%</strong></td></tr>
+                            <tr><td>保本点</td><td><strong>2800万人民币</strong></td></tr>
+                            <tr><td>总票仓</td><td>1.1亿人民币</td></tr>
+                        </table>
+
+                        <h3>票务控制</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>赠票上限</td><td>1000张</td></tr>
+                            <tr><td>最低售价</td><td>票面价50%-60%</td></tr>
+                            <tr><td>控票比例上限</td><td>20%</td></tr>
+                        </table>
+
+                        <h3>夹层投资</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>额度上限</td><td>300万人民币</td></tr>
+                            <tr><td>收益比例封顶</td><td>4个月20%</td></tr>
+                            <tr><td>可下调至</td><td>17%-18%</td></tr>
+                        </table>
+
+                        <h3>赞助与补贴</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>已洽谈赞助意向</td><td>1500万人民币</td></tr>
+                            <tr><td>赞助基线</td><td>2000万人民币</td></tr>
+                            <tr><td>政府补贴测算</td><td>500-1000万人民币</td></tr>
+                            <tr><td>招商佣金</td><td>20%</td></tr>
+                        </table>
+
+                        <h3>损失承担</h3>
+                        <table>
+                            <tr><th>指标</th><th>数值</th></tr>
+                            <tr><td>滴灌通不可抗力损失上限</td><td>总损失的20%</td></tr>
+                            <tr><td>资金挪用违约赔偿</td><td>本金+20%溢价</td></tr>
+                            <tr><td>支出浮动上限</td><td>±10%</td></tr>
+                            <tr><td>比价差价限制</td><td>不超最低价5%</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 页脚 -->
+            <div class="text-center text-gray-500 py-8 border-t mt-8">
+                <p><i class="fas fa-file-alt mr-2"></i>文档整理完成时间：2026年1月28日</p>
+                <p><i class="fas fa-folder-open mr-2"></i>来源文档：综合文档1、文档2、文档3、文档4整理汇编</p>
+                <p><i class="fas fa-bullseye mr-2"></i>文档用途：演唱会投资项目尽职调查、条款谈判、风险评估参考</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+            
+            // 更新导航高亮
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // 滚动时自动高亮导航
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section[id]');
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick')?.includes(current)) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
