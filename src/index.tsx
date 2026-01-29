@@ -105,8 +105,22 @@ function calculateComparable(
   ]
   
   // 合并所有艺人数据用于归一化（包含锚点艺人和目标艺人）
+  // 注意：锚点数据在 b.data 对象中，需要正确展开
   const allArtists = [
-    ...benchmarkList.map((b: any) => ({ ...b.data, name: b.name, id: b.id, boxOffice: b.boxOffice, tier: b.tier || 'tier3' })),
+    ...benchmarkList.map((b: any) => {
+      // 锚点的平台数据存储在 data 属性中
+      const platformData = b.data || {}
+      return {
+        baidu: platformData.baidu || 0,
+        netease: platformData.netease || 0,
+        xhs: platformData.xhs || 0,
+        ...platformData,  // 展开其他可能的自定义维度
+        name: b.name,
+        id: b.id,
+        boxOffice: b.boxOffice,
+        tier: b.tier || 'tier3'
+      }
+    }),
     { ...artistData, name: 'Target', id: 'target' }
   ]
   
