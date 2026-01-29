@@ -561,21 +561,26 @@ app.get('/', (c) => {
             
             <!-- 融资结构 - 核心交易信息 -->
             <div class="stat-card rounded-2xl p-6 mb-8 fade-in" style="background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(90, 107, 53, 0.05)); border: 2px solid rgba(0, 200, 83, 0.3);">
-                <div class="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+                <div class="flex flex-wrap items-center justify-center gap-3 md:gap-6">
                     <div class="text-center">
                         <div class="text-xs text-white/50 mb-1">融资金额</div>
                         <div class="text-2xl md:text-3xl font-bold text-green-400">5,000万</div>
                     </div>
                     <div class="text-white/30 text-xl">=</div>
-                    <div class="text-center px-4 py-2 rounded-lg" style="background: rgba(212, 175, 55, 0.15);">
-                        <div class="text-xs text-white/50 mb-1">优先级</div>
-                        <div class="text-2xl md:text-3xl font-bold gold-text">2,000万</div>
-                        <div class="text-xs gold-text/70 mt-1">年化33% | 月息2.75%</div>
+                    <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(0, 200, 83, 0.15);">
+                        <div class="text-xs text-white/50 mb-1">优先（滴灌通）</div>
+                        <div class="text-xl md:text-2xl font-bold text-green-400">2,000万</div>
+                        <div class="text-xs text-green-400/70 mt-1">年化33% | 月息2.75%</div>
                     </div>
                     <div class="text-white/30 text-xl">+</div>
-                    <div class="text-center px-4 py-2 rounded-lg" style="background: rgba(255, 152, 0, 0.15);">
-                        <div class="text-xs text-white/50 mb-1">劣后级</div>
-                        <div class="text-2xl md:text-3xl font-bold text-orange-400">3,000万</div>
+                    <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(255, 152, 0, 0.15);">
+                        <div class="text-xs text-white/50 mb-1">夹层</div>
+                        <div class="text-xl md:text-2xl font-bold text-orange-400">2,000万</div>
+                    </div>
+                    <div class="text-white/30 text-xl">+</div>
+                    <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(244, 67, 54, 0.15);">
+                        <div class="text-xs text-white/50 mb-1">劣后（主办方）</div>
+                        <div class="text-xl md:text-2xl font-bold text-red-400">1,000万</div>
                     </div>
                 </div>
             </div>
@@ -967,7 +972,7 @@ app.get('/', (c) => {
                             </tr>
                             <tr>
                                 <td>资金结构划分</td>
-                                <td class="highlight">优先2000万 + 劣后3000万</td>
+                                <td class="highlight">优先2,000万 + 夹层2,000万 + 劣后1,000万</td>
                                 <td>调整后方案中的资金结构</td>
                             </tr>
                         </tbody>
@@ -997,20 +1002,25 @@ app.get('/', (c) => {
                     <div class="text-center p-6 rounded-xl" style="background: rgba(0, 200, 83, 0.1); border: 1px solid rgba(0, 200, 83, 0.3);">
                         <div class="text-4xl font-bold text-green-400 mb-2">5,000万</div>
                         <div class="text-white/70 font-medium mb-4">融资总金额</div>
-                        <div class="flex justify-center gap-4">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold gold-text">2,000万</div>
-                                <div class="text-white/50 text-sm">优先级</div>
+                        <div class="flex justify-center gap-3 flex-wrap">
+                            <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(0, 200, 83, 0.2);">
+                                <div class="text-xl font-bold text-green-400">2,000万</div>
+                                <div class="text-white/50 text-xs">优先（滴灌通）</div>
                             </div>
-                            <div class="text-white/30 text-2xl">+</div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-orange-400">3,000万</div>
-                                <div class="text-white/50 text-sm">劣后级</div>
+                            <div class="text-white/30 text-xl self-center">+</div>
+                            <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(255, 152, 0, 0.2);">
+                                <div class="text-xl font-bold text-orange-400">2,000万</div>
+                                <div class="text-white/50 text-xs">夹层</div>
+                            </div>
+                            <div class="text-white/30 text-xl self-center">+</div>
+                            <div class="text-center px-3 py-2 rounded-lg" style="background: rgba(244, 67, 54, 0.2);">
+                                <div class="text-xl font-bold text-red-400">1,000万</div>
+                                <div class="text-white/50 text-xs">劣后（主办方）</div>
                             </div>
                         </div>
                     </div>
-                    <div class="p-6 rounded-xl" style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);">
-                        <div class="text-lg font-semibold gold-text mb-4"><i class="fas fa-percentage mr-2"></i>优先级收益结构</div>
+                    <div class="p-6 rounded-xl" style="background: rgba(0, 200, 83, 0.1); border: 1px solid rgba(0, 200, 83, 0.3);">
+                        <div class="text-lg font-semibold text-green-400 mb-4"><i class="fas fa-percentage mr-2"></i>优先级收益结构（滴灌通）</div>
                         <table class="w-full text-sm">
                             <tr class="border-b border-white/10">
                                 <td class="py-2 text-white/70">年化收益率</td>
@@ -1025,9 +1035,9 @@ app.get('/', (c) => {
                                 <td class="py-2 text-right"><span class="highlight">2.75%</span></td>
                             </tr>
                         </table>
-                        <div class="mt-4 p-3 rounded-lg text-sm" style="background: rgba(212, 175, 55, 0.15);">
-                            <i class="fas fa-calculator mr-2 gold-text"></i>
-                            <span class="text-white/80">2,000万 × 2.75%/月 = <strong class="gold-text">55万/月</strong></span>
+                        <div class="mt-4 p-3 rounded-lg text-sm" style="background: rgba(0, 200, 83, 0.15);">
+                            <i class="fas fa-calculator mr-2 text-green-400"></i>
+                            <span class="text-white/80">2,000万 × 2.75%/月 = <strong class="text-green-400">55万/月</strong></span>
                         </div>
                     </div>
                 </div>
@@ -1062,7 +1072,7 @@ app.get('/', (c) => {
                             <tr style="background: rgba(0, 200, 83, 0.08);">
                                 <td><span class="highlight" style="background: rgba(0, 200, 83, 0.3); color: #69f0ae;">T0</span></td>
                                 <td><strong style="color: #69f0ae;">拿到5000万投资款</strong></td>
-                                <td style="color: #69f0ae;">优先2,000万 + 劣后3,000万</td>
+                                <td style="color: #69f0ae;">优先2,000万 + 夹层2,000万 + 劣后1,000万</td>
                                 <td style="color: #69f0ae;"><strong>5,000万</strong></td>
                                 <td><span class="highlight-green">基准时间点 | 优先级年化33%</span></td>
                             </tr>
@@ -1615,20 +1625,20 @@ app.get('/', (c) => {
                 <div class="flow-chart">
                     <div class="flow-step" style="background: linear-gradient(135deg, rgba(0, 200, 83, 0.3), rgba(0, 200, 83, 0.1)); border-color: rgba(0, 200, 83, 0.5);">
                         <div class="text-green-400 font-bold text-lg">第一顺位</div>
-                        <div class="text-white">滴灌通优先级</div>
-                        <div class="text-sm text-white/60">2000万</div>
+                        <div class="text-white">优先（滴灌通）</div>
+                        <div class="text-sm text-white/60">2,000万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step" style="background: linear-gradient(135deg, rgba(255, 152, 0, 0.3), rgba(255, 152, 0, 0.1)); border-color: rgba(255, 152, 0, 0.5);">
                         <div class="text-orange-400 font-bold text-lg">第二顺位</div>
                         <div class="text-white">夹层</div>
-                        <div class="text-sm text-white/60">≤300万</div>
+                        <div class="text-sm text-white/60">2,000万</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step" style="background: linear-gradient(135deg, rgba(244, 67, 54, 0.3), rgba(244, 67, 54, 0.1)); border-color: rgba(244, 67, 54, 0.5);">
                         <div class="text-red-400 font-bold text-lg">第三顺位</div>
-                        <div class="text-white">劣后</div>
-                        <div class="text-sm text-white/60">3000万</div>
+                        <div class="text-white">劣后（主办方）</div>
+                        <div class="text-sm text-white/60">1,000万</div>
                     </div>
                 </div>
                 
