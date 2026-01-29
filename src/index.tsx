@@ -971,16 +971,17 @@ app.get('/', (c) => {
             
             <div class="info-box mb-8">
                 <i class="fas fa-lightbulb mr-2 gold-text"></i>
-                <strong>核心说明：</strong>实际秀费目标协商为<span class="highlight">300万USD/场</span>，暂按<span class="highlight">320万USD/场</span>核算
+                <strong>核心说明：</strong>秀费按<span class="highlight">300万USD/场</span>核算，<span class="highlight">T0 = 拿到5000万投资款</span>
             </div>
 
             <div class="stat-card rounded-2xl p-8 mb-8 fade-in">
-                <h3 class="subsection-title"><i class="fas fa-list-ol"></i>完整付款时间线</h3>
+                <h3 class="subsection-title"><i class="fas fa-list-ol"></i>海外艺人时间推进图与付款节奏</h3>
                 <div class="overflow-x-auto">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>关键时间节点</th>
+                                <th>时间节点</th>
+                                <th>阶段</th>
                                 <th>付款内容</th>
                                 <th>付款金额</th>
                                 <th>备注说明</th>
@@ -988,33 +989,60 @@ app.get('/', (c) => {
                         </thead>
                         <tbody>
                             <tr>
-                                <td><span class="highlight">签约完成</span></td>
-                                <td>10% Shows Fee</td>
-                                <td><strong>74.24万USD</strong></td>
-                                <td><span class="highlight-green">未拿到批文可退还</span></td>
+                                <td><span class="highlight">T-30</span></td>
+                                <td><strong>签约完成</strong></td>
+                                <td>10% Shows Fee × 1.16(税)</td>
+                                <td><strong>69.6万USD</strong></td>
+                                <td><span class="highlight-green">Refundable：批文不下可退还</span></td>
+                            </tr>
+                            <tr style="background: rgba(212, 175, 55, 0.05);">
+                                <td><span class="highlight" style="background: rgba(0, 200, 83, 0.2); color: #69f0ae;">T0</span></td>
+                                <td><strong style="color: #69f0ae;">拿到5000万投资款</strong></td>
+                                <td colspan="3" style="text-align: center; color: #69f0ae;"><i class="fas fa-flag-checkered mr-2"></i>基准时间点</td>
                             </tr>
                             <tr>
-                                <td><span class="highlight">拿到批文</span></td>
-                                <td>50% Shows Fee</td>
+                                <td><span class="highlight">T+7</span></td>
+                                <td><strong>拿到批文</strong></td>
+                                <td>50% Shows Fee × 1.16(税)</td>
                                 <td><strong>348万USD</strong></td>
                                 <td>通过担保账号自动支付</td>
                             </tr>
                             <tr>
-                                <td><span class="highlight">艺人到达中国</span></td>
-                                <td>40% Shows Fee</td>
-                                <td><strong>296.96万USD</strong></td>
-                                <td>支付节点可协商</td>
+                                <td><span class="highlight">T+14</span></td>
+                                <td><strong>艺人仍在美国</strong></td>
+                                <td>
+                                    机票100% + 酒店50% + 场馆费用 + 推广<br>
+                                    安保30% + 舞美30% + 签证费用<br>
+                                    场地相关方50%（消检/电检/消防/医疗等）<br>
+                                    保险行政费用
+                                </td>
+                                <td><strong>1,080.25万RMB</strong></td>
+                                <td>运营费用预付阶段</td>
                             </tr>
                             <tr>
-                                <td><span class="highlight">演出前1天</span></td>
-                                <td>100%剩余Expenses</td>
-                                <td>舞美200万+安保150万+行政22万</td>
-                                <td>舞美总费用500万，40%定金</td>
+                                <td><span class="highlight">T+21</span></td>
+                                <td><strong>艺人到达中国</strong></td>
+                                <td>剩余40% Shows Fee × 1.16(税)</td>
+                                <td><strong>278.4万USD</strong></td>
+                                <td>基于60%阶段的剩余部分</td>
                             </tr>
                             <tr>
-                                <td><span class="highlight-green">票款到账后</span></td>
+                                <td><span class="highlight">T+28</span></td>
+                                <td><strong>演出前1天</strong></td>
+                                <td>100%剩余Expenses<br>（制作/舞美/设备/人员等全部结清）</td>
+                                <td><strong>700.75万RMB</strong></td>
+                                <td>所有运营费用结清</td>
+                            </tr>
+                            <tr style="background: rgba(212, 175, 55, 0.08);">
+                                <td><span class="highlight gold-text">T+29</span></td>
+                                <td><strong class="gold-text">正式开演</strong></td>
+                                <td colspan="3" style="text-align: center;"><i class="fas fa-star mr-2 gold-text"></i><span class="gold-text">演出日</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="highlight-green">T+36</span></td>
+                                <td><strong>票款到账后</strong></td>
                                 <td>延迟付款项目</td>
-                                <td><strong>合计1002万</strong></td>
+                                <td><strong>合计1,002万RMB</strong></td>
                                 <td>滴灌通70%分成完成后支付</td>
                             </tr>
                         </tbody>
@@ -1025,26 +1053,53 @@ app.get('/', (c) => {
             <!-- Payment Flow Chart -->
             <div class="stat-card rounded-2xl p-8 fade-in">
                 <h3 class="subsection-title"><i class="fas fa-project-diagram"></i>付款流程可视化</h3>
-                <div class="flow-chart">
+                <div class="flow-chart" style="flex-wrap: wrap; gap: 1rem;">
                     <div class="flow-step">
+                        <div class="text-xs text-white/50 mb-1">T-30</div>
                         <div class="gold-text font-bold">签约</div>
-                        <div class="text-sm">10% = 74.24万USD</div>
+                        <div class="text-sm">10% = 69.6万USD</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step" style="border-color: rgba(0, 200, 83, 0.5); background: linear-gradient(135deg, rgba(0, 200, 83, 0.2), rgba(0, 200, 83, 0.05));">
+                        <div class="text-xs text-green-400 mb-1">T0</div>
+                        <div class="text-green-400 font-bold">5000万到账</div>
+                        <div class="text-sm text-green-400/70">基准时间点</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
+                        <div class="text-xs text-white/50 mb-1">T+7</div>
                         <div class="gold-text font-bold">拿到批文</div>
                         <div class="text-sm">50% = 348万USD</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
-                        <div class="gold-text font-bold">艺人到华</div>
-                        <div class="text-sm">40% = 296.96万USD</div>
+                        <div class="text-xs text-white/50 mb-1">T+14</div>
+                        <div class="gold-text font-bold">艺人在美国</div>
+                        <div class="text-sm">运营费1,080万RMB</div>
                     </div>
                     <i class="fas fa-arrow-right flow-arrow"></i>
                     <div class="flow-step">
-                        <div class="gold-text font-bold">票款到账后</div>
-                        <div class="text-sm">延迟付款1002万</div>
+                        <div class="text-xs text-white/50 mb-1">T+21</div>
+                        <div class="gold-text font-bold">艺人到华</div>
+                        <div class="text-sm">40% = 278.4万USD</div>
                     </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step">
+                        <div class="text-xs text-white/50 mb-1">T+28</div>
+                        <div class="gold-text font-bold">演出前1天</div>
+                        <div class="text-sm">结清700.75万RMB</div>
+                    </div>
+                    <i class="fas fa-arrow-right flow-arrow"></i>
+                    <div class="flow-step" style="border-color: rgba(212, 175, 55, 0.6); background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.08));">
+                        <div class="text-xs gold-text mb-1">T+29</div>
+                        <div class="gold-text font-bold">🎤 开演</div>
+                        <div class="text-sm gold-text/70">演出日</div>
+                    </div>
+                </div>
+                
+                <div class="info-box mt-6">
+                    <i class="fas fa-calculator mr-2 gold-text"></i>
+                    <strong>秀费计算：</strong>300万USD/场 × 2场 × 1.16(税) = <span class="highlight">696万USD</span>（约4,942万RMB @7.1汇率）
                 </div>
             </div>
         </div>
