@@ -1,0 +1,2323 @@
+// 艺人票房预测器页面 - Comparable模型计算器
+// 版本日期：2026-01-29 (集成到Vibelinks)
+
+export const predictorPageHTML = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艺人票房测算 - Vibelinks | Comparable模型计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .step-card {
+            transition: all 0.3s ease;
+        }
+        .step-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .tab-active {
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+        }
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .result-card {
+            transition: all 0.5s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Gold theme variables for consistency with main site */
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E4BA;
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gold-bg { background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #D4AF37 100%); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 头部 -->
+    <header class="gradient-bg text-white py-8 px-4 shadow-lg">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <i class="fas fa-chart-line"></i>
+                        艺人票房测算
+                    </h1>
+                    <p class="mt-2 text-purple-100">Comparable模型 · AI智能测算 · 专业投委会工具</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="/" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition text-sm">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回投资文档</span>
+                    </a>
+                    <div class="text-right text-sm text-purple-200 hidden md:block">
+                        <p>基于 Normalization→D→LC→F→双锚点→城市溢价 逻辑</p>
+                        <p class="mt-1">Version 2.0 | 2026-01-29</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 导航标签 -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex space-x-8">
+                <button onclick="switchTab('predict')" id="tab-predict" class="tab-active py-4 px-2 text-sm font-medium">
+                    <i class="fas fa-chart-line mr-2"></i>演唱会票房预测入口
+                </button>
+                <button onclick="switchTab('archive')" id="tab-archive" class="py-4 px-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-folder-open mr-2"></i>艺人档案
+                    <span id="archive-badge" class="ml-1 px-1.5 py-0.5 text-xs bg-amber-100 text-amber-600 rounded-full hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        
+        <!-- 演唱会票房预测入口面板 -->
+        <div id="panel-predict" class="space-y-6">
+            <!-- 艺人数据输入区 -->
+            <div class="glass rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-user-tie text-purple-600"></i>
+                        艺人数据输入
+                        <span class="text-sm font-normal text-gray-500 ml-2">（可添加/删除数据维度）</span>
+                    </h3>
+                    <button onclick="addArtistDataDimension()" class="px-3 py-1.5 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 transition-all">
+                        <i class="fas fa-plus mr-1"></i>添加维度
+                    </button>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- 左侧：数据输入 -->
+                    <div class="space-y-4">
+                        <!-- 艺人名称输入 -->
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-4">
+                            <label class="text-sm font-medium text-purple-700 mb-2 block">
+                                <i class="fas fa-user mr-1"></i>艺人名称
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="artist-search-input" 
+                                    placeholder="输入艺人名称，如: Drake, Taylor Swift, 周杰伦..."
+                                    autocomplete="off"
+                                    class="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800 bg-white">
+                                <div id="artist-autocomplete-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                                </div>
+                            </div>
+                            <p class="text-xs text-purple-500 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>输入时会显示常见艺人供快速选择
+                            </p>
+                        </div>
+                        
+                        <div id="artist-data-inputs">
+                            <!-- 动态生成的输入项 -->
+                        </div>
+                        
+                        <!-- 城市级别选择 -->
+                        <div class="bg-purple-50 rounded-xl p-4 mt-4">
+                            <h4 class="font-medium text-purple-700 mb-3">
+                                <i class="fas fa-city mr-2"></i>目标城市级别
+                            </h4>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier1" checked class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">一线城市</p>
+                                        <p class="text-xs text-gray-500">深圳/杭州/上海</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier2" class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">二线城市</p>
+                                        <p class="text-xs text-gray-500">成都/武汉/南京</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center p-3 bg-white rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all">
+                                    <input type="radio" name="targetTier" value="tier3" class="mr-2 text-purple-600">
+                                    <div>
+                                        <p class="font-medium text-gray-800">三线城市</p>
+                                        <p class="text-xs text-gray-500">长沙/郑州/济南</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button onclick="runPrediction()" 
+                            class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all">
+                            <i class="fas fa-calculator mr-2"></i>开始预测
+                        </button>
+                    </div>
+                    
+                    <!-- 右侧：预测结果 -->
+                    <div class="bg-gray-50 rounded-xl p-4">
+                        <h4 class="font-medium text-gray-700 mb-4">
+                            <i class="fas fa-chart-pie mr-2 text-purple-600"></i>
+                            预测结果
+                        </h4>
+                        <div id="prediction-result">
+                            <div class="text-center text-gray-400 py-8">
+                                <i class="fas fa-arrow-left text-3xl mb-3"></i>
+                                <p>输入数据后点击"开始预测"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 模型参数配置区 -->
+            <div class="glass rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-purple-600"></i>
+                        模型参数配置
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="saveAllParams()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
+                            <i class="fas fa-save mr-1"></i>保存
+                        </button>
+                        <button onclick="resetAllParams()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                            <i class="fas fa-undo mr-1"></i>重置
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- 左列 -->
+                    <div class="space-y-4">
+                        <!-- 需求指数D权重 -->
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-medium text-blue-700">
+                                    <i class="fas fa-balance-scale mr-2"></i>
+                                    需求指数D权重
+                                </h4>
+                                <button onclick="addWeightParam()" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                                    <i class="fas fa-plus mr-1"></i>添加
+                                </button>
+                            </div>
+                            <div id="weight-params-list" class="space-y-2">
+                            </div>
+                            <p class="text-xs text-blue-600 mt-3">
+                                <i class="fas fa-info-circle mr-1"></i>权重之和建议为1.0
+                            </p>
+                        </div>
+                        
+                        <!-- 转化率LC参数 -->
+                        <div class="bg-green-50 rounded-xl p-4">
+                            <h4 class="font-medium text-green-700 mb-4">
+                                <i class="fas fa-exchange-alt mr-2"></i>
+                                转化率LC参数
+                            </h4>
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm text-gray-600 w-24">基础常数</label>
+                                    <input type="number" id="param-lc-const" value="0.60" step="0.05" min="0" max="1"
+                                        class="flex-1 px-3 py-2 border rounded">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm text-gray-600 w-24">网易云系数</label>
+                                    <input type="number" id="param-lc-netease" value="0.40" step="0.05"
+                                        class="flex-1 px-3 py-2 border rounded">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm text-gray-600 w-24">小红书系数</label>
+                                    <input type="number" id="param-lc-xhs" value="-0.20" step="0.05"
+                                        class="flex-1 px-3 py-2 border rounded">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右列 -->
+                    <div class="space-y-4">
+                        <!-- 城市溢价系数 -->
+                        <div class="bg-purple-50 rounded-xl p-4">
+                            <h4 class="font-medium text-purple-700 mb-4">
+                                <i class="fas fa-city mr-2"></i>
+                                城市溢价系数（三线→目标城市）
+                            </h4>
+                            <div class="space-y-3">
+                                <!-- 三线→一线 -->
+                                <div class="bg-white rounded-lg p-3">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">三线 → 一线城市</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label class="text-xs text-gray-500">保守</label>
+                                            <input type="number" id="tier1-conservative" value="1.15" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">中性</label>
+                                            <input type="number" id="tier1-neutral" value="1.25" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">激进</label>
+                                            <input type="number" id="tier1-aggressive" value="1.35" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 三线→二线 -->
+                                <div class="bg-white rounded-lg p-3">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">三线 → 二线城市</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label class="text-xs text-gray-500">保守</label>
+                                            <input type="number" id="tier2-conservative" value="0.95" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">中性</label>
+                                            <input type="number" id="tier2-neutral" value="1.05" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">激进</label>
+                                            <input type="number" id="tier2-aggressive" value="1.15" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 三线→三线 -->
+                                <div class="bg-white rounded-lg p-3">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">三线 → 三线城市</p>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label class="text-xs text-gray-500">保守</label>
+                                            <input type="number" id="tier3-conservative" value="0.85" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">中性</label>
+                                            <input type="number" id="tier3-neutral" value="0.95" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">激进</label>
+                                            <input type="number" id="tier3-aggressive" value="1.05" step="0.05"
+                                                class="w-full px-2 py-1 border rounded text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Benchmark锚点数据 -->
+                <div class="mt-6 bg-orange-50 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-medium text-orange-700">
+                            <i class="fas fa-anchor mr-2"></i>
+                            Benchmark锚点数据
+                            <span class="text-sm font-normal text-orange-500 ml-2">（可选择各锚点所属城市级别）</span>
+                        </h4>
+                        <button onclick="addBenchmark()" class="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600">
+                            <i class="fas fa-plus mr-1"></i>添加锚点
+                        </button>
+                    </div>
+                    <div id="benchmark-list" class="grid md:grid-cols-2 gap-4">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 艺人档案面板 -->
+        <div id="panel-archive" class="hidden space-y-6">
+            <div class="glass rounded-2xl shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-folder-open text-amber-500"></i>
+                            艺人档案库
+                        </h2>
+                        <p class="text-gray-500 mt-1">已保存的艺人预测记录，可查看详情或复用数据</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <span id="archive-total-count" class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm">
+                            0 条记录
+                        </span>
+                        <button onclick="clearAllArchives()" class="px-3 py-1 text-red-500 hover:bg-red-50 rounded-lg text-sm transition-all">
+                            <i class="fas fa-trash-alt mr-1"></i>清空
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 档案列表 -->
+                <div id="archive-panel-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                </div>
+                
+                <!-- 空状态 -->
+                <div id="archive-empty-state" class="text-center py-16">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-amber-100 rounded-full mb-4">
+                        <i class="fas fa-archive text-4xl text-amber-400"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-600 mb-2">暂无艺人档案</h3>
+                    <p class="text-gray-400 mb-6">完成票房预测后，可以保存到档案库</p>
+                    <button onclick="switchTab('predict')" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">
+                        <i class="fas fa-plus mr-2"></i>去创建预测
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- 底部 -->
+    <footer class="bg-gray-800 text-gray-400 py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p class="mb-2">Comparable模型票房预测器 · Vibelinks Entertainment</p>
+            <p class="text-sm">基于 Normalization → D → LC → F → 双锚点 → 城市溢价 逻辑链</p>
+            <a href="/" class="inline-flex items-center gap-2 mt-4 text-purple-400 hover:text-purple-300 transition">
+                <i class="fas fa-arrow-left"></i>返回投资文档
+            </a>
+        </div>
+    </footer>
+    <script>
+        // ==================== 全局状态 ====================
+        let currentParams = null;
+        
+        // 艺人数据库（用于自动补全）
+        const ARTIST_DATABASE = [
+            // Hip-Hop / Rap
+            { name: 'Drake', cn: '德雷克', genre: 'Hip-Hop' },
+            { name: 'Travis Scott', cn: '特拉维斯·斯科特', genre: 'Hip-Hop' },
+            { name: 'Kanye West', cn: '坎耶·韦斯特', genre: 'Hip-Hop' },
+            { name: 'Cardi B', cn: '卡迪·B', genre: 'Hip-Hop' },
+            { name: 'Kendrick Lamar', cn: '肯德里克·拉马尔', genre: 'Hip-Hop' },
+            { name: 'J. Cole', cn: 'J·科尔', genre: 'Hip-Hop' },
+            { name: 'Post Malone', cn: '波斯特·马龙', genre: 'Hip-Hop' },
+            { name: 'Lil Baby', cn: '小宝贝', genre: 'Hip-Hop' },
+            { name: 'Future', cn: '未来', genre: 'Hip-Hop' },
+            { name: '21 Savage', cn: '21·萨维奇', genre: 'Hip-Hop' },
+            { name: 'Megan Thee Stallion', cn: '梅根·西·斯塔里昂', genre: 'Hip-Hop' },
+            { name: 'Nicki Minaj', cn: '妮琪·米娜', genre: 'Hip-Hop' },
+            { name: 'Eminem', cn: '埃米纳姆', genre: 'Hip-Hop' },
+            { name: 'Jay-Z', cn: '杰斯', genre: 'Hip-Hop' },
+            { name: 'Lil Wayne', cn: '小韦恩', genre: 'Hip-Hop' },
+            { name: 'Tyler, The Creator', cn: '泰勒·创造者', genre: 'Hip-Hop' },
+            { name: 'A$AP Rocky', cn: 'A$AP洛基', genre: 'Hip-Hop' },
+            { name: 'Metro Boomin', cn: '都市轰鸣', genre: 'Hip-Hop' },
+            { name: 'Playboi Carti', cn: '花花公子卡地', genre: 'Hip-Hop' },
+            { name: 'Doja Cat', cn: '多贾猫', genre: 'Hip-Hop' },
+            
+            // Pop
+            { name: 'Taylor Swift', cn: '泰勒·斯威夫特', genre: 'Pop' },
+            { name: 'Ed Sheeran', cn: '艾德·希兰', genre: 'Pop' },
+            { name: 'Ariana Grande', cn: '爱莉安娜·格兰德', genre: 'Pop' },
+            { name: 'Billie Eilish', cn: '比莉·艾利什', genre: 'Pop' },
+            { name: 'The Weeknd', cn: '威肯', genre: 'Pop' },
+            { name: 'Justin Bieber', cn: '贾斯汀·比伯', genre: 'Pop' },
+            { name: 'Bruno Mars', cn: '布鲁诺·马尔斯', genre: 'Pop' },
+            { name: 'Dua Lipa', cn: '杜阿·利帕', genre: 'Pop' },
+            { name: 'Harry Styles', cn: '哈里·斯泰尔斯', genre: 'Pop' },
+            { name: 'Olivia Rodrigo', cn: '奥利维亚·罗德里戈', genre: 'Pop' },
+            { name: 'Lady Gaga', cn: '嘎嘎小姐', genre: 'Pop' },
+            { name: 'Beyoncé', cn: '碧昂丝', genre: 'Pop' },
+            { name: 'Rihanna', cn: '蕾哈娜', genre: 'Pop' },
+            { name: 'Katy Perry', cn: '凯蒂·佩里', genre: 'Pop' },
+            { name: 'Selena Gomez', cn: '赛琳娜·戈麦斯', genre: 'Pop' },
+            { name: 'Miley Cyrus', cn: '麦莉·赛勒斯', genre: 'Pop' },
+            { name: 'Shawn Mendes', cn: '肖恩·门德斯', genre: 'Pop' },
+            { name: 'Charlie Puth', cn: '查理·普斯', genre: 'Pop' },
+            { name: 'Sia', cn: '希雅', genre: 'Pop' },
+            { name: 'Adele', cn: '阿黛尔', genre: 'Pop' },
+            { name: 'Sam Smith', cn: '萨姆·史密斯', genre: 'Pop' },
+            { name: 'Sabrina Carpenter', cn: '萨布丽娜·卡彭特', genre: 'Pop' },
+            { name: 'Chappell Roan', cn: '查佩尔·罗恩', genre: 'Pop' },
+            
+            // Latin
+            { name: 'Bad Bunny', cn: '坏兔子', genre: 'Latin' },
+            { name: 'J Balvin', cn: 'J·巴尔文', genre: 'Latin' },
+            { name: 'Daddy Yankee', cn: '洋基老爹', genre: 'Latin' },
+            { name: 'Ozuna', cn: '奥祖纳', genre: 'Latin' },
+            { name: 'Maluma', cn: '马卢马', genre: 'Latin' },
+            { name: 'Karol G', cn: '卡罗尔·G', genre: 'Latin' },
+            { name: 'Shakira', cn: '夏奇拉', genre: 'Latin' },
+            { name: 'Rauw Alejandro', cn: '劳·亚历杭德罗', genre: 'Latin' },
+            
+            // R&B / Soul
+            { name: 'SZA', cn: 'SZA', genre: 'R&B' },
+            { name: 'Frank Ocean', cn: '弗兰克·奥申', genre: 'R&B' },
+            { name: 'Daniel Caesar', cn: '丹尼尔·凯撒', genre: 'R&B' },
+            { name: 'H.E.R.', cn: 'H.E.R.', genre: 'R&B' },
+            { name: 'Usher', cn: '亚瑟', genre: 'R&B' },
+            { name: 'Chris Brown', cn: '克里斯·布朗', genre: 'R&B' },
+            { name: 'Khalid', cn: '哈立德', genre: 'R&B' },
+            
+            // Rock / Alternative
+            { name: 'Coldplay', cn: '酷玩乐队', genre: 'Rock' },
+            { name: 'Imagine Dragons', cn: '梦龙乐队', genre: 'Rock' },
+            { name: 'Maroon 5', cn: '魔力红', genre: 'Rock' },
+            { name: 'OneRepublic', cn: '共和时代', genre: 'Rock' },
+            { name: 'The 1975', cn: 'The 1975', genre: 'Rock' },
+            { name: 'Arctic Monkeys', cn: '北极猴', genre: 'Rock' },
+            { name: 'Twenty One Pilots', cn: '二十一名飞行员', genre: 'Rock' },
+            { name: 'Foo Fighters', cn: '喷火战机', genre: 'Rock' },
+            { name: 'Green Day', cn: '绿日乐队', genre: 'Rock' },
+            { name: 'Linkin Park', cn: '林肯公园', genre: 'Rock' },
+            
+            // Electronic / DJ
+            { name: 'Calvin Harris', cn: '卡尔文·哈里斯', genre: 'Electronic' },
+            { name: 'Marshmello', cn: '棉花糖', genre: 'Electronic' },
+            { name: 'The Chainsmokers', cn: '烟鬼组合', genre: 'Electronic' },
+            { name: 'David Guetta', cn: '大卫·库塔', genre: 'Electronic' },
+            { name: 'Kygo', cn: 'Kygo', genre: 'Electronic' },
+            { name: 'Tiësto', cn: '铁斯托', genre: 'Electronic' },
+            { name: 'Skrillex', cn: '史奇雷克斯', genre: 'Electronic' },
+            { name: 'Zedd', cn: '泽德', genre: 'Electronic' },
+            { name: 'Martin Garrix', cn: '马丁·盖瑞斯', genre: 'Electronic' },
+            
+            // K-Pop crossover (有在欧美市场活动的)
+            { name: 'BTS', cn: '防弹少年团', genre: 'K-Pop' },
+            { name: 'BLACKPINK', cn: 'BLACKPINK', genre: 'K-Pop' },
+            { name: 'Lisa', cn: 'Lisa', genre: 'K-Pop' },
+            { name: 'Rosé', cn: 'Rosé', genre: 'K-Pop' },
+        ];
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 加载默认参数
+            const res = await fetch('/api/params/default');
+            currentParams = await res.json();
+            console.log('Loaded default params:', currentParams);
+            
+            // 初始化自动补全
+            initAutocomplete();
+        });
+        
+        // ==================== 自动补全功能 ====================
+        function initAutocomplete() {
+            const input = document.getElementById('artist-search-input');
+            const dropdown = document.getElementById('artist-autocomplete-dropdown');
+            
+            if (!input || !dropdown) return;
+            
+            let selectedIndex = -1;
+            
+            // 输入事件
+            input.addEventListener('input', (e) => {
+                const value = e.target.value.trim().toLowerCase();
+                selectedIndex = -1;
+                
+                if (value.length < 1) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                
+                // 搜索匹配的艺人
+                const matches = ARTIST_DATABASE.filter(artist => 
+                    artist.name.toLowerCase().includes(value) || 
+                    artist.cn.includes(value)
+                ).slice(0, 8);  // 最多显示8个
+                
+                if (matches.length === 0) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+                
+                // 渲染下拉列表
+                dropdown.innerHTML = matches.map((artist, index) => \`
+                    <div class="autocomplete-item px-4 py-3 hover:bg-purple-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0"
+                         data-name="\${artist.name}" data-cn="\${artist.cn}" data-index="\${index}">
+                        <div>
+                            <span class="font-medium text-gray-800">\${highlightMatch(artist.name, value)}</span>
+                            <span class="text-gray-400 text-sm ml-2">\${artist.cn}</span>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded">\${artist.genre}</span>
+                    </div>
+                \`).join('');
+                
+                dropdown.classList.remove('hidden');
+                
+                // 点击选项
+                dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const artistName = item.dataset.name;
+                        input.value = artistName;
+                        dropdown.classList.add('hidden');
+                    });
+                });
+            });
+            
+            // 键盘导航
+            input.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    updateSelection(items, selectedIndex);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    const artistName = items[selectedIndex].dataset.name;
+                    input.value = artistName;
+                    dropdown.classList.add('hidden');
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // 点击外部关闭
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // 聚焦时如果有内容则显示建议
+            input.addEventListener('focus', () => {
+                if (input.value.trim().length >= 1) {
+                    input.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+        
+        // 显示通知
+        function showFillNotification(artistName, message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 fade-in';
+            notification.innerHTML = \`
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-800">\${artistName}</p>
+                        <p class="text-sm text-gray-500">\${message}</p>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(notification);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        function highlightMatch(text, query) {
+            const regex = new RegExp(\`(\${query})\`, 'gi');
+            return text.replace(regex, '<span class="text-purple-600 font-semibold">$1</span>');
+        }
+        
+        function updateSelection(items, index) {
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('bg-purple-50');
+                } else {
+                    item.classList.remove('bg-purple-50');
+                }
+            });
+        }
+        
+        // ==================== 标签切换 ====================
+        function switchTab(tabName) {
+            // 隐藏所有面板
+            document.querySelectorAll('[id^="panel-"]').forEach(p => p.classList.add('hidden'));
+            // 显示目标面板
+            document.getElementById('panel-' + tabName).classList.remove('hidden');
+            
+            // 更新标签样式
+            document.querySelectorAll('[id^="tab-"]').forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('text-gray-500');
+            });
+            document.getElementById('tab-' + tabName).classList.add('tab-active');
+            document.getElementById('tab-' + tabName).classList.remove('text-gray-500');
+            
+            // 如果切换到档案面板，刷新档案列表
+            if (tabName === 'archive') {
+                renderArchivePanelList();
+            }
+        }
+        
+        // ==================== 手动计算 ====================
+        async function runManualCalculation() {
+            const baidu = parseFloat(document.getElementById('manual-baidu').value);
+            const netease = parseFloat(document.getElementById('manual-netease').value);
+            const xhs = parseFloat(document.getElementById('manual-xhs').value);
+            
+            if (isNaN(baidu) || isNaN(netease) || isNaN(xhs)) {
+                alert('请输入有效的数字');
+                return;
+            }
+            
+            try {
+                const customParams = getCustomParams();
+                
+                const res = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        artistData: { baidu, netease, xhs },
+                        customParams
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                displayManualResult(data.result);
+            } catch (error) {
+                alert('计算失败: ' + error.message);
+            }
+        }
+        
+        function displayManualResult(result) {
+            const container = document.getElementById('manual-result');
+            
+            container.innerHTML = \`
+                <div class="fade-in space-y-4">
+                    <!-- 票房预测 -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                            <span class="text-yellow-700 font-medium">保守</span>
+                            <span class="text-xl font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)} 百万元</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-purple-100 rounded-lg border-2 border-purple-300">
+                            <span class="text-purple-700 font-medium">中性</span>
+                            <span class="text-2xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)} 百万元</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-green-700 font-medium">激进</span>
+                            <span class="text-xl font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)} 百万元</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 中间指数 -->
+                    <div class="bg-gray-100 rounded-lg p-4">
+                        <h5 class="font-medium text-gray-700 mb-2">计算指数</h5>
+                        <div class="grid grid-cols-3 gap-2 text-sm">
+                            <div>D: \${result.indices[2].D.toFixed(3)}</div>
+                            <div>LC: \${result.indices[2].LC.toFixed(3)}</div>
+                            <div>F: \${result.indices[2].F.toFixed(3)}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 三线票房 -->
+                    <div class="bg-orange-50 rounded-lg p-4">
+                        <h5 class="font-medium text-orange-700 mb-2">三线城市基准</h5>
+                        <p class="text-sm text-gray-600">
+                            区间: \${result.tier3.from_kanye.toFixed(2)} ~ \${result.tier3.from_travis.toFixed(2)} 百万元
+                        </p>
+                    </div>
+                </div>
+            \`;
+        }
+        
+        // ==================== Cardi B 案例 ====================
+        async function loadCardiDemo() {
+            try {
+                const res = await fetch('/api/demo/cardib');
+                const data = await res.json();
+                
+                displayCardiDemo(data);
+            } catch (error) {
+                alert('加载失败: ' + error.message);
+            }
+        }
+        
+        function displayCardiDemo(data) {
+            const container = document.getElementById('cardib-steps');
+            const { result, input, explanation } = data;
+            
+            // 获取最大值
+            const maxVals = result.normalization.maxValues || { baidu: 616, netease: 126.6, xhs: 82 };
+            
+            container.innerHTML = \`
+                <div class="fade-in space-y-6">
+                    <!-- 原始数据 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">0</span>
+                            <h4 class="text-lg font-bold text-gray-800">原始输入数据</h4>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">百度指数</p>
+                                <p class="text-2xl font-bold text-blue-600">\${input.baidu}</p>
+                            </div>
+                            <div class="bg-red-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">网易云粉丝</p>
+                                <p class="text-2xl font-bold text-red-600">\${input.netease}万</p>
+                            </div>
+                            <div class="bg-pink-50 rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">小红书粉丝</p>
+                                <p class="text-2xl font-bold text-pink-600">\${input.xhs}万</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step A: 归一化 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">A</span>
+                            <h4 class="text-lg font-bold text-gray-800">归一化 (Normalization)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step1}</p>
+                        <div class="bg-purple-50 rounded-lg p-4">
+                            <p class="text-sm font-mono mb-2">公式: x' = x / max(x)</p>
+                            <p class="text-sm">max(百度)=\${maxVals.baidu}, max(网易云)=\${maxVals.netease}, max(小红书)=\${maxVals.xhs}</p>
+                        </div>
+                        <div class="mt-4 overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="p-2 text-left">艺人</th>
+                                        <th class="p-2 text-right">百度'</th>
+                                        <th class="p-2 text-right">网易云'</th>
+                                        <th class="p-2 text-right">小红书'</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    \${result.indices.map(i => \`
+                                        <tr class="\${i.id === 'target' ? 'bg-yellow-50 font-bold' : ''}">
+                                            <td class="p-2">\${i.id === 'target' ? 'Cardi B' : i.name}</td>
+                                            <td class="p-2 text-right">\${(i.baidu_norm || 0).toFixed(3)}</td>
+                                            <td class="p-2 text-right">\${(i.netease_norm || 0).toFixed(3)}</td>
+                                            <td class="p-2 text-right">\${(i.xhs_norm || 0).toFixed(3)}</td>
+                                        </tr>
+                                    \`).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Step B: D指数 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-indigo-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold">B</span>
+                            <h4 class="text-lg font-bold text-gray-800">需求指数 D (Demand Index)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step2}</p>
+                        <div class="bg-indigo-50 rounded-lg p-4">
+                            <p class="text-sm font-mono">D = Σ(权重i × 维度i')</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-4">
+                            \${result.indices.map(i => \`
+                                <div class="text-center p-3 \${i.id === 'target' ? 'bg-yellow-100 rounded-lg' : ''}">
+                                    <p class="text-sm text-gray-500">\${i.id === 'target' ? 'Cardi B' : i.name}</p>
+                                    <p class="text-xl font-bold">\${i.D.toFixed(3)}</p>
+                                </div>
+                            \`).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Step C: LC转化率 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-teal-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-teal-500 text-white rounded-full flex items-center justify-center font-bold">C</span>
+                            <h4 class="text-lg font-bold text-gray-800">现场转化率 LC (Live Conversion)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step3}</p>
+                        <div class="bg-teal-50 rounded-lg p-4">
+                            <p class="text-sm font-mono">LC = clip(0.60 + 0.40×网易云' - 0.20×小红书', 0.60, 1.00)</p>
+                            <p class="text-xs text-gray-500 mt-1">说明：网易云音乐粉丝更可能现场购票，小红书粉丝偏重图文关注</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-4">
+                            \${result.indices.map(i => \`
+                                <div class="text-center p-3 \${i.id === 'target' ? 'bg-yellow-100 rounded-lg' : ''}">
+                                    <p class="text-sm text-gray-500">\${i.id === 'target' ? 'Cardi B' : i.name}</p>
+                                    <p class="text-xl font-bold">\${i.LC.toFixed(3)}</p>
+                                </div>
+                            \`).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Step D: F指数 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-orange-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold">D</span>
+                            <h4 class="text-lg font-bold text-gray-800">出票指数 F (Final Index)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step4}</p>
+                        <div class="bg-orange-50 rounded-lg p-4">
+                            <p class="text-sm font-mono">F = D × LC</p>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-4">
+                            \${result.indices.map(i => \`
+                                <div class="text-center p-3 \${i.id === 'target' ? 'bg-yellow-100 rounded-lg' : ''}">
+                                    <p class="text-sm text-gray-500">\${i.id === 'target' ? 'Cardi B' : i.name}</p>
+                                    <p class="text-xl font-bold">\${i.F.toFixed(3)}</p>
+                                </div>
+                            \`).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Step E: 多锚点 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-red-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold">E</span>
+                            <h4 class="text-lg font-bold text-gray-800">多锚点校准 (Comparable)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step5}</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            \${(result.anchorResults || []).map((a, idx) => {
+                                const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+                                const tierColor = a.anchorTier === 'tier1' ? 'purple' : a.anchorTier === 'tier2' ? 'blue' : 'orange';
+                                return \`
+                                <div class="bg-\${idx === 0 ? 'red' : 'amber'}-50 rounded-lg p-4">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <p class="font-medium text-\${idx === 0 ? 'red' : 'amber'}-700">\${a.name} 锚点</p>
+                                        <span class="px-2 py-0.5 text-xs rounded bg-\${tierColor}-100 text-\${tierColor}-600">\${tierNames[a.anchorTier] || '三线城市'}</span>
+                                    </div>
+                                    <p class="text-sm">ratio = \${a.ratio.toFixed(3)}</p>
+                                    <p class="text-sm">锚点城市票房 = \${a.anchorTierBoxOffice?.toFixed(2) || a.tier3BoxOffice.toFixed(2)} 百万元</p>
+                                    <p class="text-sm">→ 三线基准 = <strong>\${a.tier3BoxOffice.toFixed(2)} 百万元</strong></p>
+                                </div>
+                            \`}).join('')}
+                        </div>
+                        <div class="mt-4 bg-gray-100 rounded-lg p-4 text-center">
+                            <p class="text-sm text-gray-600">三线城市基准票房区间</p>
+                            <p class="text-xl font-bold text-gray-800">\${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万元</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step F: 城市溢价 -->
+                    <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">F</span>
+                            <h4 class="text-lg font-bold text-gray-800">城市溢价 (深圳/杭州)</h4>
+                        </div>
+                        <p class="text-gray-600 mb-4">\${explanation.step6}</p>
+                        <div class="bg-green-50 rounded-lg p-4 mb-4">
+                            <p class="text-sm">保守 = Kanye锚点 × 1.15 | 中性 = 双锚点均值 × 1.25 | 激进 = Travis锚点 × 1.35</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center p-4 bg-yellow-100 rounded-lg">
+                                <p class="text-sm text-yellow-700 font-medium">保守 (×1.15)</p>
+                                <p class="text-2xl font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万元</p>
+                            </div>
+                            <div class="text-center p-4 bg-purple-200 rounded-lg border-2 border-purple-400">
+                                <p class="text-sm text-purple-700 font-medium">中性 (×1.25)</p>
+                                <p class="text-3xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万元</p>
+                            </div>
+                            <div class="text-center p-4 bg-green-100 rounded-lg">
+                                <p class="text-sm text-green-700 font-medium">激进 (×1.35)</p>
+                                <p class="text-2xl font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)}</p>
+                                <p class="text-xs text-gray-500">百万元</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 最终结论 -->
+                    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-flag-checkered"></i>
+                            最终结论
+                        </h4>
+                        <p class="text-lg">
+                            Cardi B 深圳/杭州单场票房预测：
+                            <strong>\${result.output.conservative.value.toFixed(2)}</strong> ~ 
+                            <strong>\${result.output.aggressive.value.toFixed(2)}</strong> 百万元
+                        </p>
+                        <p class="text-purple-200 mt-2">
+                            中性情景约 <strong>\${result.output.neutral.value.toFixed(2)}</strong> 百万元
+                            （约 \${(result.output.neutral.value * 100).toFixed(0)} 万元）
+                        </p>
+                    </div>
+                </div>
+            \`;
+        }
+        
+        // ==================== 动态数据结构 ====================
+        // 默认权重参数
+        let weightParams = [
+            { id: 'baidu', name: '百度指数', value: 0.45, icon: 'fab fa-searchengin', color: 'blue', unit: '' },
+            { id: 'netease', name: '网易云粉丝', value: 0.35, icon: 'fas fa-music', color: 'red', unit: '万' },
+            { id: 'xhs', name: '小红书粉丝', value: 0.20, icon: 'fas fa-book-open', color: 'pink', unit: '万' }
+        ];
+        
+        // 默认锚点数据
+        let benchmarks = [
+            { id: 'travis', name: 'Travis Scott', boxOffice: 78.15, city: '长沙', tier: 'tier3', data: { baidu: 280, netease: 126.6, xhs: 1.0 }},
+            { id: 'kanye', name: 'Kanye West', boxOffice: 51.00, city: '澳门', tier: 'tier3', data: { baidu: 616, netease: 99.7, xhs: 13.9 }}
+        ];
+        
+        // ==================== 初始化渲染 ====================
+        function initPredictPanel() {
+            renderArtistDataInputs();
+            renderWeightParams();
+            renderBenchmarks();
+        }
+        
+        // 艺人输入数据存储（用于保留用户输入值）
+        let artistInputValues = {
+            baidu: 388,
+            netease: 80.6,
+            xhs: 82
+        };
+        
+        // 渲染艺人数据输入区
+        function renderArtistDataInputs() {
+            const container = document.getElementById('artist-data-inputs');
+            container.innerHTML = weightParams.map((p, idx) => \`
+                <div class="flex items-center gap-3 bg-gray-50 rounded-lg p-3" data-dim-id="\${p.id}">
+                    <div class="w-10 h-10 bg-\${p.color}-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="\${p.icon} text-\${p.color}-500"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <input type="text" value="\${p.name}" 
+                                onchange="updateDimensionName('\${p.id}', this.value)"
+                                onblur="updateDimensionName('\${p.id}', this.value)"
+                                class="text-sm font-medium text-gray-700 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-purple-500 focus:outline-none px-1 py-0.5 -ml-1 max-w-[120px]"
+                                title="点击编辑维度名称">
+                            \${p.unit ? '<span class="text-xs text-gray-400">(' + p.unit + ')</span>' : ''}
+                            <i class="fas fa-pencil-alt text-gray-300 text-xs" title="可编辑"></i>
+                        </div>
+                        <input type="number" id="input-\${p.id}" value="\${artistInputValues[p.id] ?? getDefaultValue(p.id)}" step="0.1"
+                            onchange="artistInputValues['\${p.id}'] = parseFloat(this.value) || 0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <button onclick="removeArtistDataDimension('\${p.id}')" 
+                        class="px-2 py-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all flex-shrink-0"
+                        title="删除此维度">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            \`).join('');
+            
+            // 显示维度数量提示
+            const countHint = document.getElementById('dimension-count-hint');
+            if (countHint) {
+                countHint.textContent = \`当前 \${weightParams.length} 个维度\`;
+            }
+        }
+        
+        // 更新维度名称（统一函数，同步更新艺人输入区和权重区）
+        function updateDimensionName(id, name) {
+            const param = weightParams.find(p => p.id === id);
+            if (param && param.name !== name) {
+                param.name = name;
+                // 重新渲染两个区域以保持同步
+                renderArtistDataInputs();
+                renderWeightParams();
+                renderBenchmarks();
+            }
+        }
+        
+        function getDefaultValue(id) {
+            const defaults = { baidu: 388, netease: 80.6, xhs: 82 };
+            return defaults[id] || 100;
+        }
+        
+        // 添加艺人数据维度
+        function addArtistDataDimension() {
+            const newId = 'dim_' + Date.now();
+            const colors = ['blue', 'red', 'pink', 'green', 'yellow', 'indigo', 'purple', 'teal'];
+            const icons = ['fas fa-chart-bar', 'fas fa-users', 'fas fa-heart', 'fas fa-star', 'fas fa-fire', 'fas fa-bolt'];
+            
+            weightParams.push({
+                id: newId,
+                name: '新维度',
+                value: 0.10,
+                icon: icons[weightParams.length % icons.length],
+                color: colors[weightParams.length % colors.length],
+                unit: ''
+            });
+            
+            // 设置默认输入值
+            artistInputValues[newId] = 100;
+            
+            // 同时更新锚点数据中的该维度
+            benchmarks.forEach(b => {
+                if (!b.data[newId]) b.data[newId] = 100;
+            });
+            
+            renderArtistDataInputs();
+            renderWeightParams();
+            renderBenchmarks();
+        }
+        
+        // 删除艺人数据维度
+        function removeArtistDataDimension(id) {
+            if (weightParams.length <= 1) {
+                alert('至少需要保留一个维度');
+                return;
+            }
+            
+            // 从权重参数中移除
+            weightParams = weightParams.filter(p => p.id !== id);
+            
+            // 从艺人输入值中移除
+            delete artistInputValues[id];
+            
+            // 从锚点数据中移除
+            benchmarks.forEach(b => delete b.data[id]);
+            
+            renderArtistDataInputs();
+            renderWeightParams();
+            renderBenchmarks();
+        }
+        
+        // 渲染权重参数列表
+        function renderWeightParams() {
+            const container = document.getElementById('weight-params-list');
+            container.innerHTML = weightParams.map((p, idx) => \`
+                <div class="flex items-center gap-2 bg-white rounded-lg p-2" data-id="\${p.id}">
+                    <input type="text" value="\${p.name}" 
+                        onchange="updateWeightName('\${p.id}', this.value)"
+                        class="flex-1 px-2 py-1 border rounded text-sm">
+                    <input type="number" value="\${p.value}" step="0.05" min="0" max="1"
+                        onchange="updateWeightValue('\${p.id}', this.value)"
+                        class="w-20 px-2 py-1 border rounded text-sm text-right">
+                    <button onclick="removeWeightParam('\${p.id}')" class="px-2 py-1 text-red-500 hover:bg-red-50 rounded">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            \`).join('');
+            
+            // 更新权重总和显示
+            const total = weightParams.reduce((sum, p) => sum + p.value, 0);
+            const totalEl = container.parentElement.querySelector('.text-xs');
+            if (totalEl) {
+                totalEl.innerHTML = \`<i class="fas fa-info-circle mr-1"></i>权重之和: \${total.toFixed(2)} \${Math.abs(total - 1) > 0.01 ? '(建议为1.0)' : '✓'}\`;
+            }
+        }
+        
+        // 渲染锚点数据列表
+        function renderBenchmarks() {
+            const container = document.getElementById('benchmark-list');
+            container.innerHTML = benchmarks.map((b, idx) => \`
+                <div class="bg-white rounded-lg p-4 border border-orange-200" data-id="\${b.id}">
+                    <div class="flex justify-between items-start mb-3">
+                        <input type="text" value="\${b.name}" 
+                            onchange="updateBenchmark('\${b.id}', 'name', this.value)"
+                            class="font-medium text-gray-800 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-orange-500 focus:outline-none">
+                        <button onclick="removeBenchmark('\${b.id}')" class="text-red-400 hover:text-red-600 text-sm">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <label class="text-xs text-gray-500">单场票房(百万)</label>
+                            <input type="number" value="\${b.boxOffice}" step="0.01"
+                                onchange="updateBenchmark('\${b.id}', 'boxOffice', parseFloat(this.value))"
+                                class="w-full px-2 py-1 border rounded mt-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">城市</label>
+                            <input type="text" value="\${b.city || ''}" 
+                                onchange="updateBenchmark('\${b.id}', 'city', this.value)"
+                                class="w-full px-2 py-1 border rounded mt-1">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="text-xs text-gray-500 mb-1 block">
+                                <i class="fas fa-map-marker-alt mr-1 text-orange-500"></i>锚点城市级别
+                            </label>
+                            <div class="flex gap-1">
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier1' ? 'bg-purple-100 border-purple-400 text-purple-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier1" \${b.tier === 'tier1' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier1'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">一线</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier2' ? 'bg-blue-100 border-blue-400 text-blue-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier2" \${b.tier === 'tier2' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier2'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">二线</span>
+                                </label>
+                                <label class="flex-1 flex items-center justify-center p-2 border rounded cursor-pointer transition-all \${b.tier === 'tier3' ? 'bg-orange-100 border-orange-400 text-orange-700' : 'bg-white hover:bg-gray-50'}">
+                                    <input type="radio" name="tier-\${b.id}" value="tier3" \${b.tier === 'tier3' ? 'checked' : ''}
+                                        onchange="updateBenchmark('\${b.id}', 'tier', 'tier3'); renderBenchmarks();"
+                                        class="hidden">
+                                    <span class="text-xs font-medium">三线</span>
+                                </label>
+                            </div>
+                        </div>
+                        \${weightParams.map(w => \`
+                        <div>
+                            <label class="text-xs text-gray-500">\${w.name}</label>
+                            <input type="number" value="\${b.data[w.id] || 0}" step="0.1"
+                                onchange="updateBenchmarkData('\${b.id}', '\${w.id}', parseFloat(this.value))"
+                                class="w-full px-2 py-1 border rounded mt-1">
+                        </div>
+                        \`).join('')}
+                    </div>
+                </div>
+            \`).join('');
+        }
+        
+        // ==================== 权重参数管理 ====================
+        function addWeightParam() {
+            // 复用艺人数据维度添加函数，保持同步
+            addArtistDataDimension();
+        }
+        
+        function removeWeightParam(id) {
+            // 复用艺人数据维度删除函数，保持同步
+            removeArtistDataDimension(id);
+        }
+        
+        function updateWeightName(id, name) {
+            // 复用统一的维度名称更新函数
+            updateDimensionName(id, name);
+        }
+        
+        function updateWeightValue(id, value) {
+            const param = weightParams.find(p => p.id === id);
+            if (param) param.value = parseFloat(value);
+            renderWeightParams();
+        }
+        
+        // ==================== 锚点数据管理 ====================
+        function addBenchmark() {
+            const newId = 'anchor_' + Date.now();
+            const newData = {};
+            weightParams.forEach(w => newData[w.id] = 100);
+            benchmarks.push({
+                id: newId,
+                name: '新艺人',
+                boxOffice: 50.00,
+                city: '',
+                tier: 'tier3',
+                data: newData
+            });
+            renderBenchmarks();
+        }
+        
+        function removeBenchmark(id) {
+            if (benchmarks.length <= 1) {
+                alert('至少需要保留一个锚点');
+                return;
+            }
+            benchmarks = benchmarks.filter(b => b.id !== id);
+            renderBenchmarks();
+        }
+        
+        function updateBenchmark(id, field, value) {
+            const benchmark = benchmarks.find(b => b.id === id);
+            if (benchmark) benchmark[field] = value;
+        }
+        
+        function updateBenchmarkData(id, dimId, value) {
+            const benchmark = benchmarks.find(b => b.id === id);
+            if (benchmark) benchmark.data[dimId] = value;
+        }
+        
+        // ==================== 预测计算 ====================
+        async function runPrediction() {
+            // 收集艺人数据
+            const artistData = {};
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                artistData[p.id] = parseFloat(input?.value || 0);
+            });
+            
+            // 获取目标城市
+            const targetTier = document.querySelector('input[name="targetTier"]:checked')?.value || 'tier1';
+            
+            // 获取自定义参数
+            const customParams = getCustomParams();
+            
+            try {
+                const res = await fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ artistData, customParams, targetTier })
+                });
+                
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                displayPredictionResult(data.result, targetTier);
+            } catch (error) {
+                alert('预测失败: ' + error.message);
+            }
+        }
+        
+        function displayPredictionResult(result, targetTier) {
+            const container = document.getElementById('prediction-result');
+            const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            const tierColors = { tier1: 'purple', tier2: 'blue', tier3: 'orange' };
+            
+            // 收集当前艺人输入数据用于详情展示
+            const currentArtistData = {};
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                currentArtistData[p.id] = parseFloat(input?.value || 0);
+            });
+            const artistName = document.getElementById('artist-search-input')?.value?.trim() || '目标艺人';
+            
+            container.innerHTML = \`
+                <div class="fade-in space-y-4">
+                    <div class="text-center mb-4">
+                        <span class="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                            <i class="fas fa-map-marker-alt mr-1"></i>目标：\${tierNames[targetTier]}
+                        </span>
+                    </div>
+                    
+                    <!-- 票房预测 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                            <span class="text-yellow-700 font-medium">保守 (×\${result.output.conservative.premium})</span>
+                            <span class="text-lg font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)} 百万</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 bg-purple-100 rounded-lg border-2 border-purple-300">
+                            <span class="text-purple-700 font-medium">中性 (×\${result.output.neutral.premium})</span>
+                            <div class="text-right">
+                                <span class="text-2xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)}</span>
+                                <span class="text-purple-600 text-sm ml-1">百万</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-green-700 font-medium">激进 (×\${result.output.aggressive.premium})</span>
+                            <span class="text-lg font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)} 百万</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="showCalculationDetail()" 
+                            class="flex-1 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-medium hover:from-indigo-600 hover:to-purple-700 transition-all shadow-md">
+                            <i class="fas fa-calculator mr-2"></i>查看详细计算过程
+                        </button>
+                    </div>
+                    <button onclick="showArchiveDialog()" 
+                        class="w-full py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all">
+                        <i class="fas fa-folder-plus mr-2"></i>建立档案
+                    </button>
+                </div>
+            \`;
+            
+            // 保存当前预测结果供建档和详情展示使用
+            window.currentPredictionResult = result;
+            window.currentTargetTier = targetTier;
+            window.currentArtistData = currentArtistData;
+            window.currentArtistName = artistName;
+        }
+        
+        // 显示详细计算过程的大浮窗 - 投委会汇报风格
+        function showCalculationDetail(archiveData = null) {
+            // 使用传入的档案数据或当前预测数据
+            const result = archiveData?.result ? {
+                output: {
+                    conservative: { value: archiveData.result.conservative, premium: 1.15 },
+                    neutral: { value: archiveData.result.neutral, premium: 1.25 },
+                    aggressive: { value: archiveData.result.aggressive, premium: 1.35 }
+                },
+                indices: [{ id: 'target', D: archiveData.indices?.D || 0, LC: archiveData.indices?.LC || 0, F: archiveData.indices?.F || 0 }],
+                tier3: { min: archiveData.result.neutral / 1.25 * 0.9, max: archiveData.result.neutral / 1.25 * 1.1, avg: archiveData.result.neutral / 1.25 },
+                anchorResults: benchmarks.map(b => ({
+                    name: b.name,
+                    anchorTier: b.tier,
+                    ratio: 0.83,
+                    tier3BoxOffice: b.boxOffice * (b.tier === 'tier1' ? 0.70 : b.tier === 'tier2' ? 0.85 : 1.0)
+                }))
+            } : window.currentPredictionResult;
+            
+            const targetTier = archiveData?.targetTier || window.currentTargetTier || 'tier1';
+            const artistData = archiveData?.inputData || window.currentArtistData || {};
+            const artistName = archiveData?.artistName || window.currentArtistName || '目标艺人';
+            
+            if (!result) {
+                alert('暂无计算数据');
+                return;
+            }
+            
+            const tierNames = { tier1: '一线城市', tier2: '二线城市', tier3: '三线城市' };
+            const targetIdx = result.indices?.find(i => i.id === 'target') || {};
+            
+            // 计算归一化相关数据
+            const normData = result.normalization || {};
+            const maxValues = normData.maxValues || {};
+            
+            // 构建归一化展示数据
+            const normDisplay = Object.entries(artistData).map(([key, val]) => {
+                const param = weightParams.find(p => p.id === key);
+                const maxVal = maxValues[key] || val;
+                const normVal = maxVal > 0 ? (val / maxVal) : 0;
+                return { name: param?.name || key, raw: val, max: maxVal, norm: normVal, id: key };
+            });
+            
+            // 计算D值的详细过程
+            const dCalcParts = weightParams.map(p => {
+                const val = artistData[p.id] || 0;
+                const maxVal = maxValues[p.id] || val;
+                const normVal = maxVal > 0 ? (val / maxVal) : 0;
+                return { weight: p.value, norm: normVal, name: p.name };
+            });
+            
+            // 获取网易云和小红书的归一化值用于LC计算展示
+            const neteaseNorm = normDisplay.find(n => n.id === 'netease')?.norm || 0;
+            const xhsNorm = normDisplay.find(n => n.id === 'xhs')?.norm || 0;
+            
+            // 构建锚点数据展示（用于归一化说明）
+            const benchmarkDataDisplay = benchmarks.map(b => {
+                return {
+                    name: b.name,
+                    data: b.data || { baidu: 0, netease: 0, xhs: 0 },
+                    boxOffice: b.boxOffice,
+                    tier: b.tier
+                };
+            });
+            
+            const dialog = document.createElement('div');
+            dialog.id = 'calculation-detail-dialog';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4';
+            dialog.innerHTML = \`
+                <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden fade-in flex flex-col">
+                    <!-- 极简头部 - 只有标题和关闭 -->
+                    <div class="bg-slate-800 text-white px-6 py-3 flex justify-between items-center flex-shrink-0">
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-chart-line text-emerald-400"></i>
+                                <span class="font-bold">Comparable模型计算详解</span>
+                            </div>
+                            <div class="h-4 w-px bg-slate-600"></div>
+                            <span class="text-slate-300 text-sm">\${artistName} → \${tierNames[targetTier]}</span>
+                        </div>
+                        <button onclick="this.closest('#calculation-detail-dialog').remove()" 
+                            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 transition-all">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 主内容区 - 完全可滚动 -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div class="p-6 space-y-6">
+                            
+                            <!-- Step A: 归一化 -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-blue-600 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">A</div>
+                                    <h3 class="font-bold text-white">Step A · 归一化 (Normalization)</h3>
+                                </div>
+                                <div class="p-5">
+                                    <!-- 1. 原始数据表格 -->
+                                    <div class="mb-5">
+                                        <p class="text-sm font-bold text-gray-800 mb-3">1. 原始输入数据</p>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-sm border-collapse">
+                                                <thead>
+                                                    <tr class="bg-gray-100">
+                                                        <th class="border border-gray-200 px-3 py-2 text-left font-medium">艺人</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">百度指数</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">网易云粉丝(万)</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">小红书粉丝(万)</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">三线票房</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    \${benchmarkDataDisplay.map(b => \`
+                                                        <tr class="bg-orange-50">
+                                                            <td class="border border-gray-200 px-3 py-2 font-medium">\${b.name} <span class="text-xs text-orange-500">(锚点)</span></td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.baidu}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.netease}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${b.data.xhs}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">\${b.boxOffice}M</td>
+                                                        </tr>
+                                                    \`).join('')}
+                                                    <tr class="bg-blue-50">
+                                                        <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName} <span class="text-xs text-blue-500">(目标)</span></td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.baidu || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.netease || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${artistData.xhs || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">待预测</td>
+                                                    </tr>
+                                                    <tr class="bg-gray-50">
+                                                        <td class="border border-gray-200 px-3 py-2 font-medium text-gray-500">max值</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='baidu')?.max.toFixed(0) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='netease')?.max.toFixed(1) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-gray-600">\${normDisplay.find(n=>n.id==='xhs')?.max.toFixed(1) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 2. 归一化说明 -->
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-blue-400 mb-5">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>归一化目的：</strong>各维度量级差异大（百度几百，网易云几十万，小红书几万），
+                                            直接加权会被大数值主导。归一化后统一到0-1区间，让权重公平生效。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：x' = x / max(x)，即每个值除以该列最大值
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- 3. 归一化结果表格 -->
+                                    <div class="mb-4">
+                                        <p class="text-sm font-bold text-gray-800 mb-3">2. 归一化结果</p>
+                                        <div class="overflow-x-auto">
+                                            <table class="w-full text-sm border-collapse">
+                                                <thead>
+                                                    <tr class="bg-gray-100">
+                                                        <th class="border border-gray-200 px-3 py-2 text-left font-medium">艺人</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">Baidu'</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">Netease'</th>
+                                                        <th class="border border-gray-200 px-3 py-2 text-center font-medium">XHS'</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    \${benchmarkDataDisplay.map(b => {
+                                                        const baiduMax = normDisplay.find(n=>n.id==='baidu')?.max || 1;
+                                                        const neteaseMax = normDisplay.find(n=>n.id==='netease')?.max || 1;
+                                                        const xhsMax = normDisplay.find(n=>n.id==='xhs')?.max || 1;
+                                                        return \`
+                                                        <tr class="bg-orange-50">
+                                                            <td class="border border-gray-200 px-3 py-2 font-medium">\${b.name}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.baidu / baiduMax).toFixed(3)}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.netease / neteaseMax).toFixed(3)}</td>
+                                                            <td class="border border-gray-200 px-3 py-2 text-center">\${(b.data.xhs / xhsMax).toFixed(3)}</td>
+                                                        </tr>
+                                                        \`;
+                                                    }).join('')}
+                                                    <tr class="bg-blue-100">
+                                                        <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='baidu')?.norm.toFixed(3) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='netease')?.norm.toFixed(3) || '-'}</td>
+                                                        <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${normDisplay.find(n=>n.id==='xhs')?.norm.toFixed(3) || '-'}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step B: 需求指数D -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-purple-600 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">B</div>
+                                    <h3 class="font-bold text-white">Step B · 需求指数 D (Demand Index)</h3>
+                                </div>
+                                <div class="p-5">
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-purple-400 mb-4">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>D指数 = 加权平均的市场需求强度。</strong> 
+                                            百度指数反映大众搜索热度，网易云代表核心音乐受众，小红书反映话题热度。
+                                            历史数据回归显示百度和网易云对票房预测力更强。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：D = 0.45×Baidu' + 0.35×Netease' + 0.20×XHS'
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- D值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">D指数</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Travis Scott</td><td class="border border-gray-200 px-3 py-2 text-center">0.557</td></tr>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Kanye West</td><td class="border border-gray-200 px-3 py-2 text-center">0.760</td></tr>
+                                                <tr class="bg-blue-100"><td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td><td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${(targetIdx.D || 0).toFixed(3)}</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                                        <p class="text-xs text-gray-500 mb-2">\${artistName}：D = \${dCalcParts.map(p => \`\${(p.weight).toFixed(2)}×\${p.norm.toFixed(3)}\`).join(' + ')}</p>
+                                        <p class="text-3xl font-bold text-purple-600 text-center">D = \${(targetIdx.D || 0).toFixed(3)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step C: 转化率LC -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-emerald-600 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">C</div>
+                                    <h3 class="font-bold text-white">Step C · 现场转化效率 LC (Live Conversion)</h3>
+                                </div>
+                                <div class="p-5">
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-emerald-400 mb-4">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>LC修正线上热度→实际购票的转化率。</strong> 
+                                            网易云粉丝是「真爱粉」购票意愿强(+)；小红书粉丝更多是「路人粉」看热闹不买票(-)。
+                                            这避免高估「虚火」艺人。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：LC = clip(0.60 + 0.40×Netease' − 0.20×XHS', 0.60, 1.00)
+                                        </p>
+                                    </div>
+                                    
+                                    <!-- LC值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">LC</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">说明</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Travis Scott</td><td class="border border-gray-200 px-3 py-2 text-center text-green-600 font-medium">0.998</td><td class="border border-gray-200 px-3 py-2 text-xs text-gray-500">网易云高+小红书极低→转化率极高</td></tr>
+                                                <tr class="bg-orange-50"><td class="border border-gray-200 px-3 py-2">Kanye West</td><td class="border border-gray-200 px-3 py-2 text-center text-green-600 font-medium">0.881</td><td class="border border-gray-200 px-3 py-2 text-xs text-gray-500">网易云高+小红书中低→转化率高</td></tr>
+                                                <tr class="bg-blue-100"><td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td><td class="border border-gray-200 px-3 py-2 text-center font-bold text-red-600">\${(targetIdx.LC || 0).toFixed(3)}</td><td class="border border-gray-200 px-3 py-2 text-xs text-red-500">小红书高→转化率被拉低</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-100">
+                                        <p class="text-xs text-gray-500 mb-2">\${artistName}：LC = 0.60 + 0.40×\${neteaseNorm.toFixed(3)} − 0.20×\${xhsNorm.toFixed(3)}</p>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs px-2 py-1 rounded \${(targetIdx.LC || 0) >= 0.85 ? 'bg-green-100 text-green-700' : (targetIdx.LC || 0) >= 0.70 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}">
+                                                \${(targetIdx.LC || 0) >= 0.85 ? '转化率高' : (targetIdx.LC || 0) >= 0.70 ? '转化率中等' : '⚠️ 小红书粉丝占比高，转化率偏低'}
+                                            </span>
+                                            <p class="text-3xl font-bold text-emerald-600">LC = \${(targetIdx.LC || 0).toFixed(3)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step D: 出票指数F -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-amber-500 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">D</div>
+                                    <h3 class="font-bold text-white">Step D · 最终出票指数 F (Final Index)</h3>
+                                </div>
+                                <div class="p-5">
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-amber-400 mb-4">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>F = D × LC，综合出票能力指数。</strong> 
+                                            F用于与锚点艺人横向对比，计算比值后映射到真实票房。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">公式：F = D × LC</p>
+                                    </div>
+                                    
+                                    <!-- F值对比表格 -->
+                                    <div class="overflow-x-auto mb-4">
+                                        <table class="w-full text-sm border-collapse">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="border border-gray-200 px-3 py-2 text-left">艺人</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">D</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">LC</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">F</th>
+                                                    <th class="border border-gray-200 px-3 py-2 text-center">三线票房</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-orange-50">
+                                                    <td class="border border-gray-200 px-3 py-2">Travis Scott</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.557</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.998</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold">0.556</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">78.15M</td>
+                                                </tr>
+                                                <tr class="bg-orange-50">
+                                                    <td class="border border-gray-200 px-3 py-2">Kanye West</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.760</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center">0.881</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold">0.669</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-orange-600 font-bold">51.00M</td>
+                                                </tr>
+                                                <tr class="bg-blue-100">
+                                                    <td class="border border-gray-200 px-3 py-2 font-bold text-blue-700">\${artistName}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-blue-700">\${(targetIdx.D || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-blue-700">\${(targetIdx.LC || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center font-bold text-blue-700">\${(targetIdx.F || 0).toFixed(3)}</td>
+                                                    <td class="border border-gray-200 px-3 py-2 text-center text-gray-400">待计算</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="bg-amber-50 rounded-lg p-4 border border-amber-100 text-center">
+                                        <p class="text-sm text-gray-600 mb-2">F = \${(targetIdx.D || 0).toFixed(3)} × \${(targetIdx.LC || 0).toFixed(3)}</p>
+                                        <p class="text-4xl font-bold text-amber-600">F = \${(targetIdx.F || 0).toFixed(3)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step E: 双锚点校准 -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-orange-500 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">E</div>
+                                    <h3 class="font-bold text-white">Step E · Comparable双锚点校准</h3>
+                                </div>
+                                <div class="p-5">
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-orange-400 mb-4">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>用「比较法」映射票房。</strong> 
+                                            计算\${artistName}与锚点的F指数比值r，再乘以锚点真实票房，得到\${artistName}的三线基准票房。
+                                            双锚点分别计算，形成预测区间。
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2 font-mono">
+                                            公式：r = F_\${artistName} ÷ F_锚点；三线票房 = 锚点票房 × r
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="space-y-3 mb-4">
+                                        \${(result.anchorResults || []).map(a => \`
+                                            <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-4 border border-orange-100">
+                                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            <i class="fas fa-anchor text-orange-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-bold text-gray-800">\${a.name}锚点</p>
+                                                            <p class="text-xs text-gray-500">三线票房 \${a.name === 'Travis Scott' ? '78.15' : '51.00'}M</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-xs text-gray-600 font-mono">
+                                                            r = \${(targetIdx.F || 0).toFixed(3)} ÷ \${a.name === 'Travis Scott' ? '0.556' : '0.669'} = <strong>\${(a.ratio || 0).toFixed(3)}</strong>
+                                                        </p>
+                                                        <p class="text-xs text-gray-600 font-mono mt-1">
+                                                            \${a.name === 'Travis Scott' ? '78.15' : '51.00'} × \${(a.ratio || 0).toFixed(3)} = 
+                                                        </p>
+                                                        <p class="text-xl font-bold text-orange-600">\${a.tier3BoxOffice.toFixed(2)} 百万</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        \`).join('')}
+                                    </div>
+                                    
+                                    <div class="bg-orange-100 rounded-lg p-4 text-center">
+                                        <p class="text-xs text-gray-600 mb-1">⇒ \${artistName}三线城市基准票房区间</p>
+                                        <p class="text-2xl font-bold text-gray-800">
+                                            \${result.tier3.min.toFixed(2)} ~ \${result.tier3.max.toFixed(2)} 百万元
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-1">（约\${(result.tier3.min * 100).toFixed(0)}万 ~ \${(result.tier3.max * 100).toFixed(0)}万 RMB）</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Step F: 城市溢价 -->
+                            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div class="bg-indigo-600 px-5 py-3 flex items-center gap-3">
+                                    <div class="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-bold text-sm">F</div>
+                                    <h3 class="font-bold text-white">Step F · 城市溢价（\${tierNames[targetTier]}）→ 最终预测</h3>
+                                </div>
+                                <div class="p-5">
+                                    <div class="bg-slate-50 rounded-lg p-4 border-l-4 border-indigo-400 mb-4">
+                                        <p class="text-gray-700 text-sm leading-relaxed">
+                                            <strong>应用城市溢价系数。</strong> 
+                                            \${tierNames[targetTier]}消费力和市场成熟度与三线不同，需调整。三档情景：
+                                        </p>
+                                        <ul class="text-xs text-gray-600 mt-2 space-y-1">
+                                            <li>• <strong>保守</strong>（×\${result.output.conservative.premium}）：Kanye锚点基准 × 保守溢价</li>
+                                            <li>• <strong>中性</strong>（×\${result.output.neutral.premium}）：双锚点均值 × 中性溢价</li>
+                                            <li>• <strong>激进</strong>（×\${result.output.aggressive.premium}）：Travis锚点基准 × 激进溢价</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div class="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-center">
+                                            <p class="text-yellow-700 font-bold text-sm">保守</p>
+                                            <p class="text-xs text-gray-500 mb-2">×\${result.output.conservative.premium}</p>
+                                            <p class="text-2xl font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.conservative.value * 100).toFixed(0)}万</p>
+                                        </div>
+                                        <div class="bg-purple-100 rounded-xl p-4 border-2 border-purple-400 text-center shadow-md">
+                                            <p class="text-purple-700 font-bold text-sm">中性 ⭐</p>
+                                            <p class="text-xs text-gray-500 mb-2">×\${result.output.neutral.premium}</p>
+                                            <p class="text-3xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.neutral.value * 100).toFixed(0)}万</p>
+                                        </div>
+                                        <div class="bg-green-50 rounded-xl p-4 border border-green-200 text-center">
+                                            <p class="text-green-700 font-bold text-sm">激进</p>
+                                            <p class="text-xs text-gray-500 mb-2">×\${result.output.aggressive.premium}</p>
+                                            <p class="text-2xl font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)}</p>
+                                            <p class="text-xs text-gray-500">百万元</p>
+                                            <p class="text-xs text-gray-400">约\${(result.output.aggressive.value * 100).toFixed(0)}万</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 小结 -->
+                            <div class="bg-slate-800 rounded-xl p-5 text-white">
+                                <p class="font-bold mb-2">
+                                    <i class="fas fa-flag-checkered mr-2"></i>结论
+                                </p>
+                                <p class="text-slate-300 text-sm leading-relaxed">
+                                    <strong class="text-white">\${artistName}</strong> 在 <strong class="text-white">\${tierNames[targetTier]}</strong> 
+                                    单场票房预测：<strong class="text-purple-300">\${result.output.conservative.value.toFixed(2)} ~ \${result.output.aggressive.value.toFixed(2)} 百万元</strong>，
+                                    中性预期 <strong class="text-purple-300">\${result.output.neutral.value.toFixed(2)} 百万元</strong>。
+                                    基于多平台数据和验证锚点，具参考价值；实际票房还受档期、营销、竞品等因素影响。
+                                </p>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- 底部操作栏 -->
+                    <div class="bg-white px-6 py-3 border-t flex justify-between items-center flex-shrink-0">
+                        <div class="flex gap-2">
+                            \${archiveData ? \`
+                                <button onclick="loadArchiveData('\${archiveData.id}'); switchTab('predict'); this.closest('#calculation-detail-dialog').remove();" 
+                                    class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all text-sm">
+                                    <i class="fas fa-redo mr-1"></i>复用数据预测
+                                </button>
+                                \${!archiveData.isPreset ? \`
+                                <button onclick="deleteArchive('\${archiveData.id}'); this.closest('#calculation-detail-dialog').remove();" 
+                                    class="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-all text-sm">
+                                    <i class="fas fa-trash mr-1"></i>删除档案
+                                </button>
+                                \` : ''}
+                            \` : ''}
+                        </div>
+                        <button onclick="this.closest('#calculation-detail-dialog').remove()" 
+                            class="px-5 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-all text-sm">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(dialog);
+        }
+        
+        // ==================== 参数管理 ====================
+        function getCustomParams() {
+            // 收集权重
+            const weights = weightParams.map(p => ({
+                id: p.id,
+                name: p.name,
+                value: p.value,
+                icon: p.icon,
+                color: p.color
+            }));
+            
+            // 收集LC参数
+            const lc = {
+                constant: parseFloat(document.getElementById('param-lc-const')?.value || 0.60),
+                netease_coef: parseFloat(document.getElementById('param-lc-netease')?.value || 0.40),
+                xhs_coef: parseFloat(document.getElementById('param-lc-xhs')?.value || -0.20),
+                min: 0.60,
+                max: 1.00
+            };
+            
+            // 收集城市级别乘数配置
+            const cityTiers = {
+                tier1: { name: '一线城市', multiplier: 1.0 },
+                tier2: { name: '二线城市', multiplier: 0.85 },
+                tier3: { name: '三线城市', multiplier: 0.70 }
+            };
+            
+            // 收集城市溢价（从三线到各级别的溢价）
+            const tierPremiums = {
+                toTier1: {
+                    conservative: parseFloat(document.getElementById('tier1-conservative')?.value || 1.15),
+                    neutral: parseFloat(document.getElementById('tier1-neutral')?.value || 1.25),
+                    aggressive: parseFloat(document.getElementById('tier1-aggressive')?.value || 1.35)
+                },
+                toTier2: {
+                    conservative: parseFloat(document.getElementById('tier2-conservative')?.value || 0.95),
+                    neutral: parseFloat(document.getElementById('tier2-neutral')?.value || 1.05),
+                    aggressive: parseFloat(document.getElementById('tier2-aggressive')?.value || 1.15)
+                },
+                toTier3: {
+                    conservative: parseFloat(document.getElementById('tier3-conservative')?.value || 0.85),
+                    neutral: parseFloat(document.getElementById('tier3-neutral')?.value || 0.95),
+                    aggressive: parseFloat(document.getElementById('tier3-aggressive')?.value || 1.05)
+                }
+            };
+            
+            // 锚点数据（包含城市级别）
+            const benchmarksWithTier = benchmarks.map(b => ({
+                ...b,
+                tier: b.tier || 'tier3'  // 确保每个锚点都有tier属性
+            }));
+            
+            return { weights, lc, cityTiers, tierPremiums, benchmarks: benchmarksWithTier };
+        }
+        
+        function saveAllParams() {
+            // 先同步当前输入框的值到 artistInputValues
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                if (input) {
+                    artistInputValues[p.id] = parseFloat(input.value) || 0;
+                }
+            });
+            
+            const params = {
+                weightParams,
+                benchmarks,
+                artistInputValues,  // 保存艺人输入值
+                lc: {
+                    constant: parseFloat(document.getElementById('param-lc-const')?.value || 0.60),
+                    netease_coef: parseFloat(document.getElementById('param-lc-netease')?.value || 0.40),
+                    xhs_coef: parseFloat(document.getElementById('param-lc-xhs')?.value || -0.20)
+                },
+                tierPremiums: {
+                    toTier1: {
+                        conservative: parseFloat(document.getElementById('tier1-conservative')?.value || 1.15),
+                        neutral: parseFloat(document.getElementById('tier1-neutral')?.value || 1.25),
+                        aggressive: parseFloat(document.getElementById('tier1-aggressive')?.value || 1.35)
+                    },
+                    toTier2: {
+                        conservative: parseFloat(document.getElementById('tier2-conservative')?.value || 0.95),
+                        neutral: parseFloat(document.getElementById('tier2-neutral')?.value || 1.05),
+                        aggressive: parseFloat(document.getElementById('tier2-aggressive')?.value || 1.15)
+                    },
+                    toTier3: {
+                        conservative: parseFloat(document.getElementById('tier3-conservative')?.value || 0.85),
+                        neutral: parseFloat(document.getElementById('tier3-neutral')?.value || 0.95),
+                        aggressive: parseFloat(document.getElementById('tier3-aggressive')?.value || 1.05)
+                    }
+                }
+            };
+            localStorage.setItem('comparableParamsV2', JSON.stringify(params));
+            alert('参数已保存');
+        }
+        
+        function resetAllParams() {
+            if (confirm('确定要重置所有参数为默认值吗？')) {
+                localStorage.removeItem('comparableParamsV2');
+                location.reload();
+            }
+        }
+        
+        function generateCalculationDetails(calc) {
+            const targetIdx = calc.indices.find(i => i.id === 'target');
+            return \`
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="font-medium">归一化最大值</p>
+                        \${Object.entries(calc.normalization.maxValues || {}).map(([k, v]) => \`<p>\${k}: \${v}</p>\`).join('')}
+                    </div>
+                    <div>
+                        <p class="font-medium">目标艺人指数</p>
+                        <p>D: \${targetIdx?.D?.toFixed(4) || '-'}</p>
+                        <p>LC: \${targetIdx?.LC?.toFixed(4) || '-'}</p>
+                        <p>F: \${targetIdx?.F?.toFixed(4) || '-'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="font-medium">锚点校准</p>
+                        \${(calc.anchorResults || []).map(a => \`<p>\${a.name}: ratio=\${a.ratio.toFixed(3)} → \${a.tier3BoxOffice.toFixed(2)}百万</p>\`).join('')}
+                    </div>
+                </div>
+            \`;
+        }
+        
+        // 加载保存的参数
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('comparableParamsV2');
+            if (saved) {
+                try {
+                    const params = JSON.parse(saved);
+                    if (params.weightParams) weightParams = params.weightParams;
+                    if (params.benchmarks) benchmarks = params.benchmarks;
+                    if (params.artistInputValues) artistInputValues = params.artistInputValues;  // 加载艺人输入值
+                    if (params.lc) {
+                        setTimeout(() => {
+                            document.getElementById('param-lc-const').value = params.lc.constant;
+                            document.getElementById('param-lc-netease').value = params.lc.netease_coef;
+                            document.getElementById('param-lc-xhs').value = params.lc.xhs_coef;
+                        }, 100);
+                    }
+                    if (params.tierPremiums) {
+                        setTimeout(() => {
+                            document.getElementById('tier1-conservative').value = params.tierPremiums.toTier1?.conservative || 1.15;
+                            document.getElementById('tier1-neutral').value = params.tierPremiums.toTier1?.neutral || 1.25;
+                            document.getElementById('tier1-aggressive').value = params.tierPremiums.toTier1?.aggressive || 1.35;
+                            document.getElementById('tier2-conservative').value = params.tierPremiums.toTier2?.conservative || 0.95;
+                            document.getElementById('tier2-neutral').value = params.tierPremiums.toTier2?.neutral || 1.05;
+                            document.getElementById('tier2-aggressive').value = params.tierPremiums.toTier2?.aggressive || 1.15;
+                            document.getElementById('tier3-conservative').value = params.tierPremiums.toTier3?.conservative || 0.85;
+                            document.getElementById('tier3-neutral').value = params.tierPremiums.toTier3?.neutral || 0.95;
+                            document.getElementById('tier3-aggressive').value = params.tierPremiums.toTier3?.aggressive || 1.05;
+                        }, 100);
+                    }
+                } catch (e) {
+                    console.error('加载保存的参数失败:', e);
+                }
+            }
+            
+            // 初始化预测面板
+            setTimeout(initPredictPanel, 50);
+            
+            // 加载艺人档案
+            setTimeout(loadArtistArchives, 100);
+        });
+        
+        // ==================== 艺人档案管理 ====================
+        let artistArchives = [];  // 档案数组
+        
+        // Cardi B 预置档案（基于文档 CardiB_Comparable_计算过程_可复算_v2.docx）
+        const CARDI_B_PRESET_ARCHIVE = {
+            id: 'preset_cardib',
+            artistName: 'Cardi B',
+            notes: '【示例档案】深圳/杭州单场票房预测 - 基于Comparable模型六步计算（2026-01-26版）',
+            createdAt: '2026-01-26T10:00:00.000Z',
+            inputData: {
+                baidu: 388,
+                netease: 80.6,
+                xhs: 82.0
+            },
+            targetTier: 'tier1',
+            result: {
+                conservative: 40.52,  // Kanye锚点×保守溢价1.15
+                neutral: 62.67,       // 双锚点均值×中性溢价1.25
+                aggressive: 87.79     // Travis锚点×激进溢价1.35
+            },
+            indices: {
+                D: 0.706,   // 0.45×0.630 + 0.35×0.637 + 0.20×1.000
+                LC: 0.655,  // clip(0.60 + 0.40×0.637 - 0.20×1.000, 0.60, 1.00) = 0.655
+                F: 0.462    // D × LC = 0.706 × 0.655
+            },
+            // 锚点校准详细数据
+            anchorCalibration: {
+                travis: { F: 0.556, ratio: 0.832, tier3BoxOffice: 65.03 },  // 78.15 × 0.832
+                kanye: { F: 0.669, ratio: 0.691, tier3BoxOffice: 35.24 }    // 51.00 × 0.691
+            },
+            tier3Range: { min: 35.24, max: 65.03, avg: 50.14 },
+            isPreset: true
+        };
+        
+        // 加载档案
+        function loadArtistArchives() {
+            const saved = localStorage.getItem('artistArchives');
+            if (saved) {
+                try {
+                    artistArchives = JSON.parse(saved);
+                } catch (e) {
+                    artistArchives = [];
+                }
+            }
+            
+            // 确保 Cardi B 预置档案存在
+            const hasCardiB = artistArchives.some(a => a.id === 'preset_cardib');
+            if (!hasCardiB) {
+                artistArchives.push(CARDI_B_PRESET_ARCHIVE);
+            }
+            
+            renderArchiveList();
+        }
+        
+        // 保存档案到本地存储
+        function saveArtistArchives() {
+            localStorage.setItem('artistArchives', JSON.stringify(artistArchives));
+            renderArchiveList();
+        }
+        
+        // 显示建档对话框
+        function showArchiveDialog() {
+            if (!window.currentPredictionResult) {
+                alert('请先进行预测');
+                return;
+            }
+            
+            const artistName = document.getElementById('artist-search-input')?.value?.trim() || '';
+            
+            // 创建对话框
+            const dialog = document.createElement('div');
+            dialog.id = 'archive-dialog';
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            dialog.innerHTML = \`
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 fade-in">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-folder-plus text-amber-500"></i>
+                        建立艺人档案
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-1">艺人名称 *</label>
+                            <input type="text" id="archive-artist-name" value="\${artistName}" 
+                                placeholder="输入艺人名称"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-1">备注（可选）</label>
+                            <textarea id="archive-notes" rows="2" 
+                                placeholder="添加备注信息..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                        </div>
+                        
+                        <div class="bg-amber-50 rounded-lg p-3">
+                            <p class="text-sm text-amber-700 font-medium mb-2">将保存以下数据：</p>
+                            <ul class="text-xs text-amber-600 space-y-1">
+                                <li>• 平台数据（百度指数、网易云、小红书等）</li>
+                                <li>• 预测结果（保守/中性/激进）</li>
+                                <li>• 目标城市级别</li>
+                                <li>• 建档时间</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button onclick="closeArchiveDialog()" 
+                            class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all">
+                            取消
+                        </button>
+                        <button onclick="confirmArchive()" 
+                            class="flex-1 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all">
+                            <i class="fas fa-check mr-1"></i>确认建档
+                        </button>
+                    </div>
+                </div>
+            \`;
+            document.body.appendChild(dialog);
+            
+            // 聚焦到名称输入框
+            setTimeout(() => {
+                document.getElementById('archive-artist-name')?.focus();
+            }, 100);
+        }
+        
+        // 关闭对话框
+        function closeArchiveDialog() {
+            const dialog = document.getElementById('archive-dialog');
+            if (dialog) dialog.remove();
+        }
+        
+        // 确认建档
+        function confirmArchive() {
+            const artistName = document.getElementById('archive-artist-name')?.value?.trim();
+            const notes = document.getElementById('archive-notes')?.value?.trim();
+            
+            if (!artistName) {
+                alert('请输入艺人名称');
+                return;
+            }
+            
+            // 收集当前输入的艺人数据
+            const inputData = {};
+            weightParams.forEach(p => {
+                const input = document.getElementById('input-' + p.id);
+                inputData[p.id] = parseFloat(input?.value || 0);
+            });
+            
+            // 创建档案记录
+            const archive = {
+                id: 'archive_' + Date.now(),
+                artistName: artistName,
+                notes: notes || '',
+                createdAt: new Date().toISOString(),
+                inputData: inputData,
+                targetTier: window.currentTargetTier,
+                result: {
+                    conservative: window.currentPredictionResult.output.conservative.value,
+                    neutral: window.currentPredictionResult.output.neutral.value,
+                    aggressive: window.currentPredictionResult.output.aggressive.value
+                },
+                indices: window.currentPredictionResult.indices?.find(i => i.id === 'target') || {}
+            };
+            
+            // 添加到档案列表
+            artistArchives.unshift(archive);  // 最新的在前面
+            saveArtistArchives();
+            
+            closeArchiveDialog();
+            showFillNotification(artistName, '档案已建立');
+        }
+        
+        // 渲染档案列表（更新导航徽章）
+        function renderArchiveList() {
+            // 更新导航栏徽章
+            const badge = document.getElementById('archive-badge');
+            if (badge) {
+                if (artistArchives.length > 0) {
+                    badge.textContent = artistArchives.length;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+            
+            // 更新档案面板中的列表
+            renderArchivePanelList();
+        }
+        
+        // 渲染档案面板中的档案卡片
+        function renderArchivePanelList() {
+            const container = document.getElementById('archive-panel-list');
+            const countEl = document.getElementById('archive-total-count');
+            const emptyState = document.getElementById('archive-empty-state');
+            
+            if (countEl) {
+                countEl.textContent = artistArchives.length + ' 条记录';
+            }
+            
+            if (!container) return;
+            
+            if (artistArchives.length === 0) {
+                container.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            if (emptyState) emptyState.classList.add('hidden');
+            
+            const tierNames = { tier1: '一线', tier2: '二线', tier3: '三线' };
+            const tierColorClasses = { 
+                tier1: { bg: 'bg-purple-100', text: 'text-purple-600' }, 
+                tier2: { bg: 'bg-blue-100', text: 'text-blue-600' }, 
+                tier3: { bg: 'bg-orange-100', text: 'text-orange-600' } 
+            };
+            
+            container.innerHTML = artistArchives.map(a => {
+                const tierColor = tierColorClasses[a.targetTier] || tierColorClasses.tier3;
+                const isPreset = a.isPreset;
+                return \`
+                <div class="bg-white rounded-xl p-4 border \${isPreset ? 'border-amber-300 ring-1 ring-amber-200' : 'border-amber-100'} hover:border-amber-300 hover:shadow-lg transition-all cursor-pointer group"
+                    onclick="showArchiveDetail('\${a.id}')">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br \${isPreset ? 'from-purple-500 to-indigo-600' : 'from-amber-400 to-orange-500'} rounded-full flex items-center justify-center text-white font-bold">
+                                \${a.artistName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold text-gray-800">\${a.artistName}</p>
+                                    \${isPreset ? '<span class="px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded">示例</span>' : ''}
+                                </div>
+                                <p class="text-xs text-gray-400">
+                                    \${new Date(a.createdAt).toLocaleDateString('zh-CN')}
+                                </p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs rounded-full \${tierColor.bg} \${tierColor.text}">
+                            \${tierNames[a.targetTier] || '一线'}
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="bg-yellow-50 rounded p-2 text-center">
+                            <p class="text-xs text-yellow-600">保守</p>
+                            <p class="font-bold text-yellow-700">\${a.result.conservative.toFixed(1)}</p>
+                        </div>
+                        <div class="bg-purple-50 rounded p-2 text-center border border-purple-200">
+                            <p class="text-xs text-purple-600">中性</p>
+                            <p class="font-bold text-purple-700">\${a.result.neutral.toFixed(1)}</p>
+                        </div>
+                        <div class="bg-green-50 rounded p-2 text-center">
+                            <p class="text-xs text-green-600">激进</p>
+                            <p class="font-bold text-green-700">\${a.result.aggressive.toFixed(1)}</p>
+                        </div>
+                    </div>
+                    
+                    \${a.notes ? \`<p class="text-xs text-gray-500 mb-3 p-2 bg-gray-50 rounded truncate"><i class="fas fa-sticky-note mr-1"></i>\${a.notes}</p>\` : ''}
+                    
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="event.stopPropagation(); loadArchiveData('\${a.id}'); switchTab('predict');" 
+                            class="flex-1 py-2 text-sm bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-all">
+                            <i class="fas fa-redo mr-1"></i>复用预测
+                        </button>
+                        \${!isPreset ? \`
+                        <button onclick="event.stopPropagation(); deleteArchive('\${a.id}')" 
+                            class="px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        \` : ''}
+                    </div>
+                </div>
+            \`;
+            }).join('');
+        }
+        
+        // 显示档案详情 - 直接调用详细计算过程浮窗
+        function showArchiveDetail(archiveId) {
+            const archive = artistArchives.find(a => a.id === archiveId);
+            if (!archive) return;
+            
+            // 直接显示详细计算过程
+            showCalculationDetail(archive);
+        }
+        
+        // 加载档案数据进行复用
+        function loadArchiveData(archiveId) {
+            const archive = artistArchives.find(a => a.id === archiveId);
+            if (!archive) return;
+            
+            // 填充艺人名称
+            const searchInput = document.getElementById('artist-search-input');
+            if (searchInput) searchInput.value = archive.artistName;
+            
+            // 填充输入数据
+            Object.entries(archive.inputData).forEach(([key, val]) => {
+                artistInputValues[key] = val;
+                const input = document.getElementById('input-' + key);
+                if (input) {
+                    input.value = val;
+                    input.classList.add('ring-2', 'ring-amber-400');
+                    setTimeout(() => input.classList.remove('ring-2', 'ring-amber-400'), 1000);
+                }
+            });
+            
+            // 设置目标城市
+            const tierRadio = document.querySelector(\`input[name="targetTier"][value="\${archive.targetTier}"]\`);
+            if (tierRadio) tierRadio.checked = true;
+            
+            showFillNotification(archive.artistName, '已加载档案数据，可进行预测');
+        }
+        
+        // 删除档案
+        function deleteArchive(archiveId) {
+            if (!confirm('确定要删除此档案吗？')) return;
+            
+            artistArchives = artistArchives.filter(a => a.id !== archiveId);
+            saveArtistArchives();
+        }
+        
+        // 清空全部档案
+        function clearAllArchives() {
+            if (artistArchives.length === 0) {
+                alert('暂无档案可清空');
+                return;
+            }
+            
+            if (!confirm(\`确定要清空全部 \${artistArchives.length} 条档案吗？此操作不可恢复。\`)) return;
+            
+            artistArchives = [];
+            saveArtistArchives();
+        }
+    </script>
+</body>
+</html>
+`;
