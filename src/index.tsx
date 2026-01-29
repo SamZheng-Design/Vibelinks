@@ -559,6 +559,27 @@ app.get('/', (c) => {
                 </div>
             </div>
             
+            <!-- 融资结构 - 核心交易信息 -->
+            <div class="stat-card rounded-2xl p-6 mb-8 fade-in" style="background: linear-gradient(135deg, rgba(0, 200, 83, 0.08), rgba(90, 107, 53, 0.05)); border: 2px solid rgba(0, 200, 83, 0.3);">
+                <div class="flex flex-wrap items-center justify-center gap-4 md:gap-8">
+                    <div class="text-center">
+                        <div class="text-xs text-white/50 mb-1">融资金额</div>
+                        <div class="text-2xl md:text-3xl font-bold text-green-400">5,000万</div>
+                    </div>
+                    <div class="text-white/30 text-xl">=</div>
+                    <div class="text-center px-4 py-2 rounded-lg" style="background: rgba(212, 175, 55, 0.15);">
+                        <div class="text-xs text-white/50 mb-1">优先级</div>
+                        <div class="text-2xl md:text-3xl font-bold gold-text">2,000万</div>
+                        <div class="text-xs gold-text/70 mt-1">年化33% | 月息2.75%</div>
+                    </div>
+                    <div class="text-white/30 text-xl">+</div>
+                    <div class="text-center px-4 py-2 rounded-lg" style="background: rgba(255, 152, 0, 0.15);">
+                        <div class="text-xs text-white/50 mb-1">劣后级</div>
+                        <div class="text-2xl md:text-3xl font-bold text-orange-400">3,000万</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 次要指标 - 小卡片 -->
             <div class="grid grid-cols-3 md:grid-cols-6 gap-4 mb-12">
                 <div class="stat-card rounded-xl p-4 text-center fade-in" style="transition-delay: 0.2s">
