@@ -1365,25 +1365,25 @@ app.get('/', (c) => {
                     <div class="step-card bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
                         <div class="flex items-center gap-3 mb-4">
                             <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold">F</span>
-                            <h4 class="text-lg font-bold text-gray-800">城市溢价 (深圳/杭州)</h4>
+                            <h4 class="text-lg font-bold text-gray-800">城市溢价（一线城市）</h4>
                         </div>
                         <p class="text-gray-600 mb-4">\${explanation.step6}</p>
                         <div class="bg-green-50 rounded-lg p-4 mb-4">
-                            <p class="text-sm">保守 = Kanye锚点 × 1.15 | 中性 = 双锚点均值 × 1.25 | 激进 = Travis锚点 × 1.35</p>
+                            <p class="text-sm">保守 = Kanye锚点 × \${result.output.conservative.premium} | 中性 = 双锚点均值 × \${result.output.neutral.premium} | 激进 = Travis锚点 × \${result.output.aggressive.premium}</p>
                         </div>
                         <div class="grid grid-cols-3 gap-4">
                             <div class="text-center p-4 bg-yellow-100 rounded-lg">
-                                <p class="text-sm text-yellow-700 font-medium">保守 (×1.15)</p>
+                                <p class="text-sm text-yellow-700 font-medium">保守 (×\${result.output.conservative.premium})</p>
                                 <p class="text-2xl font-bold text-yellow-700">\${result.output.conservative.value.toFixed(2)}</p>
                                 <p class="text-xs text-gray-500">百万元</p>
                             </div>
                             <div class="text-center p-4 bg-purple-200 rounded-lg border-2 border-purple-400">
-                                <p class="text-sm text-purple-700 font-medium">中性 (×1.25)</p>
+                                <p class="text-sm text-purple-700 font-medium">中性 (×\${result.output.neutral.premium})</p>
                                 <p class="text-3xl font-bold text-purple-700">\${result.output.neutral.value.toFixed(2)}</p>
                                 <p class="text-xs text-gray-500">百万元</p>
                             </div>
                             <div class="text-center p-4 bg-green-100 rounded-lg">
-                                <p class="text-sm text-green-700 font-medium">激进 (×1.35)</p>
+                                <p class="text-sm text-green-700 font-medium">激进 (×\${result.output.aggressive.premium})</p>
                                 <p class="text-2xl font-bold text-green-700">\${result.output.aggressive.value.toFixed(2)}</p>
                                 <p class="text-xs text-gray-500">百万元</p>
                             </div>
@@ -1397,7 +1397,7 @@ app.get('/', (c) => {
                             最终结论
                         </h4>
                         <p class="text-lg">
-                            Cardi B 深圳/杭州单场票房预测：
+                            Cardi B 一线城市单场票房预测：
                             <strong>\${result.output.conservative.value.toFixed(2)}</strong> ~ 
                             <strong>\${result.output.aggressive.value.toFixed(2)}</strong> 百万元
                         </p>
@@ -1784,12 +1784,19 @@ app.get('/', (c) => {
         
         // 显示详细计算过程的大浮窗 - 投委会汇报风格
         function showCalculationDetail(archiveData = null) {
+            // 获取当前配置的溢价系数
+            const currentParams = getCustomParams();
+            const targetTierForPremium = archiveData?.targetTier || window.currentTargetTier || 'tier1';
+            const tierKey = 'to' + targetTierForPremium.charAt(0).toUpperCase() + targetTierForPremium.slice(1);
+            const premiums = currentParams.tierPremiums?.[tierKey] || 
+                { conservative: 1.15, neutral: 1.25, aggressive: 1.35 };
+            
             // 使用传入的档案数据或当前预测数据
             const result = archiveData?.result ? {
                 output: {
-                    conservative: { value: archiveData.result.conservative, premium: 1.15 },
-                    neutral: { value: archiveData.result.neutral, premium: 1.25 },
-                    aggressive: { value: archiveData.result.aggressive, premium: 1.35 }
+                    conservative: { value: archiveData.result.conservative, premium: premiums.conservative },
+                    neutral: { value: archiveData.result.neutral, premium: premiums.neutral },
+                    aggressive: { value: archiveData.result.aggressive, premium: premiums.aggressive }
                 },
                 indices: [{ id: 'target', D: archiveData.indices?.D || 0, LC: archiveData.indices?.LC || 0, F: archiveData.indices?.F || 0 }],
                 tier3: { min: archiveData.result.neutral / 1.25 * 0.9, max: archiveData.result.neutral / 1.25 * 1.1, avg: archiveData.result.neutral / 1.25 },
